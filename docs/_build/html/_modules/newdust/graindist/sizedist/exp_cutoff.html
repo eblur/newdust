@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>newdust.graindist.sizedist.exp_cutoff &mdash; astrodust 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="astrodust 0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for newdust.graindist.sizedist.exp_cutoff</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Power law grain size distribution with an exponential cut-off at the large end</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">trapz</span>
+<span class="kn">from</span> <span class="nn">newdust</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">c</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ExpCutoff&#39;</span><span class="p">]</span>
+
+<span class="c1"># Some default values</span>
+<span class="n">RHO</span>      <span class="o">=</span> <span class="mf">3.0</span>     <span class="c1"># g cm^-3 (average grain material density)</span>
+
+<span class="n">NA</span>       <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># default number for grain size dist resolution</span>
+<span class="n">PDIST</span>    <span class="o">=</span> <span class="mf">3.5</span>     <span class="c1"># default slope for power law distribution</span>
+
+<span class="c1"># min and max grain radii for MRN distribution</span>
+<span class="n">AMIN</span>     <span class="o">=</span> <span class="mf">0.005</span>   <span class="c1"># micron</span>
+<span class="n">ACUT</span>     <span class="o">=</span> <span class="mf">0.3</span>     <span class="c1"># micron</span>
+<span class="n">NFOLD</span>    <span class="o">=</span> <span class="mi">5</span>       <span class="c1"># Number of e-foldings (a/amax) to cover past the amax point</span>
+
+<span class="c1">#------------------------------------</span>
+
+<div class="viewcode-block" id="ExpCutoff"><a class="viewcode-back" href="../../../../graindist.html#newdust.graindist.sizedist.ExpCutoff">[docs]</a><span class="k">class</span> <span class="nc">ExpCutoff</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    | amin : minimum grain size [microns]</span>
+<span class="sd">    | acut : maximum grain size [microns], after which exponential function will cause a turn over in grain size</span>
+<span class="sd">    | p   : scalar for power law dn/da \propto a^-p</span>
+<span class="sd">    | NA  : int : number of a values to use</span>
+<span class="sd">    | log : boolean : False (default), True = use log-spaced a values</span>
+<span class="sd">    | nfold : number of e-foldings to go beyond acut</span>
+<span class="sd">    |</span>
+<span class="sd">    | **ATTRIBUTES**</span>
+<span class="sd">    |   acut, p, a</span>
+<span class="sd">    |</span>
+<span class="sd">    | **FUNCTIONS**</span>
+<span class="sd">    | ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]</span>
+<span class="sd">    |   md = dust mass column [g cm^-2]</span>
+<span class="sd">    |   rho = dust grain material density [g cm^-3]</span>
+<span class="sd">    |</span>
+<span class="sd">    | plot(ax, md, rho=3.0, *kwargs*) : plots (dn/da) a^4 [cm^-2 um^3]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="n">AMIN</span><span class="p">,</span> <span class="n">acut</span><span class="o">=</span><span class="n">ACUT</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">PDIST</span><span class="p">,</span> <span class="n">na</span><span class="o">=</span><span class="n">NA</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nfold</span><span class="o">=</span><span class="n">NFOLD</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acut</span> <span class="o">=</span> <span class="n">acut</span>
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">amin</span><span class="p">,</span> <span class="n">acut</span> <span class="o">*</span> <span class="n">nfold</span><span class="p">,</span> <span class="n">na</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">amin</span><span class="p">,</span> <span class="n">acut</span> <span class="o">*</span> <span class="n">nfold</span><span class="p">,</span> <span class="n">na</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span>    <span class="o">=</span> <span class="n">p</span>
+
+    <span class="k">def</span> <span class="nf">ndens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">):</span>
+        <span class="n">adep</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">acut</span><span class="p">)</span>   <span class="c1"># um^-p</span>
+        <span class="n">gdens</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">rho</span>
+        <span class="n">dmda</span>  <span class="o">=</span> <span class="n">adep</span> <span class="o">*</span> <span class="n">gdens</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">micron2cm</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># g um^-p</span>
+        <span class="n">const</span> <span class="o">=</span> <span class="n">md</span> <span class="o">/</span> <span class="n">trapz</span><span class="p">(</span><span class="n">dmda</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># cm^-? um^p-1</span>
+        <span class="k">return</span> <span class="n">const</span> <span class="o">*</span> <span class="n">adep</span>  <span class="c1"># cm^-? um^-1</span>
+
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndens</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Radius (um)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Lia Corrales.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

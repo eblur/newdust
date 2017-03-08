@@ -22,16 +22,24 @@ AMAX     = 0.3     # micron
 
 class Powerlaw(object):
     """
-    | **ATTRIBUTES**
+    | **INPUTS**
     | amin : minimum grain size [microns]
     | amax : maximum grain size [microns]
     | p   : scalar for power law dn/da \propto a^-p
     | NA  : int : number of a values to use
     | log : boolean : False (default), True = use log-spaced a values
+    |
+    | **ATTRIBUTES**
+    |   amin, amax, p, a
+    |
+    | **FUNCTIONS**
+    | ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]
+    |   md = dust mass column [g cm^-2]
+    |   rho = dust grain material density [g cm^-3]
+    |
+    | plot(ax, md, rho=3.0, *kwargs*) : plots (dn/da) a^4 [cm^-2 um^3]
     """
     def __init__(self, amin=AMIN, amax=AMAX, p=PDIST, na=NA, log=False):
-        self.amin = amin
-        self.amax = amax
         if log:
             self.a = np.logspace(amin, amax, na)
         else:
@@ -39,14 +47,6 @@ class Powerlaw(object):
         self.p    = p
 
     def ndens(self, md, rho=RHO):
-        """
-        Calculate number density of dust grains as a function of grain size
-            | **RETURNS** numpy.ndarray of dn/da values [number density per micron]
-            |
-            | **INPUTS**
-            | md : dust mass density [e.g. g cm^-2]
-            | rho : grain material density [g cm^-3]
-        """
         adep  = np.power(self.a, -self.p)   # um^-p
         gdens = (4. / 3.) * np.pi * rho
         dmda  = adep * gdens * np.power(self.a * c.micron2cm, 3)  # g um^-p

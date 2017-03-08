@@ -63,32 +63,56 @@
 </dd></dl>
 
 <dl class="class">
-<dt>
-<em class="property">class </em><code class="descclassname">newdust.graindist.sizedist.</code><code class="descname">Grain</code><span class="sig-paren">(</span><em>rad=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/sizedist/grain.html#Grain"><span class="viewcode-link">[source]</span></a></dt>
+<dt id="newdust.graindist.sizedist.Powerlaw">
+<em class="property">class </em><code class="descclassname">newdust.graindist.sizedist.</code><code class="descname">Powerlaw</code><span class="sig-paren">(</span><em>amin=0.005</em>, <em>amax=0.3</em>, <em>p=3.5</em>, <em>na=100</em>, <em>log=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/sizedist/powerlaw.html#Powerlaw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.sizedist.Powerlaw" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
-<div class="line"><strong>ATTRIBUTES</strong></div>
-<div class="line">a   : scalar [micron]</div>
+<div class="line"><strong>INPUTS</strong></div>
+<div class="line">amin : minimum grain size [microns]</div>
+<div class="line">amax : maximum grain size [microns]</div>
+<div class="line">p   : scalar for power law dn/da propto a^-p</div>
+<div class="line">NA  : int : number of a values to use</div>
+<div class="line">log : boolean : False (default), True = use log-spaced a values</div>
 <div class="line"><br /></div>
-<div class="line"><strong>FUNCTIONS</strong></div>
-<div class="line">ndens ( md : mass density [g cm^-2 or g cm^-3] )</div>
+<div class="line"><strong>ATTRIBUTES</strong></div>
 <div class="line-block">
-<div class="line"><em>returns</em> scalar number density [cm^-3]</div>
+<div class="line">amin, amax, p, a</div>
+<div class="line"><br /></div>
 </div>
+<div class="line"><strong>FUNCTIONS</strong></div>
+<div class="line">ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line-block">
+<div class="line">md = dust mass column [g cm^-2]</div>
+<div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line"><br /></div>
+</div>
+<div class="line">plot(ax, md, rho=3.0, <em>kwargs</em>) : plots (dn/da) a^4 [cm^-2 um^3]</div>
 </div>
 </dd></dl>
 
 <dl class="class">
-<dt>
-<em class="property">class </em><code class="descclassname">newdust.graindist.sizedist.</code><code class="descname">Grain</code><span class="sig-paren">(</span><em>rad=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/sizedist/grain.html#Grain"><span class="viewcode-link">[source]</span></a></dt>
+<dt id="newdust.graindist.sizedist.ExpCutoff">
+<em class="property">class </em><code class="descclassname">newdust.graindist.sizedist.</code><code class="descname">ExpCutoff</code><span class="sig-paren">(</span><em>amin=0.005</em>, <em>acut=0.3</em>, <em>p=3.5</em>, <em>na=100</em>, <em>log=False</em>, <em>nfold=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/sizedist/exp_cutoff.html#ExpCutoff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.sizedist.ExpCutoff" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
-<div class="line"><strong>ATTRIBUTES</strong></div>
-<div class="line">a   : scalar [micron]</div>
+<div class="line">amin : minimum grain size [microns]</div>
+<div class="line">acut : maximum grain size [microns], after which exponential function will cause a turn over in grain size</div>
+<div class="line">p   : scalar for power law dn/da propto a^-p</div>
+<div class="line">NA  : int : number of a values to use</div>
+<div class="line">log : boolean : False (default), True = use log-spaced a values</div>
+<div class="line">nfold : number of e-foldings to go beyond acut</div>
 <div class="line"><br /></div>
-<div class="line"><strong>FUNCTIONS</strong></div>
-<div class="line">ndens ( md : mass density [g cm^-2 or g cm^-3] )</div>
+<div class="line"><strong>ATTRIBUTES</strong></div>
 <div class="line-block">
-<div class="line"><em>returns</em> scalar number density [cm^-3]</div>
+<div class="line">acut, p, a</div>
+<div class="line"><br /></div>
 </div>
+<div class="line"><strong>FUNCTIONS</strong></div>
+<div class="line">ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line-block">
+<div class="line">md = dust mass column [g cm^-2]</div>
+<div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line"><br /></div>
+</div>
+<div class="line">plot(ax, md, rho=3.0, <em>kwargs</em>) : plots (dn/da) a^4 [cm^-2 um^3]</div>
 </div>
 </dd></dl>
 
