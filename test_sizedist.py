@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.integrate import trapz
 
-from graindist import sizedist
-import constants as c
+from newdust import graindist
+from newdust import constants as c
 
 MDTEST  = 1.e-4  # g cm^-2
 RHOTEST = 3.0    # g cm^-3
@@ -12,7 +12,7 @@ def percent_diff(a, b):
     return np.abs(1.0 - (a/b))
 
 def test_Grain():
-    test = sizedist.Grain()
+    test = graindist.Grain()
     nd   = test.ndens(MDTEST, RHOTEST)
     assert len(test.a) == 1
     assert len(nd)     == 1
@@ -20,7 +20,7 @@ def test_Grain():
     assert percent_diff(tot_mass, MDTEST) <= 0.01
 
 def test_Powerlaw():
-    test = sizedist.Powerlaw()
+    test = graindist.Powerlaw()
     nd   = test.ndens(MDTEST, RHOTEST)
     assert len(test.a) == len(nd)
     md   = (4.0*np.pi/3.0) * (test.a * c.micron2cm)**3 * RHOTEST * nd
@@ -28,7 +28,7 @@ def test_Powerlaw():
     assert percent_diff(tot_mass, MDTEST) <= 0.01
 
 def test_ExpCutoff():
-    test = sizedist.ExpCutoff()
+    test = graindist.ExpCutoff()
     nd   = test.ndens(MDTEST, RHOTEST)
     assert len(test.a) == len(nd)
     md   = (4.0*np.pi/3.0) * (test.a * c.micron2cm)**3 * RHOTEST * nd

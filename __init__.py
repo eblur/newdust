@@ -1,3 +1,3 @@
 
-import constants as c
+import constants
 import graindist

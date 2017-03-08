@@ -3,12 +3,13 @@ Single grain size distribution
 """
 
 import numpy as np
-from ... import constants as c
+from newdust import constants as c
 
 __all__ = ['Grain']
 
 # Some default values
 AMICRON = 1.0  # um
+RHO     = 3.0     # g cm^-3 (average grain material density)
 
 #-------------------------------
 
@@ -25,7 +26,7 @@ class Grain(object):
         assert np.size(rad) == 1
         self.a   = np.array([rad])
 
-    def ndens(self, md, rho):
+    def ndens(self, md, rho=RHO):
         """
         Calculate number density of dust grains
             |

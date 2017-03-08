@@ -4,7 +4,7 @@ Power law grain size distribution
 
 import numpy as np
 from scipy.integrate import trapz
-from ... import constants as c
+from newdust import constants as c
 
 __all__ = ['Powerlaw']
 
@@ -52,3 +52,10 @@ class Powerlaw(object):
         dmda  = adep * gdens * np.power(self.a * c.micron2cm, 3)  # g um^-p
         const = md / trapz(dmda, self.a)  # cm^-? um^p-1
         return const * adep  # cm^-? um^-1
+
+    def plot(self, ax, md, rho=RHO, **kwargs):
+        ax.plot(self.a, self.ndens(md, rho) * np.power(self.a, 4), **kwargs)
+        ax.set_xlabel("Radius (um)")
+        ax.set_ylabel("$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)")
+        ax.set_xscale('log')
+        ax.set_yscale('log')

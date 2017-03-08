@@ -1,3 +1,4 @@
-from grain import *
-from powerlaw import *
-from exp_cutoff import *
+#import constants
+from grain import Grain
+from powerlaw import Powerlaw
+from exp_cutoff import ExpCutoff

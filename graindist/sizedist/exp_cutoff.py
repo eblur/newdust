@@ -4,7 +4,7 @@ Power law grain size distribution with an exponential cut-off at the large end
 
 import numpy as np
 from scipy.integrate import trapz
-from ... import constants as c
+from newdust import constants as c
 
 __all__ = ['ExpCutoff']
 
@@ -17,7 +17,7 @@ PDIST    = 3.5     # default slope for power law distribution
 # min and max grain radii for MRN distribution
 AMIN     = 0.005   # micron
 ACUT     = 0.3     # micron
-NFOLD    = 3       # Number of e-foldings (a/amax) to cover past the amax point
+NFOLD    = 5       # Number of e-foldings (a/amax) to cover past the amax point
 
 #------------------------------------
 
@@ -50,8 +50,15 @@ class ExpCutoff(object):
             | md : dust mass density [e.g. g cm^-2]
             | rho : grain material density [g cm^-3]
         """
-        adep  = np.power(self.a, -self.p) * np.exp(self.a/self.acut)   # um^-p
+        adep  = np.power(self.a, -self.p) * np.exp(-self.a/self.acut)   # um^-p
         gdens = (4. / 3.) * np.pi * rho
         dmda  = adep * gdens * np.power(self.a * c.micron2cm, 3)  # g um^-p
         const = md / trapz(dmda, self.a)  # cm^-? um^p-1
         return const * adep  # cm^-? um^-1
+
+    def plot(self, ax, md, rho=RHO, **kwargs):
+        ax.plot(self.a, self.ndens(md, rho) * np.power(self.a, 4), **kwargs)
+        ax.set_xlabel("Radius (um)")
+        ax.set_ylabel("$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)")
+        ax.set_xscale('log')
+        ax.set_yscale('log')
