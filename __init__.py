@@ -1,3 +1,2 @@
-
 import constants
-import graindist
+from . import graindist

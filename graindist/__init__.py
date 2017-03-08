@@ -1,1 +1,2 @@
-from sizedist import *
+
+import sizedist
