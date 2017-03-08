@@ -26,3 +26,11 @@ def test_Powerlaw():
     md   = (4.0*np.pi/3.0) * (test.a * c.micron2cm)**3 * RHOTEST * nd
     tot_mass = trapz(md, test.a)
     assert percent_diff(tot_mass, MDTEST) <= 0.01
+
+def test_ExpCutoff():
+    test = sizedist.ExpCutoff()
+    nd   = test.ndens(MDTEST, RHOTEST)
+    assert len(test.a) == len(nd)
+    md   = (4.0*np.pi/3.0) * (test.a * c.micron2cm)**3 * RHOTEST * nd
+    tot_mass = trapz(md, test.a)
+    assert percent_diff(tot_mass, MDTEST) <= 0.01
