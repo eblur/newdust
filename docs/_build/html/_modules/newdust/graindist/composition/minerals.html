@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>newdust.graindist.composition.minerals &mdash; astrodust 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="astrodust 0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for newdust.graindist.composition.minerals</h1><div class="highlight"><pre>
+<span class="c1">#</span>
+<span class="c1"># minerals.py -- Some tables for ISM abundances and depletion factors</span>
+<span class="c1"># that are useful for calculating dust mass and dust-to-gas ratios</span>
+<span class="c1">#</span>
+<span class="c1"># 2016.01.22 - lia@space.mit.edu</span>
+<span class="c1">##----------------------------------------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">amu</span>   <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;H&#39;</span><span class="p">:</span><span class="mf">1.008</span><span class="p">,</span><span class="s1">&#39;He&#39;</span><span class="p">:</span><span class="mf">4.0026</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mf">12.011</span><span class="p">,</span><span class="s1">&#39;N&#39;</span><span class="p">:</span><span class="mf">14.007</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">:</span><span class="mf">15.999</span><span class="p">,</span><span class="s1">&#39;Ne&#39;</span><span class="p">:</span><span class="mf">20.1797</span><span class="p">,</span>
+         <span class="s1">&#39;Na&#39;</span><span class="p">:</span><span class="mf">22.989</span><span class="p">,</span><span class="s1">&#39;Mg&#39;</span><span class="p">:</span><span class="mf">24.305</span><span class="p">,</span><span class="s1">&#39;Al&#39;</span><span class="p">:</span><span class="mf">26.981</span><span class="p">,</span><span class="s1">&#39;Si&#39;</span><span class="p">:</span><span class="mf">28.085</span><span class="p">,</span><span class="s1">&#39;P&#39;</span><span class="p">:</span><span class="mf">30.973</span><span class="p">,</span><span class="s1">&#39;S&#39;</span><span class="p">:</span><span class="mf">32.06</span><span class="p">,</span>
+         <span class="s1">&#39;Cl&#39;</span><span class="p">:</span><span class="mf">35.45</span><span class="p">,</span><span class="s1">&#39;Ar&#39;</span><span class="p">:</span><span class="mf">39.948</span><span class="p">,</span><span class="s1">&#39;Ca&#39;</span><span class="p">:</span><span class="mf">40.078</span><span class="p">,</span><span class="s1">&#39;Ti&#39;</span><span class="p">:</span><span class="mf">47.867</span><span class="p">,</span><span class="s1">&#39;Cr&#39;</span><span class="p">:</span><span class="mf">51.9961</span><span class="p">,</span><span class="s1">&#39;Mn&#39;</span><span class="p">:</span><span class="mf">54.938</span><span class="p">,</span>
+         <span class="s1">&#39;Fe&#39;</span><span class="p">:</span><span class="mf">55.845</span><span class="p">,</span><span class="s1">&#39;Co&#39;</span><span class="p">:</span><span class="mf">58.933</span><span class="p">,</span><span class="s1">&#39;Ni&#39;</span><span class="p">:</span><span class="mf">58.6934</span><span class="p">}</span>
+<span class="n">amu_g</span> <span class="o">=</span> <span class="mf">1.661e-24</span>  <span class="c1"># g</span>
+<span class="n">mp</span>    <span class="o">=</span> <span class="mf">1.673e-24</span>  <span class="c1"># g (proton mass)</span>
+
+<span class="n">wilms</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;H&#39;</span><span class="p">:</span><span class="mf">12.0</span><span class="p">,</span> <span class="s1">&#39;He&#39;</span><span class="p">:</span><span class="mf">10.99</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mf">8.38</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span><span class="mf">7.88</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">:</span><span class="mf">8.69</span><span class="p">,</span> <span class="s1">&#39;Ne&#39;</span><span class="p">:</span><span class="mf">7.94</span><span class="p">,</span>
+         <span class="s1">&#39;Na&#39;</span><span class="p">:</span><span class="mf">6.16</span><span class="p">,</span> <span class="s1">&#39;Mg&#39;</span><span class="p">:</span><span class="mf">7.40</span><span class="p">,</span> <span class="s1">&#39;Al&#39;</span><span class="p">:</span><span class="mf">6.33</span><span class="p">,</span> <span class="s1">&#39;Si&#39;</span><span class="p">:</span><span class="mf">7.27</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span><span class="mf">5.42</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span><span class="mf">7.09</span><span class="p">,</span>
+         <span class="s1">&#39;Cl&#39;</span><span class="p">:</span><span class="mf">5.12</span><span class="p">,</span> <span class="s1">&#39;Ar&#39;</span><span class="p">:</span><span class="mf">6.41</span><span class="p">,</span> <span class="s1">&#39;Ca&#39;</span><span class="p">:</span><span class="mf">6.20</span><span class="p">,</span> <span class="s1">&#39;Ti&#39;</span><span class="p">:</span><span class="mf">4.81</span><span class="p">,</span> <span class="s1">&#39;Cr&#39;</span><span class="p">:</span><span class="mf">5.51</span><span class="p">,</span> <span class="s1">&#39;Mn&#39;</span><span class="p">:</span><span class="mf">5.34</span><span class="p">,</span>
+         <span class="s1">&#39;Fe&#39;</span><span class="p">:</span><span class="mf">7.43</span><span class="p">,</span> <span class="s1">&#39;Co&#39;</span><span class="p">:</span><span class="mf">4.92</span><span class="p">,</span> <span class="s1">&#39;Ni&#39;</span><span class="p">:</span><span class="mf">6.05</span><span class="p">}</span>  <span class="c1"># 12 + log A_z</span>
+
+<span class="c1"># Fraction of elements still in gas form</span>
+<span class="n">wilms_1mbeta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;H&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;He&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">:</span><span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;Ne&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;Na&#39;</span><span class="p">:</span><span class="mf">0.25</span><span class="p">,</span>
+                <span class="s1">&#39;Mg&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span> <span class="s1">&#39;Al&#39;</span><span class="p">:</span><span class="mf">0.02</span><span class="p">,</span> <span class="s1">&#39;Si&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span><span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span><span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">:</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;Ar&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="s1">&#39;Ca&#39;</span><span class="p">:</span><span class="mf">0.003</span><span class="p">,</span> <span class="s1">&#39;Ti&#39;</span><span class="p">:</span><span class="mf">0.002</span><span class="p">,</span> <span class="s1">&#39;Cr&#39;</span><span class="p">:</span><span class="mf">0.03</span><span class="p">,</span> <span class="s1">&#39;Mn&#39;</span><span class="p">:</span><span class="mf">0.07</span><span class="p">,</span> <span class="s1">&#39;Fe&#39;</span><span class="p">:</span><span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;Co&#39;</span><span class="p">:</span><span class="mf">0.05</span><span class="p">,</span>
+                <span class="s1">&#39;Ni&#39;</span><span class="p">:</span><span class="mf">0.04</span><span class="p">}</span>
+
+<div class="viewcode-block" id="Mineral"><a class="viewcode-back" href="../../../../minerals.html#newdust.graindist.composition.minerals.Mineral">[docs]</a><span class="k">class</span> <span class="nc">Mineral</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    | Use a dictionary to define the composition.</span>
+<span class="sd">    | e.g. Olivines of pure MgFe^{2+}SiO_4 composition would be</span>
+<span class="sd">    | olivine_halfMg = Mineral( {&#39;Mg&#39;:1.0, &#39;Fe&#39;:1.0, &#39;Si&#39;:1.0, &#39;O&#39;:4.0} )</span>
+<span class="sd">    | self.composition : dictionary containing elements and their weights</span>
+<span class="sd">    |</span>
+<span class="sd">    | @property</span>
+<span class="sd">    | self._weight_amu : amu weight of unit crystal</span>
+<span class="sd">    | self.weight_g    : g weight of unit crystal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span> <span class="o">=</span> <span class="n">comp</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weight_amu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">*</span> <span class="n">amu</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weight_g</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_amu</span> <span class="o">*</span> <span class="n">amu_g</span></div>
+
+<div class="viewcode-block" id="calc_mass_conversion"><a class="viewcode-back" href="../../../../minerals.html#newdust.graindist.composition.minerals.calc_mass_conversion">[docs]</a><span class="k">def</span> <span class="nf">calc_mass_conversion</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">mineral</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    | Returns the number of atoms per gram of a particular mineral object</span>
+<span class="sd">    | Useful for converting mass column to a number density column for an element</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mineral</span><span class="p">)</span> <span class="o">==</span> <span class="n">Mineral</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span>
+    <span class="k">return</span> <span class="n">mineral</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">elem</span><span class="p">]</span> <span class="o">/</span> <span class="n">mineral</span><span class="o">.</span><span class="n">weight_g</span>  <span class="c1"># g^{-1}</span></div>
+
+
+<div class="viewcode-block" id="calc_element_column"><a class="viewcode-back" href="../../../../minerals.html#newdust.graindist.composition.minerals.calc_element_column">[docs]</a><span class="k">def</span> <span class="nf">calc_element_column</span><span class="p">(</span><span class="n">NH</span><span class="p">,</span> <span class="n">fmineral</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">mineral</span><span class="p">,</span> <span class="n">d2g</span><span class="o">=</span><span class="mf">0.009</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the column density of an element for a particular NH value,</span>
+<span class="sd">    assuming a dust-to-gas ratio (d2g) and the fraction of dust in that</span>
+<span class="sd">    particular mineral species (fmineral)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dust_mass</span> <span class="o">=</span> <span class="n">NH</span> <span class="o">*</span> <span class="n">mp</span> <span class="o">*</span> <span class="n">d2g</span> <span class="o">*</span> <span class="n">fmineral</span>  <span class="c1"># g cm^{-2}</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Dust mass = </span><span class="si">%.3e</span><span class="s1"> g cm^-2&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dust_mass</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">calc_mass_conversion</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="n">mineral</span><span class="p">)</span> <span class="o">*</span> <span class="n">dust_mass</span>  <span class="c1"># cm^{-2}</span></div>
+
+
+<div class="viewcode-block" id="get_ISM_abund"><a class="viewcode-back" href="../../../../minerals.html#newdust.graindist.composition.minerals.get_ISM_abund">[docs]</a><span class="k">def</span> <span class="nf">get_ISM_abund</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">abund_table</span><span class="o">=</span><span class="n">wilms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given an abundance table, calculate the number per H atom of a</span>
+<span class="sd">    given element in any ISM form</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">abund_table</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">abund_table</span><span class="p">[</span><span class="n">elem</span><span class="p">]</span> <span class="o">-</span> <span class="mf">12.0</span><span class="p">)</span>  <span class="c1"># number per H atom</span></div>
+
+<div class="viewcode-block" id="get_dust_abund"><a class="viewcode-back" href="../../../../minerals.html#newdust.graindist.composition.minerals.get_dust_abund">[docs]</a><span class="k">def</span> <span class="nf">get_dust_abund</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">abund_table</span><span class="o">=</span><span class="n">wilms</span><span class="p">,</span> <span class="n">gas_ratio</span><span class="o">=</span><span class="n">wilms_1mbeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given an abundance table (dict) and a table of gas ratios (dict),</span>
+<span class="sd">    calculate the number per H atom of a given ISM element in *solid* form</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">abund_table</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">gas_ratio</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span>
+    <span class="k">return</span> <span class="n">get_ISM_abund</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">abund_table</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">gas_ratio</span><span class="p">[</span><span class="n">elem</span><span class="p">])</span>  <span class="c1"># number per H atom</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Lia Corrales.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

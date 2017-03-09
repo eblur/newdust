@@ -4,6 +4,8 @@ astrodust.graindist.composition
 .. toctree::
    :maxdepth: 1
 
+   minerals
+
 Abstract Class: *CmIndex*
 --------------------------
 
