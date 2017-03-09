@@ -46,10 +46,7 @@ class CmSilicate(object):
             E = lam
         if unit == 'angs':
             E = c.hc_angs / lam
-        igood = (E >= self.interps[0].x[0]) & (E <= self.interps[0].x[-1])
-        result = np.zeros(len(E))+1.0
-        result[igood] = self.interps[0](E[igood])
-        return result
+        return self.interps[0](E)
 
     def ip(self, lam, unit='kev'):
         assert unit in ALLOWED_UNITS
@@ -57,10 +54,7 @@ class CmSilicate(object):
             E = lam
         if unit == 'angs':
             E = c.hc_angs / lam
-        igood = (E >= self.interps[1].x[0]) & (E <= self.interps[1].x[-1])
-        result = np.zeros(len(E))
-        result[igood] = self.interps[1](E[igood])
-        return result
+        return self.interps[1](E)
 
     def plot(self, ax, lam=None, unit='kev', rppart=True, impart=True):
         if lam is None:
