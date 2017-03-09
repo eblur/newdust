@@ -41,7 +41,7 @@ class Powerlaw(object):
     """
     def __init__(self, amin=AMIN, amax=AMAX, p=PDIST, na=NA, log=False):
         if log:
-            self.a = np.logspace(amin, amax, na)
+            self.a = np.logspace(np.log10(amin), np.log10(amax), na)
         else:
             self.a = np.linspace(amin, amax, na)
         self.p    = p

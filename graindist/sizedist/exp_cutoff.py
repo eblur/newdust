@@ -43,7 +43,7 @@ class ExpCutoff(object):
     def __init__(self, amin=AMIN, acut=ACUT, p=PDIST, na=NA, log=False, nfold=NFOLD):
         self.acut = acut
         if log:
-            self.a = np.logspace(amin, acut * nfold, na)
+            self.a = np.logspace(np.log10(amin), np.log10(acut * nfold), na)
         else:
             self.a = np.linspace(amin, acut * nfold, na)
         self.p    = p
