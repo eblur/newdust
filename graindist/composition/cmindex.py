@@ -21,59 +21,6 @@ __all__ = ['CmDrude', 'CmGraphite', 'CmSilicate']
 #         : rp(E) where E is in [keV]
 #  ip     : same as above, ip(E) where E is in [keV]
 
-class CmGraphite(object):
-    """
-    | **ATTRIBUTES**
-    | cmtype : 'Graphite'
-    | size   : 'big' or 'small'
-    | orient : 'perp' or 'para'
-    | citation : A string containing citation to original work
-    | rp(E)  : scipy.interp1d object
-    | ip(E)  : scipy.interp1d object [E in keV]
-    """
-    def __init__(self, size='big', orient='perp'):
-        # size : string ('big' or 'small')
-        #      : 'big' gives results for 0.1 um sized graphite grains at 20 K [Draine (2003)]
-        #      : 'small' gives results for 0.01 um sized grains at 20 K
-        # orient : string ('perp' or 'para')
-        #        : 'perp' gives results for E-field perpendicular to c-axis
-        #        : 'para' gives results for E-field parallel to c-axis
-        #
-        self.cmtype = 'Graphite'
-        self.size   = size
-        self.orient = orient
-        self.citation = "Using optical constants for graphite,\nDraine, B. T. 2003, ApJ, 598, 1026\nhttp://adsabs.harvard.edu/abs/2003ApJ...598.1026D"
-
-        D03file = _find_cmfile('CM_D03.pysav')  # look up file
-        D03vals = c.restore(D03file)  # read in index values
-
-        if size == 'big':
-            if orient == 'perp':
-                lamvals = D03vals['Cpe_010_lam']
-                revals  = D03vals['Cpe_010_re']
-                imvals  = D03vals['Cpe_010_im']
-
-            if orient == 'para':
-                lamvals = D03vals['Cpa_010_lam']
-                revals  = D03vals['Cpa_010_re']
-                imvals  = D03vals['Cpa_010_im']
-
-        if size == 'small':
-
-            if orient == 'perp':
-                lamvals = D03vals['Cpe_001_lam']
-                revals  = D03vals['Cpe_001_re']
-                imvals  = D03vals['Cpe_001_im']
-
-            if orient == 'para':
-                lamvals = D03vals['Cpa_001_lam']
-                revals  = D03vals['Cpa_001_re']
-                imvals  = D03vals['Cpa_001_im']
-
-        lamEvals = c.hc / c.micron2cm / lamvals  # keV
-        self.rp  = interp1d(lamEvals, revals)
-        self.ip  = interp1d(lamEvals, imvals)
-
 
 #------------- A quick way to grab a single CM ------------
 

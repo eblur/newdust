@@ -7,3 +7,4 @@ def _find_cmfile(name):
 
 from .cmdrude import CmDrude
 from .cmsilicate import CmSilicate
+from .cmgraphite import CmGraphite
