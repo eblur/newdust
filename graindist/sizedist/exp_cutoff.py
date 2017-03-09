@@ -4,7 +4,7 @@ Power law grain size distribution with an exponential cut-off at the large end
 
 import numpy as np
 from scipy.integrate import trapz
-from newdust import constants as c
+from newdust.graindist import shape
 
 __all__ = ['ExpCutoff']
 
@@ -34,9 +34,10 @@ class ExpCutoff(object):
     |   acut, p, a
     |
     | *functions*
-    | ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]
+    | ndens(md, rho=3.0, shape=Sphere()) : returns number density (dn/da) [cm^-2 um^-1]
     |   md = dust mass column [g cm^-2]
     |   rho = dust grain material density [g cm^-3]
+    |   shape = dust grain shape (default spherical)
     |
     | plot(ax, md, rho=3.0, *kwargs*) : plots (dn/da) a^4 [cm^-2 um^3]
     """
@@ -48,10 +49,10 @@ class ExpCutoff(object):
             self.a = np.linspace(amin, acut * nfold, na)
         self.p    = p
 
-    def ndens(self, md, rho=RHO):
+    def ndens(self, md, rho=RHO, shape=shape.Sphere()):
         adep  = np.power(self.a, -self.p) * np.exp(-self.a/self.acut)   # um^-p
-        gdens = (4. / 3.) * np.pi * rho
-        dmda  = adep * gdens * np.power(self.a * c.micron2cm, 3)  # g um^-p
+        mgra  = shape.vol(self.a) * rho  # g (mass of each grain)
+        dmda  = adep * mgra
         const = md / trapz(dmda, self.a)  # cm^-? um^p-1
         return const * adep  # cm^-? um^-1
 

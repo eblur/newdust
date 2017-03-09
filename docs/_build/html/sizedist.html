@@ -65,9 +65,11 @@
 <div class="line">a   : scalar [micron]</div>
 <div class="line"><br /></div>
 <div class="line"><em>functions</em></div>
-<div class="line">ndens ( md : mass density [g cm^-2 or g cm^-3] )</div>
+<div class="line">ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density of dust grains</div>
 <div class="line-block">
-<div class="line"><em>returns</em> scalar number density [cm^-3]</div>
+<div class="line">md = dust mass column [g cm^-2]</div>
+<div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line">shape = dust grain shape (default spherical)</div>
 </div>
 </div>
 </dd></dl>
@@ -89,10 +91,11 @@
 <div class="line"><br /></div>
 </div>
 <div class="line"><em>functions</em></div>
-<div class="line">ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line">ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density (dn/da) [cm^-2 um^-1]</div>
 <div class="line-block">
 <div class="line">md = dust mass column [g cm^-2]</div>
 <div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line">shape = dust grain shape (default spherical)</div>
 <div class="line"><br /></div>
 </div>
 <div class="line">plot(ax, md, rho=3.0, <em>kwargs</em>) : plots (dn/da) a^4 [cm^-2 um^3]</div>
@@ -116,10 +119,11 @@
 <div class="line"><br /></div>
 </div>
 <div class="line"><em>functions</em></div>
-<div class="line">ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line">ndens(md, rho=3.0, shape=Sphere()) : returns number density (dn/da) [cm^-2 um^-1]</div>
 <div class="line-block">
 <div class="line">md = dust mass column [g cm^-2]</div>
 <div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line">shape = dust grain shape (default spherical)</div>
 <div class="line"><br /></div>
 </div>
 <div class="line">plot(ax, md, rho=3.0, <em>kwargs</em>) : plots (dn/da) a^4 [cm^-2 um^3]</div>

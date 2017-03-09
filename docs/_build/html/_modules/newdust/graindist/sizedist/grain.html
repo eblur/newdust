@@ -44,7 +44,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">newdust</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">c</span>
+<span class="kn">from</span> <span class="nn">newdust.graindist</span> <span class="kn">import</span> <span class="n">shape</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Grain&#39;</span><span class="p">]</span>
 
@@ -60,14 +60,16 @@
 <span class="sd">    | a   : scalar [micron]</span>
 <span class="sd">    |</span>
 <span class="sd">    | *functions*</span>
-<span class="sd">    | ndens ( md : mass density [g cm^-2 or g cm^-3] )</span>
-<span class="sd">    |    *returns* scalar number density [cm^-3]</span>
+<span class="sd">    | ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density of dust grains</span>
+<span class="sd">    |   md = dust mass column [g cm^-2]</span>
+<span class="sd">    |   rho = dust grain material density [g cm^-3]</span>
+<span class="sd">    |   shape = dust grain shape (default spherical)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rad</span><span class="o">=</span><span class="n">AMICRON</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">a</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rad</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">ndens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ndens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate number density of dust grains</span>
 <span class="sd">            |</span>
@@ -75,7 +77,7 @@
 <span class="sd">            | md : dust mass density [e.g. g cm^-2]</span>
 <span class="sd">            | rho : grain material density [g cm^-3]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">gvol</span> <span class="o">=</span> <span class="mf">4.</span> <span class="o">/</span> <span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="n">c</span><span class="o">.</span><span class="n">micron2cm</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">gvol</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">md</span> <span class="o">/</span> <span class="p">(</span><span class="n">gvol</span> <span class="o">*</span> <span class="n">rho</span><span class="p">)</span></div>
 </pre></div>
 
