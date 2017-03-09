@@ -4,6 +4,7 @@ from newdust import constants as c
 __all__ = ['CmDrude']
 
 ALLOWED_UNITS = ['kev', 'angs']
+RHO_DRUDE     = 3.0  # g cm^-3
 
 class CmDrude(object):
     """
@@ -16,7 +17,7 @@ class CmDrude(object):
     | rp(E)  : real part of complex index of refraction [E in keV]
     | ip(E)  : imaginary part of complex index of refraction [always 0.0]
     """
-    def __init__(self, rho=3.0):  # Returns a CM using the Drude approximation
+    def __init__(self, rho=RHO_DRUDE):  # Returns a CM using the Drude approximation
         self.cmtype = 'Drude'
         self.rho    = rho
         self.citation = "Using the Drude approximation.\nBohren, C. F. & Huffman, D. R., 1983, Absorption and Scattering of Light by Small Particles (New York: Wiley)"
@@ -30,7 +31,7 @@ class CmDrude(object):
         mm1 = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(c.hc/E, 2)
         return mm1+1
 
-    def ip(self, lam):
+    def ip(self, lam, unit='kev'):
         if np.size(lam) > 1:
             return np.zeros(np.size(lam))
         else:

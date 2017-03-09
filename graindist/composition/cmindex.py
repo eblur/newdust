@@ -21,38 +21,6 @@ __all__ = ['CmDrude', 'CmGraphite', 'CmSilicate']
 #         : rp(E) where E is in [keV]
 #  ip     : same as above, ip(E) where E is in [keV]
 
-
-def _find_cmfile(name):
-    root_path = os.path.dirname(__file__).rstrip('composition')
-    data_path = root_path + 'tables/'
-    return data_path + name
-
-class CmDrude(object):
-    """
-    | **ATTRIBUTES**
-    | cmtype : 'Drude'
-    | rho    : grain density [g cm^-3]
-    | citation : A string containing citation to original work
-    |
-    | ** FUNCTIONS**
-    | rp(E)  : real part of complex index of refraction [E in keV]
-    | ip(E)  : imaginary part of complex index of refraction [always 0.0]
-    """
-    def __init__(self, rho=3.0):  # Returns a CM using the Drude approximation
-        self.cmtype = 'Drude'
-        self.rho    = rho
-        self.citation = "Using the Drude approximation.\nBohren, C. F. & Huffman, D. R., 1983, Absorption and Scattering of Light by Small Particles (New York: Wiley)"
-
-    def rp(self, E):
-        mm1 = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(c.hc/E, 2)
-        return mm1+1
-
-    def ip(self, E):
-        if np.size(E) > 1:
-            return np.zeros(np.size(E))
-        else:
-            return 0.0
-
 class CmGraphite(object):
     """
     | **ATTRIBUTES**
@@ -106,28 +74,6 @@ class CmGraphite(object):
         self.rp  = interp1d(lamEvals, revals)
         self.ip  = interp1d(lamEvals, imvals)
 
-class CmSilicate(object):
-    """
-    | **ATTRIBUTES**
-    | cmtype : 'Silicate'
-    | citation : A string containing citation to the original work
-    | rp(E)  : scipy.interp1d object
-    | ip(E)  : scipy.interp1d object [E in keV]
-    """
-    def __init__(self):
-        self.cmtype = 'Silicate'
-        self.citation = "Using optical constants for astrosilicate,\nDraine, B. T. 2003, ApJ, 598, 1026\nhttp://adsabs.harvard.edu/abs/2003ApJ...598.1026D"
-
-        D03file = _find_cmfile('CM_D03.pysav')
-        D03vals = c.restore(D03file)      # look up file
-
-        lamvals = D03vals['Sil_lam']
-        revals  = D03vals['Sil_re']
-        imvals  = D03vals['Sil_im']
-
-        lamEvals = c.hc / c.micron2cm / lamvals  # keV
-        self.rp  = interp1d(lamEvals, revals)
-        self.ip  = interp1d(lamEvals, imvals)
 
 #------------- A quick way to grab a single CM ------------
 
