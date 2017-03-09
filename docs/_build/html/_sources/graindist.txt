@@ -8,3 +8,4 @@ This module is for setting up dust grain populations
 
    sizedist
    composition
+   shape

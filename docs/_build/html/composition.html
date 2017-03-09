@@ -52,11 +52,11 @@
 <p>Abstract class <em>CmIndex</em> describes the complex index of refraction for a particular material.
 It must contain the following attributes:</p>
 <ul class="simple">
-<li>cmtype (a string)</li>
-<li>rho (g cm^-3)</li>
-<li>rp (a function that takes wavelength [&#8220;angs&#8221;] or energy [&#8220;kev&#8221;] and returns the real part of the complex index of refraction)</li>
-<li>ip (a function that takes wavelength [&#8220;angs&#8221;] or energy [&#8220;kev&#8221;] and returns the imaginary part of the complex index of refraction)</li>
-<li>cm (a function that takes wavelengths [&#8220;angs&#8221;] or energy [&#8220;kev&#8221;] and returns the complex index of refraction, <em>dtype=&#8217;complex&#8217;</em>)</li>
+<li><cite>cmtype</cite> (a string)</li>
+<li><cite>rho</cite> (g cm^-3)</li>
+<li><cite>rp</cite> (a function that takes wavelength [&#8220;angs&#8221;] or energy [&#8220;kev&#8221;] and returns the real part of the complex index of refraction)</li>
+<li><cite>ip</cite> (a function that takes wavelength [&#8220;angs&#8221;] or energy [&#8220;kev&#8221;] and returns the imaginary part of the complex index of refraction)</li>
+<li><cite>cm</cite> (a function that takes wavelengths [&#8220;angs&#8221;] or energy [&#8220;kev&#8221;] and returns the complex index of refraction, <em>dtype=&#8217;complex&#8217;</em>)</li>
 </ul>
 <p>Right now the only units accepted are &#8220;kev&#8221; and &#8220;angs&#8221;</p>
 </div>
