@@ -3,13 +3,10 @@ from scipy.integrate import trapz
 
 from newdust.graindist import sizedist
 from newdust import constants as c
+from . import percent_diff
 
 MDTEST  = 1.e-4  # g cm^-2
 RHOTEST = 3.0    # g cm^-3
-
-def percent_diff(a, b):
-    # Return the absolute value of the percent difference between two values
-    return np.abs(1.0 - (a/b))
 
 def test_Grain():
     test = sizedist.Grain()
