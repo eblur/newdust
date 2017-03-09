@@ -13,21 +13,27 @@ class CmGraphite(object):
     """
     | **ATTRIBUTES**
     | cmtype : 'Graphite'
+    | rho : grain material density (g cm^-3)
     | size   : 'big' or 'small'
+    |   'big' gives results for 0.1 um sized graphite grains at 20 K [Draine (2003)]
+    |   'small' gives results for 0.01 um sized grains at 20 K
     | orient : 'perp' or 'para'
+    |   'perp' gives results for E-field perpendicular to c-axis
+    |   'para' gives results for E-field parallel to c-axis
     | citation : A string containing citation to original work
-    | rp(E)  : scipy.interp1d object
-    | ip(E)  : scipy.interp1d object [E in keV]
+    | interps  : A tuple containing scipy.interp1d objects (rp, ip)
+    |
+    | *functions*
+    | rp(lam, unit='kev') : Returns real part (unit='kev'|'angs')
+    | ip(lam, unit='kev') : Returns imaginary part (unit='kev'|'angs')
+    | cm(lam, unit='kev') : Complex index of refraction of dtype='complex'
+    | plot(lam=None, unit='kev') : Plots Re(m-1) and Im(m)
+    |   if lam is *None*, plots the original interp objects
+    |   otherwise, plots with user defined wavelength (lam)
     """
-    def __init__(self, size='big', orient='perp'):
-        # size : string ('big' or 'small')
-        #      : 'big' gives results for 0.1 um sized graphite grains at 20 K [Draine (2003)]
-        #      : 'small' gives results for 0.01 um sized grains at 20 K
-        # orient : string ('perp' or 'para')
-        #        : 'perp' gives results for E-field perpendicular to c-axis
-        #        : 'para' gives results for E-field parallel to c-axis
-        #
+    def __init__(self, rho=RHO_GRA, size='big', orient='perp'):
         self.cmtype = 'Graphite'
+        self.rho    = rho
         self.size   = size
         self.orient = orient
         self.citation = "Using optical constants for graphite,\nDraine, B. T. 2003, ApJ, 598, 1026\nhttp://adsabs.harvard.edu/abs/2003ApJ...598.1026D"
@@ -78,6 +84,9 @@ class CmGraphite(object):
         if unit == 'angs':
             E = c.hc_angs / lam
         return self.interps[1](E)
+
+    def cm(self, lam, unit='kev'):
+        return self.rp(lam, unit=unit) + 1j * self.ip(lam, unit=unit)
 
     def plot(self, ax, lam=None, unit='kev', rppart=True, impart=True):
         if lam is None:

@@ -32,7 +32,7 @@ class Powerlaw(object):
     | **ATTRIBUTES**
     |   amin, amax, p, a
     |
-    | **FUNCTIONS**
+    | *functions*
     | ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]
     |   md = dust mass column [g cm^-2]
     |   rho = dust grain material density [g cm^-3]

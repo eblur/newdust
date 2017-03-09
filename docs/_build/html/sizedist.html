@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>astrodust.graindist.sizedist &mdash; astrodust 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="astrodust 0.1 documentation" href="index.html" />
+    <link rel="up" title="astrodust.graindist" href="graindist.html" />
+    <link rel="next" title="astrodust.graindist.composition" href="composition.html" />
+    <link rel="prev" title="astrodust.graindist" href="graindist.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="astrodust-graindist-sizedist">
+<h1>astrodust.graindist.sizedist<a class="headerlink" href="#astrodust-graindist-sizedist" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<div class="section" id="abstract-class-sizedist">
+<h2>Abstract Class: <em>Sizedist</em><a class="headerlink" href="#abstract-class-sizedist" title="Permalink to this headline">¶</a></h2>
+<p>Abstract class <em>Sizedist</em> must contain attributes:</p>
+<ul class="simple">
+<li><cite>a</cite> (an array)</li>
+<li><cite>ndens</cite> (function that takes some normalization value or set of values)</li>
+</ul>
+<p>Right now <cite>ndens</cite> only takes M_d and rho as inputs.</p>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="newdust.graindist.sizedist.Grain">
+<em class="property">class </em><code class="descclassname">newdust.graindist.sizedist.</code><code class="descname">Grain</code><span class="sig-paren">(</span><em>rad=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/sizedist/grain.html#Grain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.sizedist.Grain" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line"><strong>ATTRIBUTES</strong></div>
+<div class="line">a   : scalar [micron]</div>
+<div class="line"><br /></div>
+<div class="line"><em>functions</em></div>
+<div class="line">ndens ( md : mass density [g cm^-2 or g cm^-3] )</div>
+<div class="line-block">
+<div class="line"><em>returns</em> scalar number density [cm^-3]</div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="newdust.graindist.sizedist.Powerlaw">
+<em class="property">class </em><code class="descclassname">newdust.graindist.sizedist.</code><code class="descname">Powerlaw</code><span class="sig-paren">(</span><em>amin=0.005</em>, <em>amax=0.3</em>, <em>p=3.5</em>, <em>na=100</em>, <em>log=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/sizedist/powerlaw.html#Powerlaw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.sizedist.Powerlaw" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line"><strong>INPUTS</strong></div>
+<div class="line">amin : minimum grain size [microns]</div>
+<div class="line">amax : maximum grain size [microns]</div>
+<div class="line">p   : scalar for power law dn/da propto a^-p</div>
+<div class="line">NA  : int : number of a values to use</div>
+<div class="line">log : boolean : False (default), True = use log-spaced a values</div>
+<div class="line"><br /></div>
+<div class="line"><strong>ATTRIBUTES</strong></div>
+<div class="line-block">
+<div class="line">amin, amax, p, a</div>
+<div class="line"><br /></div>
+</div>
+<div class="line"><em>functions</em></div>
+<div class="line">ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line-block">
+<div class="line">md = dust mass column [g cm^-2]</div>
+<div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line"><br /></div>
+</div>
+<div class="line">plot(ax, md, rho=3.0, <em>kwargs</em>) : plots (dn/da) a^4 [cm^-2 um^3]</div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="newdust.graindist.sizedist.ExpCutoff">
+<em class="property">class </em><code class="descclassname">newdust.graindist.sizedist.</code><code class="descname">ExpCutoff</code><span class="sig-paren">(</span><em>amin=0.005</em>, <em>acut=0.3</em>, <em>p=3.5</em>, <em>na=100</em>, <em>log=False</em>, <em>nfold=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/sizedist/exp_cutoff.html#ExpCutoff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.sizedist.ExpCutoff" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line">amin : minimum grain size [microns]</div>
+<div class="line">acut : maximum grain size [microns], after which exponential function will cause a turn over in grain size</div>
+<div class="line">p   : scalar for power law dn/da propto a^-p</div>
+<div class="line">NA  : int : number of a values to use</div>
+<div class="line">log : boolean : False (default), True = use log-spaced a values</div>
+<div class="line">nfold : number of e-foldings to go beyond acut</div>
+<div class="line"><br /></div>
+<div class="line"><strong>ATTRIBUTES</strong></div>
+<div class="line-block">
+<div class="line">acut, p, a</div>
+<div class="line"><br /></div>
+</div>
+<div class="line"><em>functions</em></div>
+<div class="line">ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line-block">
+<div class="line">md = dust mass column [g cm^-2]</div>
+<div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line"><br /></div>
+</div>
+<div class="line">plot(ax, md, rho=3.0, <em>kwargs</em>) : plots (dn/da) a^4 [cm^-2 um^3]</div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">astrodust.graindist.sizedist</a><ul>
+<li><a class="reference internal" href="#abstract-class-sizedist">Abstract Class: <em>Sizedist</em></a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="graindist.html">astrodust.graindist</a><ul>
+      <li>Previous: <a href="graindist.html" title="previous chapter">astrodust.graindist</a></li>
+      <li>Next: <a href="composition.html" title="next chapter">astrodust.graindist.composition</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/sizedist.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Lia Corrales.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/sizedist.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

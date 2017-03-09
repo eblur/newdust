@@ -13,12 +13,14 @@ class CmSilicate(object):
     """
     | **ATTRIBUTES**
     | cmtype : 'Silicate'
+    | rho : grain material density (g cm^-3)
     | citation : A string containing citation to the original work
-    | interps : Tuple containing to scipy.interp1d objects (rp, ip)
+    | interps : A tuple containing scipy.interp1d objects (rp, ip)
     |
-    | **FUNCTIONS**
-    | rp(lam, unit='kev')  : returns real part (unit='kev'|'angs')
-    | ip(lam, unit='kev')  : returns real part (unit='kev'|'angs')
+    | *functions*
+    | rp(lam, unit='kev')  : Returns real part (unit='kev'|'angs')
+    | ip(lam, unit='kev')  : Returns imaginary part (unit='kev'|'angs')
+    | cm(lam, unit='kev') : Complex index of refraction of dtype='complex'
     | plot(lam=None, unit='kev') : Plots Re(m-1) and Im(m)
     |   if lam is *None*, plots the original interp objects
     |   otherwise, plots with user defined wavelength (lam)
@@ -55,6 +57,9 @@ class CmSilicate(object):
         if unit == 'angs':
             E = c.hc_angs / lam
         return self.interps[1](E)
+
+    def cm(self, lam, unit='kev'):
+        return self.rp(lam, unit=unit) + 1j * self.ip(lam, unit=unit)
 
     def plot(self, ax, lam=None, unit='kev', rppart=True, impart=True):
         if lam is None:

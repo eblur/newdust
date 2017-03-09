@@ -13,9 +13,11 @@ class CmDrude(object):
     | rho    : grain density [g cm^-3]
     | citation : A string containing citation to original work
     |
-    | ** FUNCTIONS**
-    | rp(E)  : real part of complex index of refraction [E in keV]
-    | ip(E)  : imaginary part of complex index of refraction [always 0.0]
+    | *functions*
+    | rp(lam, unit='kev') : Returns real part (unit='kev'|'angs')
+    | ip(lam, unit='kev') : Returns imaginary part (always 0.0)
+    | cm(lam, unit='kev') : Complex index of refraction of dtype='complex'
+    | plot(lam, unit='kev') : Plots Re(m-1)
     """
     def __init__(self, rho=RHO_DRUDE):  # Returns a CM using the Drude approximation
         self.cmtype = 'Drude'
@@ -36,6 +38,9 @@ class CmDrude(object):
             return np.zeros(np.size(lam))
         else:
             return 0.0
+
+    def cm(self, lam, unit='kev'):
+        return self.rp(lam, unit=unit) + 0j
 
     def plot(self, ax, lam, unit='kev', **kwargs):
         assert unit in ALLOWED_UNITS

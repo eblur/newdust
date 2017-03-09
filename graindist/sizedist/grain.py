@@ -18,7 +18,7 @@ class Grain(object):
     | **ATTRIBUTES**
     | a   : scalar [micron]
     |
-    | **FUNCTIONS**
+    | *functions*
     | ndens ( md : mass density [g cm^-2 or g cm^-3] )
     |    *returns* scalar number density [cm^-3]
     """

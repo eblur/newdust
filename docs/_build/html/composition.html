@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>astrodust.graindist.composition &mdash; astrodust 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="astrodust 0.1 documentation" href="index.html" />
+    <link rel="up" title="astrodust.graindist" href="graindist.html" />
+    <link rel="prev" title="astrodust.graindist.sizedist" href="sizedist.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="astrodust-graindist-composition">
+<h1>astrodust.graindist.composition<a class="headerlink" href="#astrodust-graindist-composition" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<div class="section" id="abstract-class-cmindex">
+<h2>Abstract Class: <em>CmIndex</em><a class="headerlink" href="#abstract-class-cmindex" title="Permalink to this headline">¶</a></h2>
+<p>Abstract class <em>CmIndex</em> describes the complex index of refraction for a particular material.
+It must contain the following attributes:</p>
+<ul class="simple">
+<li>cmtype (a string)</li>
+<li>rho (g cm^-3)</li>
+<li>rp (a function that takes wavelength [&#8220;angs&#8221;] or energy [&#8220;kev&#8221;] and returns the real part of the complex index of refraction)</li>
+<li>ip (a function that takes wavelength [&#8220;angs&#8221;] or energy [&#8220;kev&#8221;] and returns the imaginary part of the complex index of refraction)</li>
+</ul>
+<p>Right now the only units accepted are &#8220;kev&#8221; and &#8220;angs&#8221;</p>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="newdust.graindist.composition.CmDrude">
+<em class="property">class </em><code class="descclassname">newdust.graindist.composition.</code><code class="descname">CmDrude</code><span class="sig-paren">(</span><em>rho=3.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/composition/cmdrude.html#CmDrude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.composition.CmDrude" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line"><strong>ATTRIBUTES</strong></div>
+<div class="line">cmtype : &#8216;Drude&#8217;</div>
+<div class="line">rho    : grain density [g cm^-3]</div>
+<div class="line">citation : A string containing citation to original work</div>
+<div class="line"><br /></div>
+<div class="line"><em>functions</em></div>
+<div class="line">rp(lam, unit=&#8217;kev&#8217;) : Returns real part (unit=&#8217;kev&#8217;|&#8217;angs&#8217;)</div>
+<div class="line">ip(lam, unit=&#8217;kev&#8217;) : Returns imaginary part (always 0.0)</div>
+<div class="line">cm(lam, unit=&#8217;kev&#8217;) : Complex index of refraction of dtype=&#8217;complex&#8217;</div>
+<div class="line">plot(lam, unit=&#8217;kev&#8217;) : Plots Re(m-1)</div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="newdust.graindist.composition.CmSilicate">
+<em class="property">class </em><code class="descclassname">newdust.graindist.composition.</code><code class="descname">CmSilicate</code><span class="sig-paren">(</span><em>rho=3.8</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/composition/cmsilicate.html#CmSilicate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.composition.CmSilicate" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line"><strong>ATTRIBUTES</strong></div>
+<div class="line">cmtype : &#8216;Silicate&#8217;</div>
+<div class="line">rho : grain material density (g cm^-3)</div>
+<div class="line">citation : A string containing citation to the original work</div>
+<div class="line">interps : A tuple containing scipy.interp1d objects (rp, ip)</div>
+<div class="line"><br /></div>
+<div class="line"><em>functions</em></div>
+<div class="line">rp(lam, unit=&#8217;kev&#8217;)  : Returns real part (unit=&#8217;kev&#8217;|&#8217;angs&#8217;)</div>
+<div class="line">ip(lam, unit=&#8217;kev&#8217;)  : Returns imaginary part (unit=&#8217;kev&#8217;|&#8217;angs&#8217;)</div>
+<div class="line">cm(lam, unit=&#8217;kev&#8217;) : Complex index of refraction of dtype=&#8217;complex&#8217;</div>
+<div class="line">plot(lam=None, unit=&#8217;kev&#8217;) : Plots Re(m-1) and Im(m)</div>
+<div class="line-block">
+<div class="line">if lam is <em>None</em>, plots the original interp objects</div>
+<div class="line">otherwise, plots with user defined wavelength (lam)</div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="newdust.graindist.composition.CmGraphite">
+<em class="property">class </em><code class="descclassname">newdust.graindist.composition.</code><code class="descname">CmGraphite</code><span class="sig-paren">(</span><em>rho=2.2</em>, <em>size='big'</em>, <em>orient='perp'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/composition/cmgraphite.html#CmGraphite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.composition.CmGraphite" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line"><strong>ATTRIBUTES</strong></div>
+<div class="line">cmtype : &#8216;Graphite&#8217;</div>
+<div class="line">rho : grain material density (g cm^-3)</div>
+<div class="line">size   : &#8216;big&#8217; or &#8216;small&#8217;</div>
+<div class="line-block">
+<div class="line">&#8216;big&#8217; gives results for 0.1 um sized graphite grains at 20 K [Draine (2003)]</div>
+<div class="line">&#8216;small&#8217; gives results for 0.01 um sized grains at 20 K</div>
+</div>
+<div class="line">orient : &#8216;perp&#8217; or &#8216;para&#8217;</div>
+<div class="line-block">
+<div class="line">&#8216;perp&#8217; gives results for E-field perpendicular to c-axis</div>
+<div class="line">&#8216;para&#8217; gives results for E-field parallel to c-axis</div>
+</div>
+<div class="line">citation : A string containing citation to original work</div>
+<div class="line">interps  : A tuple containing scipy.interp1d objects (rp, ip)</div>
+<div class="line"><br /></div>
+<div class="line"><em>functions</em></div>
+<div class="line">rp(lam, unit=&#8217;kev&#8217;) : Returns real part (unit=&#8217;kev&#8217;|&#8217;angs&#8217;)</div>
+<div class="line">ip(lam, unit=&#8217;kev&#8217;) : Returns imaginary part (unit=&#8217;kev&#8217;|&#8217;angs&#8217;)</div>
+<div class="line">cm(lam, unit=&#8217;kev&#8217;) : Complex index of refraction of dtype=&#8217;complex&#8217;</div>
+<div class="line">plot(lam=None, unit=&#8217;kev&#8217;) : Plots Re(m-1) and Im(m)</div>
+<div class="line-block">
+<div class="line">if lam is <em>None</em>, plots the original interp objects</div>
+<div class="line">otherwise, plots with user defined wavelength (lam)</div>
+</div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">astrodust.graindist.composition</a><ul>
+<li><a class="reference internal" href="#abstract-class-cmindex">Abstract Class: <em>CmIndex</em></a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="graindist.html">astrodust.graindist</a><ul>
+      <li>Previous: <a href="sizedist.html" title="previous chapter">astrodust.graindist.sizedist</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/composition.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Lia Corrales.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/composition.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

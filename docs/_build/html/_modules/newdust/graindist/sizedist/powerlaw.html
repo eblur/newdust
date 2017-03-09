@@ -61,7 +61,7 @@
 
 <span class="c1">#------------------------------------</span>
 
-<div class="viewcode-block" id="Powerlaw"><a class="viewcode-back" href="../../../../graindist.html#newdust.graindist.sizedist.Powerlaw">[docs]</a><span class="k">class</span> <span class="nc">Powerlaw</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Powerlaw"><a class="viewcode-back" href="../../../../sizedist.html#newdust.graindist.sizedist.Powerlaw">[docs]</a><span class="k">class</span> <span class="nc">Powerlaw</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    | **INPUTS**</span>
 <span class="sd">    | amin : minimum grain size [microns]</span>
@@ -73,7 +73,7 @@
 <span class="sd">    | **ATTRIBUTES**</span>
 <span class="sd">    |   amin, amax, p, a</span>
 <span class="sd">    |</span>
-<span class="sd">    | **FUNCTIONS**</span>
+<span class="sd">    | *functions*</span>
 <span class="sd">    | ndens(md, rho=3.0) : returns number density (dn/da) [cm^-2 um^-1]</span>
 <span class="sd">    |   md = dust mass column [g cm^-2]</span>
 <span class="sd">    |   rho = dust grain material density [g cm^-3]</span>
@@ -82,7 +82,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="n">AMIN</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="n">AMAX</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">PDIST</span><span class="p">,</span> <span class="n">na</span><span class="o">=</span><span class="n">NA</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">,</span> <span class="n">na</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">amin</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">amax</span><span class="p">),</span> <span class="n">na</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">,</span> <span class="n">na</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p</span>    <span class="o">=</span> <span class="n">p</span>
