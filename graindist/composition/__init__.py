@@ -8,14 +8,3 @@ def _find_cmfile(name):
 from .cmdrude import CmDrude
 from .cmsilicate import CmSilicate
 from .cmgraphite import CmGraphite
-
-def _getCM(E, model):
-    """
-    | **INPUTS**
-    | E     : scalar or np.array [keV]
-    | model : any Cm-type object
-    |
-    | **RETURNS**
-    | Complex index of refraction : scalar or np.array of dtype='complex'
-    """
-    return model.rp(E) + 1j * model.ip(E)
