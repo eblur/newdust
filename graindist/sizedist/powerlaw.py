@@ -18,6 +18,8 @@ PDIST    = 3.5     # default slope for power law distribution
 AMIN     = 0.005   # micron
 AMAX     = 0.3     # micron
 
+SHAPE    = shape.Sphere()
+
 #------------------------------------
 
 class Powerlaw(object):
@@ -47,15 +49,15 @@ class Powerlaw(object):
             self.a = np.linspace(amin, amax, na)
         self.p    = p
 
-    def ndens(self, md, rho=RHO, shape=shape.Sphere()):
+    def ndens(self, md, rho=RHO, shape=SHAPE):
         adep  = np.power(self.a, -self.p)   # um^-p
         mgra  = shape.vol(self.a) * rho     # g (mass of each grain)
         dmda  = adep * mgra
         const = md / trapz(dmda, self.a)  # cm^-? um^p-1
         return const * adep  # cm^-? um^-1
 
-    def plot(self, ax, md, rho=RHO, **kwargs):
-        ax.plot(self.a, self.ndens(md, rho) * np.power(self.a, 4), **kwargs)
+    def plot(self, ax, md, rho=RHO, shape=SHAPE, **kwargs):
+        ax.plot(self.a, self.ndens(md, rho, shape) * np.power(self.a, 4), **kwargs)
         ax.set_xlabel("Radius (um)")
         ax.set_ylabel("$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)")
         ax.set_xscale('log')

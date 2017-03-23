@@ -11,6 +11,8 @@ __all__ = ['Grain']
 AMICRON = 1.0  # um
 RHO     = 3.0     # g cm^-3 (average grain material density)
 
+SHAPE    = shape.Sphere()
+
 #-------------------------------
 
 class Grain(object):
@@ -28,7 +30,7 @@ class Grain(object):
         assert np.size(rad) == 1
         self.a   = np.array([rad])
 
-    def ndens(self, md, rho=RHO, shape=shape.Sphere()):
+    def ndens(self, md, rho=RHO, shape=SHAPE):
         """
         Calculate number density of dust grains
             |
