@@ -19,7 +19,10 @@ class GrainDist(object):
     | *properties*
     | a     : grain radii from size.a
     | ndens : number density from size.ndens using the other attributes as input
-    | mdens : mass density from size.ndens using the other attributes as input
+    | mdens : mass density as a function of grain size
+    |
+    | *functions*
+    | plot(ax, **kwargs) : Plots the number density of dust grains via size.plot()
     """
     def __init__(self, sizedist, composition, shape=SHAPE, md=MD_DEFAULT):
         self.size = sizedist
@@ -40,8 +43,11 @@ class GrainDist(object):
         mg = self.shape.vol(self.a) * self.comp.rho  # mass of each dust grain [g]
         return self.ndens * mg
 
-    def plot(self, ax, **kwargs):
-        self.size.plot(ax, md=self.md, rho=self.comp.rho, shape=self.shape, **kwargs)
+    def plot(self, ax=None, **kwargs):
+        if isinstance(self.size, sizedist.Grain):
+            print("Number density of dust grains = %.2e cm^-2" % self.ndens)
+        else:
+            self.size.plot(ax, md=self.md, rho=self.comp.rho, shape=self.shape, **kwargs)
 
 #-- Helper functions
 ALLOWED_SIZES = ['Grain','Powerlaw','ExpCutoff']
