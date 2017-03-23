@@ -58,6 +58,11 @@ class ExpCutoff(object):
         const = md / trapz(dmda, self.a)  # cm^-? um^p-1
         return const * adep  # cm^-? um^-1
 
+    def mdens(self, md, rho=RHO, shape=SHAPE):
+        nd = self.ndens(md, rho, shape)  # dn/da [cm^-2 um^-1]
+        mg = shape.vol(self.a) * rho     # grain mass for each radius [g]
+        return nd * mg  # g cm^-2 um^-1
+
     def plot(self, ax, md, rho=RHO, shape=SHAPE, **kwargs):
         ax.plot(self.a, self.ndens(md, rho, shape) * np.power(self.a, 4), **kwargs)
         ax.set_xlabel("Radius (um)")

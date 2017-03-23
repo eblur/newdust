@@ -39,4 +39,9 @@ class Grain(object):
             | rho : grain material density [g cm^-3]
         """
         gvol = shape.vol(self.a)
-        return md / (gvol * rho)
+        return md / (gvol * rho)  # cm^-2
+
+    def mdens(self, md, rho=RHO, shape=SHAPE):
+        nd = self.ndens(md, rho, shape)  # number density [cm^-2]
+        mg = shape.vol(self.a) * rho     # grain mass for this size [g]
+        return nd * mg  # dust mass column [g cm^-2]
