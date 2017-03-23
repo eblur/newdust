@@ -52,6 +52,8 @@
 <span class="n">AMICRON</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># um</span>
 <span class="n">RHO</span>     <span class="o">=</span> <span class="mf">3.0</span>     <span class="c1"># g cm^-3 (average grain material density)</span>
 
+<span class="n">SHAPE</span>    <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+
 <span class="c1">#-------------------------------</span>
 
 <div class="viewcode-block" id="Grain"><a class="viewcode-back" href="../../../../sizedist.html#newdust.graindist.sizedist.Grain">[docs]</a><span class="k">class</span> <span class="nc">Grain</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -61,15 +63,16 @@
 <span class="sd">    |</span>
 <span class="sd">    | *functions*</span>
 <span class="sd">    | ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density of dust grains</span>
-<span class="sd">    |   md = dust mass column [g cm^-2]</span>
-<span class="sd">    |   rho = dust grain material density [g cm^-3]</span>
+<span class="sd">    | mdens(md, rho=3.0, shape=shape.Sphere()) : returns mass density of dust grains [redundant, but required by abstract class]</span>
+<span class="sd">    |   md    = dust mass column [g cm^-2]</span>
+<span class="sd">    |   rho   = dust grain material density [g cm^-3]</span>
 <span class="sd">    |   shape = dust grain shape (default spherical)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rad</span><span class="o">=</span><span class="n">AMICRON</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">a</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rad</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">ndens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="nf">ndens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">SHAPE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate number density of dust grains</span>
 <span class="sd">            |</span>
@@ -78,7 +81,12 @@
 <span class="sd">            | rho : grain material density [g cm^-3]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">gvol</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">md</span> <span class="o">/</span> <span class="p">(</span><span class="n">gvol</span> <span class="o">*</span> <span class="n">rho</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">md</span> <span class="o">/</span> <span class="p">(</span><span class="n">gvol</span> <span class="o">*</span> <span class="n">rho</span><span class="p">)</span>  <span class="c1"># cm^-2</span>
+
+    <span class="k">def</span> <span class="nf">mdens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">SHAPE</span><span class="p">):</span>
+        <span class="n">nd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndens</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>  <span class="c1"># number density [cm^-2]</span>
+        <span class="n">mg</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">rho</span>     <span class="c1"># grain mass for this size [g]</span>
+        <span class="k">return</span> <span class="n">nd</span> <span class="o">*</span> <span class="n">mg</span>  <span class="c1"># dust mass column [g cm^-2]</span></div>
 </pre></div>
 
           </div>

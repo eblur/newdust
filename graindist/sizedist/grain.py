@@ -22,8 +22,9 @@ class Grain(object):
     |
     | *functions*
     | ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density of dust grains
-    |   md = dust mass column [g cm^-2]
-    |   rho = dust grain material density [g cm^-3]
+    | mdens(md, rho=3.0, shape=shape.Sphere()) : returns mass density of dust grains [redundant, but required by abstract class]
+    |   md    = dust mass column [g cm^-2]
+    |   rho   = dust grain material density [g cm^-3]
     |   shape = dust grain shape (default spherical)
     """
     def __init__(self, rad=AMICRON):

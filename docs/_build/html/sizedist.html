@@ -51,9 +51,9 @@
 <p>Abstract class <em>Sizedist</em> must contain attributes:</p>
 <ul class="simple">
 <li><cite>a</cite> (an array)</li>
-<li><cite>ndens</cite> (function that takes some normalization value or set of values)</li>
+<li><cite>ndens</cite> (md, rho, shape) returns number density of dust grains [e.g. cm^-2 um^-1]</li>
+<li><cite>mdens</cite> (md, rho, shape) returns mass density of dust grains [e.g. g cm^-2 um^-1]</li>
 </ul>
-<p>Right now <cite>ndens</cite> only takes M_d and rho as inputs.</p>
 </div>
 <div class="section" id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
@@ -66,9 +66,10 @@
 <div class="line"><br /></div>
 <div class="line"><em>functions</em></div>
 <div class="line">ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density of dust grains</div>
+<div class="line">mdens(md, rho=3.0, shape=shape.Sphere()) : returns mass density of dust grains [redundant, but required by abstract class]</div>
 <div class="line-block">
-<div class="line">md = dust mass column [g cm^-2]</div>
-<div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line">md    = dust mass column [g cm^-2]</div>
+<div class="line">rho   = dust grain material density [g cm^-3]</div>
 <div class="line">shape = dust grain shape (default spherical)</div>
 </div>
 </div>
@@ -92,9 +93,10 @@
 </div>
 <div class="line"><em>functions</em></div>
 <div class="line">ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line">mdens(md, rho=3.0, shape=shape.Sphere()) : returns mass density (dm/da) [g cm^-2 um^-1]</div>
 <div class="line-block">
-<div class="line">md = dust mass column [g cm^-2]</div>
-<div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line">md    = total dust mass column [g cm^-2]</div>
+<div class="line">rho   = dust grain material density [g cm^-3]</div>
 <div class="line">shape = dust grain shape (default spherical)</div>
 <div class="line"><br /></div>
 </div>
@@ -119,10 +121,11 @@
 <div class="line"><br /></div>
 </div>
 <div class="line"><em>functions</em></div>
-<div class="line">ndens(md, rho=3.0, shape=Sphere()) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line">ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density (dn/da) [cm^-2 um^-1]</div>
+<div class="line">mdens(md, rho=3.0, shape=shape.Sphere()) : returns mass density (dm/da) [g cm^-2 um^-1]</div>
 <div class="line-block">
-<div class="line">md = dust mass column [g cm^-2]</div>
-<div class="line">rho = dust grain material density [g cm^-3]</div>
+<div class="line">md    = total dust mass column [g cm^-2]</div>
+<div class="line">rho   = dust grain material density [g cm^-3]</div>
 <div class="line">shape = dust grain shape (default spherical)</div>
 <div class="line"><br /></div>
 </div>

@@ -12,9 +12,9 @@ Abstract class *Sizedist* must contain attributes:
 
 - `a` (an array)
 
-- `ndens` (function that takes some normalization value or set of values)
+- `ndens` (md, rho, shape) returns number density of dust grains [e.g. cm^-2 um^-1]
 
-Right now `ndens` only takes M_d and \rho as inputs.
+- `mdens` (md, rho, shape) returns mass density of dust grains [e.g. g cm^-2 um^-1]
 
 Classes
 -------

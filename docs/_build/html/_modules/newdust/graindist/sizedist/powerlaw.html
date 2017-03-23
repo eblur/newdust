@@ -59,6 +59,8 @@
 <span class="n">AMIN</span>     <span class="o">=</span> <span class="mf">0.005</span>   <span class="c1"># micron</span>
 <span class="n">AMAX</span>     <span class="o">=</span> <span class="mf">0.3</span>     <span class="c1"># micron</span>
 
+<span class="n">SHAPE</span>    <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+
 <span class="c1">#------------------------------------</span>
 
 <div class="viewcode-block" id="Powerlaw"><a class="viewcode-back" href="../../../../sizedist.html#newdust.graindist.sizedist.Powerlaw">[docs]</a><span class="k">class</span> <span class="nc">Powerlaw</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -75,8 +77,9 @@
 <span class="sd">    |</span>
 <span class="sd">    | *functions*</span>
 <span class="sd">    | ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density (dn/da) [cm^-2 um^-1]</span>
-<span class="sd">    |   md = dust mass column [g cm^-2]</span>
-<span class="sd">    |   rho = dust grain material density [g cm^-3]</span>
+<span class="sd">    | mdens(md, rho=3.0, shape=shape.Sphere()) : returns mass density (dm/da) [g cm^-2 um^-1]</span>
+<span class="sd">    |   md    = total dust mass column [g cm^-2]</span>
+<span class="sd">    |   rho   = dust grain material density [g cm^-3]</span>
 <span class="sd">    |   shape = dust grain shape (default spherical)</span>
 <span class="sd">    |</span>
 <span class="sd">    | plot(ax, md, rho=3.0, *kwargs*) : plots (dn/da) a^4 [cm^-2 um^3]</span>
@@ -88,15 +91,20 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">,</span> <span class="n">na</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p</span>    <span class="o">=</span> <span class="n">p</span>
 
-    <span class="k">def</span> <span class="nf">ndens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="nf">ndens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">SHAPE</span><span class="p">):</span>
         <span class="n">adep</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span>   <span class="c1"># um^-p</span>
         <span class="n">mgra</span>  <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">rho</span>     <span class="c1"># g (mass of each grain)</span>
         <span class="n">dmda</span>  <span class="o">=</span> <span class="n">adep</span> <span class="o">*</span> <span class="n">mgra</span>
-        <span class="n">const</span> <span class="o">=</span> <span class="n">md</span> <span class="o">/</span> <span class="n">trapz</span><span class="p">(</span><span class="n">dmda</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># cm^-? um^p-1</span>
-        <span class="k">return</span> <span class="n">const</span> <span class="o">*</span> <span class="n">adep</span>  <span class="c1"># cm^-? um^-1</span>
+        <span class="n">const</span> <span class="o">=</span> <span class="n">md</span> <span class="o">/</span> <span class="n">trapz</span><span class="p">(</span><span class="n">dmda</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># cm^-2 um^p-1</span>
+        <span class="k">return</span> <span class="n">const</span> <span class="o">*</span> <span class="n">adep</span>  <span class="c1"># cm^-2 um^-1</span>
 
-    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndens</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">mdens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">SHAPE</span><span class="p">):</span>
+        <span class="n">nd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndens</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>  <span class="c1"># dn/da [cm^-2 um^-1]</span>
+        <span class="n">mg</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">rho</span>     <span class="c1"># grain mass for each radius [g]</span>
+        <span class="k">return</span> <span class="n">nd</span> <span class="o">*</span> <span class="n">mg</span>  <span class="c1"># g cm^-2 um^-1</span>
+
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">SHAPE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndens</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Radius (um)&quot;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)&quot;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>

@@ -36,9 +36,10 @@ class ExpCutoff(object):
     |   acut, p, a
     |
     | *functions*
-    | ndens(md, rho=3.0, shape=Sphere()) : returns number density (dn/da) [cm^-2 um^-1]
-    |   md = dust mass column [g cm^-2]
-    |   rho = dust grain material density [g cm^-3]
+    | ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density (dn/da) [cm^-2 um^-1]
+    | mdens(md, rho=3.0, shape=shape.Sphere()) : returns mass density (dm/da) [g cm^-2 um^-1]
+    |   md    = total dust mass column [g cm^-2]
+    |   rho   = dust grain material density [g cm^-3]
     |   shape = dust grain shape (default spherical)
     |
     | plot(ax, md, rho=3.0, *kwargs*) : plots (dn/da) a^4 [cm^-2 um^3]
