@@ -44,7 +44,17 @@ AMAX = 0.3  # um
 
 def make_GrainDist(sstring, cstring, amax=AMAX, rho=None, md=MD_DEFAULT):
     """
-    | A shortcut for creating GrainDist objects
+    | A shortcut function for creating GrainDist objects
+    |
+    | **INPUTS**
+    | sstring : 'Grain', 'Powerlaw' or 'ExpCutoff' (defines the grain size distribution)
+    | cstring : 'Drude', 'Silicate' or 'Graphite' (defines the composition)
+    | amax    : Defines the grain size distribution properties
+    |   *Grain:* defines the singular grain size
+    |   *Powerlaw:* defines the maximum grain size
+    |   *ExpCutoff:* defines the *acut* value
+    | rho     : if defined, will alter the rho keyword in composition
+    | md      : dust mass column (g cm^-2)
     """
     assert sstring in ALLOWED_SIZES
     assert cstring in ALLOWED_COMPS

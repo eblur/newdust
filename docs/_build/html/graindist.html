@@ -41,7 +41,54 @@
             
   <div class="section" id="astrodust-graindist">
 <h1>astrodust.graindist<a class="headerlink" href="#astrodust-graindist" title="Permalink to this headline">¶</a></h1>
-<p>This module is for setting up dust grain populations</p>
+<p>This module provides the essential <strong>GrainDist</strong> class, which contains
+information about the the grain size distribution, composition (e.g. Graphite vs
+Silicate), and shape.  Right now only spherical dust grain shapes are supported.</p>
+</div>
+<div class="section" id="graindist-class">
+<h1>GrainDist class<a class="headerlink" href="#graindist-class" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="newdust.graindist.GrainDist">
+<em class="property">class </em><code class="descclassname">newdust.graindist.</code><code class="descname">GrainDist</code><span class="sig-paren">(</span><em>sizedist</em>, <em>composition</em>, <em>shape=&lt;newdust.graindist.shape.sphere.Sphere object&gt;</em>, <em>md=0.0001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/graindist.html#GrainDist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.GrainDist" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line"><strong>ATTRIBUTES</strong></div>
+<div class="line">size  : Abstract class from astrodust.sizedist</div>
+<div class="line">comp  : Abstract class from astrodust.composition</div>
+<div class="line">shape : Abstract class from astrodust.shape</div>
+<div class="line">md    : float</div>
+<div class="line"><br /></div>
+<div class="line"><em>properties</em></div>
+<div class="line">a     : grain radii from size.a</div>
+<div class="line">ndens : number density from size.ndens using the other properties as input</div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="helper-functions">
+<h1>Helper functions<a class="headerlink" href="#helper-functions" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="newdust.graindist.make_GrainDist">
+<code class="descclassname">newdust.graindist.</code><code class="descname">make_GrainDist</code><span class="sig-paren">(</span><em>sstring</em>, <em>cstring</em>, <em>amax=0.3</em>, <em>rho=None</em>, <em>md=0.0001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/graindist.html#make_GrainDist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.make_GrainDist" title="Permalink to this definition">¶</a></dt>
+<dd><div class="line-block">
+<div class="line">A shortcut function for creating GrainDist objects</div>
+<div class="line"><br /></div>
+<div class="line"><strong>INPUTS</strong></div>
+<div class="line">sstring : &#8216;Grain&#8217;, &#8216;Powerlaw&#8217; or &#8216;ExpCutoff&#8217; (defines the grain size distribution)</div>
+<div class="line">cstring : &#8216;Drude&#8217;, &#8216;Silicate&#8217; or &#8216;Graphite&#8217; (defines the composition)</div>
+<div class="line">amax    : Defines the grain size distribution properties</div>
+<div class="line-block">
+<div class="line"><em>Grain:</em> defines the singular grain size</div>
+<div class="line"><em>Powerlaw:</em> defines the maximum grain size</div>
+<div class="line"><em>ExpCutoff:</em> defines the <em>acut</em> value</div>
+</div>
+<div class="line">rho     : if defined, will alter the rho keyword in composition</div>
+<div class="line">md      : dust mass column (g cm^-2)</div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="supporting-modules">
+<h1>Supporting modules<a class="headerlink" href="#supporting-modules" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="sizedist.html">astrodust.graindist.sizedist</a><ul>
@@ -69,7 +116,15 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">astrodust.graindist</a></li>
+<li><a class="reference internal" href="#graindist-class">GrainDist class</a></li>
+<li><a class="reference internal" href="#helper-functions">Helper functions</a></li>
+<li><a class="reference internal" href="#supporting-modules">Supporting modules</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
