@@ -22,7 +22,8 @@ m_p = np.float64(1.673e-24)  # g
 # Constants for converting things
 
 micron2cm = 1.e-6 * 100.0  # cm/micron
-pc2cm     = 3.09e18        # cm/pc
+pc2cm     = 3.09e18        # cm/parsec
+angs2cm   = 1.e-8          # cm/angs
 
 arcs2rad  = (2.0*np.pi) / (360.*60.*60.)  # rad/arcsec
 arcm2rad  = (2.0*np.pi) / (360.*60.)      # rad/arcmin
