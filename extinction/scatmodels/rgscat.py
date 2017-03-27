@@ -59,6 +59,6 @@ class RGscat(object):
         x      = 2.0 * np.pi * a_cm / lam_cm
         mm1    = cm.rp(lam, unit) + 1j * cm.ip(lam, unit) - 1
 
-        thdep  = 2./9. * np.exp(-0.5*(theta/self.Char(lam, a, unit))**2)
+        thdep  = 2./9. * np.exp(-np.power(theta/self.Char(lam, a, unit), 2) / 2.0)
         dsig   = 2.0 * a_cm**2 * x**4 * np.abs(mm1)**2
         return dsig * thdep
