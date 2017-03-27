@@ -1,4 +1,5 @@
 from .rgscat import RGscat
+from .miescat import Mie
 from ... import constants as c
 
 """

@@ -47,3 +47,6 @@ def test_rgscat():
     qext = test.Qext(E_KEV, A_UM, CMD, unit='kev')
     assert qsca1 == qext
     assert test.Qabs(E_KEV, A_UM, CMD, unit='kev') == 0.0
+
+def test_mie():
+    test = scatmodels.Mie()
