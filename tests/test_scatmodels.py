@@ -13,8 +13,8 @@ from . import percent_diff
 CMD   = graindist.composition.CmDrude()
 A_UM  = 0.5  # um
 E_KEV = 2.0  # keV
-THETA = np.logspace(-10.0, np.log10(np.pi), 1000) # scattering angles (rad)
-ASEC2RAD = (2.0 * np.pi) / (360.0 * 60. * 60.)    # rad / arcsec
+THETA = np.logspace(-10.0, np.log10(np.pi), 1000)  # scattering angles (rad)
+ASEC2RAD = (2.0 * np.pi) / (360.0 * 60. * 60.)     # rad / arcsec
 
 def test_rgscat():
     test = scatmodels.RGscat()
@@ -42,3 +42,7 @@ def test_rgscat():
     A2 = 2.0 * A_UM
     qsca3 = test.Qsca(E_KEV, A2, CMD, unit='kev')
     assert percent_diff(qsca3, 4.0*qsca1) <= 0.01
+
+    # Test that the absorption component for RG model is zero
+    qabs = qsca1 - test.Qext(E_KEV, A_UM, CMD, unit='kev')
+    assert qabs == 0.0
