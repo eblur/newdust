@@ -48,6 +48,9 @@ class RGscat(object):
     def Qext(self, lam, a, cm, unit='kev'):
         return self.Qsca(lam, a, cm, unit)
 
+    def Qabs(self, lam, a, cm, unit='kev'):
+        return 0.0
+
     def Char(self, lam, a, unit='kev'):   # Standard deviation on scattering angle
         lam_cm = _lam_cm(lam, unit)
         E_kev  = c.hc / lam_cm            # kev cm / cm

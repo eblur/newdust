@@ -44,5 +44,6 @@ def test_rgscat():
     assert percent_diff(qsca3, 4.0*qsca1) <= 0.01
 
     # Test that the absorption component for RG model is zero
-    qabs = qsca1 - test.Qext(E_KEV, A_UM, CMD, unit='kev')
-    assert qabs == 0.0
+    qext = test.Qext(E_KEV, A_UM, CMD, unit='kev')
+    assert qsca1 == qext
+    assert test.Qabs(E_KEV, A_UM, CMD, unit='kev') == 0.0
