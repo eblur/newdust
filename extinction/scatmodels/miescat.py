@@ -3,16 +3,6 @@ from ... import constants as c
 
 __all__ = ['Mie']
 
-ALLOWED_UNITS = ['kev','angs']
-
-def _lam_cm(lam, unit='kev'):
-    assert unit in ALLOWED_UNITS
-    if unit == 'kev':
-        result  = c.hc / lam  # kev cm / kev
-    if unit == 'angs':
-        result  = c.angs2cm * lam  # cm/angs * angs
-    return result  # cm
-
 # Major update: March 27, 2016
 # This code is slow, so to avoid running getQs over and over again, create
 # "calculate" function that runs getQs and stores it, then returns the appropriate values later??  Not sure ...
@@ -56,9 +46,8 @@ class Mie(object):
             print('Error: Can only specify one value for a')
             return
 
-
-        refrel = cm.rp(lam, unit) + 1j * cm.ip(lam, unit)
-        lam_cm = _lam_cm(lam, unit)
+        refrel = cm.cm(lam, unit)  # dtype='complex'
+        lam_cm = c._lam_cm(lam, unit)
         x      = (2.0 * np.pi * a*c.micron2cm) / lam_cm
 
         qsca, qext, qback, gsca, Cdiff = _mie_helper(x, refrel, theta=theta)
@@ -69,7 +58,15 @@ class Mie(object):
         self.qext  = qext
         self.qback = qback
         self.gsca  = gsca
-        self.diff  = Cdiff * geo # cm^2 / ster
+        self.diff  = Cdiff * geo  # cm^2 / ster
+
+    @property
+    def qabs(self):
+        if self.qext is None:
+            print("Error: Need to calculate cross sectins")
+            return 0.0
+        else:
+            return self.qext - self.qsca
 
     def Qsca(self, recalc=False, **kwargs):
         if self.qsca is None:
@@ -111,10 +108,6 @@ def _mie_helper(x, refrel, theta=None):
     amu    = np.array([])
 
     if theta is not None:
-        if np.size(lam) > 1 and np.size(lam) != np.size(theta):
-            print('Error: If more than one lam value specified, theta must have same size as E')
-            return
-
         if np.size(theta) == 1:
             theta = np.array([theta])
 
@@ -141,7 +134,7 @@ def _mie_helper(x, refrel, theta=None):
     xstop  = x + 4.0 * np.power(x, 0.3333) + 2.0
     test   = np.append(xstop, ymod)
     nmx    = np.max(test) + 15
-    nmx    = np.int32(nmx)
+    nmx    = np.int64(nmx)
 
     nstop  = xstop
 #   nmxx   = 150000

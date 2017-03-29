@@ -1,8 +1,10 @@
 import numpy as np
 from scipy.integrate import trapz
 
+import pytest
+
 from newdust import constants as c
-from newdust import graindist
+from newdust.graindist import composition
 from newdust.extinction import scatmodels
 from . import percent_diff
 
@@ -10,9 +12,11 @@ from . import percent_diff
 # I couldn't get differential scattering cross section to integrate to total
 # scattering cross-section within < 5%.  Could be the integration method?
 
-CMD   = graindist.composition.CmDrude()
+CMD   = composition.CmDrude()
+CMS   = composition.CmSilicate()
 A_UM  = 0.5  # um
-E_KEV = 2.0  # keV
+E_KEV = 2.0    # keV
+LAM   = 4500.  # angs
 THETA = np.logspace(-10.0, np.log10(np.pi), 1000)  # scattering angles (rad)
 ASEC2RAD = (2.0 * np.pi) / (360.0 * 60. * 60.)     # rad / arcsec
 
@@ -48,9 +52,22 @@ def test_rgscat():
     assert qsca1 == qext
     assert test.Qabs(E_KEV, A_UM, CMD, unit='kev') == 0.0
 
-def test_mie():
+@pytest.mark.parametrize('cm',
+                         [composition.CmSilicate(),
+                          composition.CmGraphite()])
+def test_mie(cm):
     test = scatmodels.Mie()
-    test.calculate(E_KEV, A_UM, CMD, unit='kev')
+    test.calculate(LAM, A_UM, cm, unit='angs')
 
-    # total cross-section must asymptoted to zero at high energy
-    #assert np.exp(-test.Qsca(recalc=True, lam=1.e10, a=A_UM, cm=CMD)) == 1.0
+    # Test that cross-section asymptotes to a small number when grain size gets very small
+    test.calculate(LAM, 1.e-10, cm, unit='angs')
+    assert percent_diff(np.exp(test.qsca), 1.0) < 0.001
+    assert percent_diff(np.exp(test.qext), 1.0) < 0.001
+    assert percent_diff(np.exp(test.qabs), 1.0) < 0.001
+
+    # Test that the differential scattering cross section integrates to total
+    TH_asec = THETA / ASEC2RAD  # rad * (arcsec/rad)
+    test.calculate(LAM, A_UM, cm, unit='angs', theta=TH_asec)
+    dtot = trapz(test.diff * 2.0*np.pi*THETA, THETA)  # cm^2
+    sigsca = test.qsca * np.pi * (A_UM * c.micron2cm)**2  # cm^2
+    assert percent_diff(dtot, sigsca) <= 0.05

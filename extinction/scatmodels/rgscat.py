@@ -42,7 +42,7 @@ class RGscat(object):
 
         x    = 2.0 * np.pi * a_cm / lam_cm
 
-        mm1  = cm.rp(lam, unit=unit) - 1 + 1j * cm.ip(lam, unit=unit)
+        mm1  = cm.rp(lam, unit=unit) + 1j * cm.ip(lam, unit=unit) - 1.0
         return 2.0 * np.power(x, 2) * np.power(np.abs(mm1), 2)
 
     def Qext(self, lam, a, cm, unit='kev'):
