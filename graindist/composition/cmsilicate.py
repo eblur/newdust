@@ -40,20 +40,23 @@ class CmSilicate(object):
         ip  = interp1d(lamvals * c.micron2cm, imvals)
         self.interps = (rp, ip)
 
-    def _interp_helper(self, lam_cm, interp):
+    def _interp_helper(self, lam_cm, interp, rp=False):
         # Returns zero for wavelengths not covered by the interpolation object
+        # If the real part is needed, returns 1 (consistent with vacuum)
         result = np.zeros(np.size(lam_cm))
+        if rp: result += 1
+
         if np.size(lam_cm) == 1:
             if (lam_cm >= np.min(interp.x)) & (lam_cm <= np.max(interp.x)):
                 result = interp(lam_cm)
-            else:
-                ii = (lam_cm >= np.min(interp.x)) & (lam_cm <= np.max(interp.x))
-                result[ii] = interp(lam_cm[ii])
+        else:
+            ii = (lam_cm >= np.min(interp.x)) & (lam_cm <= np.max(interp.x))
+            result[ii] = interp(lam_cm[ii])
         return result
 
     def rp(self, lam, unit='kev'):
         lam_cm = c._lam_cm(lam, unit)
-        return self._interp_helper(lam_cm, self.interps[0])
+        return self._interp_helper(lam_cm, self.interps[0], rp=True)
 
     def ip(self, lam, unit='kev'):
         lam_cm = c._lam_cm(lam, unit)

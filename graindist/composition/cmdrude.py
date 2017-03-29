@@ -3,7 +3,8 @@ from newdust import constants as c
 
 __all__ = ['CmDrude']
 
-RHO_DRUDE     = 3.0  # g cm^-3
+RHO_DRUDE  = 3.0  # g cm^-3
+LAM_MAX    = c.hc / 0.01 # maximal wavelength that we will allow for RG-Drude
 
 class CmDrude(object):
     """
@@ -25,12 +26,19 @@ class CmDrude(object):
 
     def rp(self, lam, unit='kev'):
         assert unit in c.ALLOWED_LAM_UNITS
-        if unit == 'angs':
-            E = c.hc_angs / lam  # keV
-        if unit == 'kev':
-            E = lam
-        mm1 = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(c.hc/E, 2)
-        return mm1+1
+        lam_cm = c._lam_cm(lam, unit)
+
+        # Returns 1 if the wavelength supplied is too low energy (i.e. inappropriate for applying Drude)
+        mm1 = np.zeros(np.size(lam_cm))
+        if (np.size(lam_cm) == 1):
+            if lam_cm >= LAM_MAX:
+                pass
+            else:
+                mm1 = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(lam_cm, 2)
+        else:
+            ii = (lam_cm <= LAM_MAX)
+            mm1[ii] = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(lam_cm[ii], 2)
+        return mm1 + 1.0
 
     def ip(self, lam, unit='kev'):
         if np.size(lam) > 1:

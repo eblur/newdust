@@ -31,3 +31,15 @@ def test_cmgraphite(sizes, orients):
     test = composition.CmGraphite(rho=2.0, size=sizes, orient=orients)
     assert test.rho == RHO_TEST
     test_abstract_class(test)
+
+# Test that super high energy values go to rp = 1.0, ip = 0.0
+ELO, EHI = 1.e-10, 1.e10  # keV
+@pytest.mark.parametrize('cm',
+                         [composition.CmDrude(),
+                          composition.CmSilicate(),
+                          composition.CmGraphite()])
+def test_Elims(cm):
+    assert cm.rp(EHI, unit='kev') == 1.0
+    assert cm.rp(ELO, unit='kev') == 1.0
+    assert cm.ip(EHI, unit='kev') == 0.0
+    assert cm.ip(ELO, unit='kev') == 0.0

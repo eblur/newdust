@@ -79,6 +79,14 @@ def _lam_cm(lam, unit='kev'):
         result  = angs2cm * lam  # cm/angs * angs
     return result  # cm
 
+def _lam_kev(lam, unit='kev'):
+    assert unit in ALLOWED_LAM_UNITS
+    if unit == 'kev':
+        result = lam
+    if unit == 'angs':
+        result = hc_angs / lam  # kev angs / angs
+    return result
+
 #------- Save and restore functions, similar to IDL -------#
 # http://idl2python.blogspot.com/2010/10/save-and-restore-2.html
 # Updated April 20, 2012 to store objects
