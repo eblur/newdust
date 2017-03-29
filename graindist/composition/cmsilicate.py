@@ -36,8 +36,8 @@ class CmSilicate(object):
         revals  = D03vals['Sil_re']
         imvals  = D03vals['Sil_im']
 
-        rp  = interp1d(lamvals * c.micron2cm, revals)
-        ip  = interp1d(lamvals * c.micron2cm, imvals)
+        rp  = interp1d(lamvals * c.micron2cm, revals)  # wavelength (cm), rp
+        ip  = interp1d(lamvals * c.micron2cm, imvals)  # wavelength (cm), ip
         self.interps = (rp, ip)
 
     def _interp_helper(self, lam_cm, interp, rp=False):
@@ -69,11 +69,11 @@ class CmSilicate(object):
         if lam is None:
             rp_m1 = np.abs(self.interps[0].y - 1.0)
             ip = self.interps[1].y
-            x  = self.interps[0].x
-            xlabel = "Energy (keV)"
+            x  = self.interps[0].x / c.micron2cm  # cm / (cm/um)
+            xlabel = "Wavelength (um)"
         else:
             rp_m1 = np.abs(self.rp(lam, unit=unit)-1.0)
-            ip = self.ip(lam, unit=unit)
+            ip = self.ip(lam, unit)
             x  = lam
             assert unit in c.ALLOWED_LAM_UNITS
             if unit == 'kev': xlabel = "Energy (keV)"

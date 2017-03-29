@@ -63,9 +63,8 @@ class CmGraphite(object):
                 revals  = D03vals['Cpa_001_re']
                 imvals  = D03vals['Cpa_001_im']
 
-        lamEvals = c.hc / c.micron2cm / lamvals  # keV
-        rp  = interp1d(lamEvals, revals)
-        ip  = interp1d(lamEvals, imvals)
+        rp  = interp1d(lamvals * c.micron2cm, revals)  # wavelength (cm), rp
+        ip  = interp1d(lamvals * c.micron2cm, imvals)  # wavelength (cm), ip
         self.interps = (rp, ip)
 
     def _interp_helper(self, lam_cm, interp, rp=False):
@@ -97,11 +96,11 @@ class CmGraphite(object):
         if lam is None:
             rp_m1 = np.abs(self.interps[0].y - 1.0)
             ip = self.interps[1].y
-            x  = self.interps[0].x
-            xlabel = "Energy (keV)"
+            x  = self.interps[0].x / c.micron2cm  # cm / (cm/um)
+            xlabel = "Wavelength (um)"
         else:
-            rp_m1 = np.abs(self.rp(lam, unit=unit)-1.0)
-            ip = self.ip(lam, unit=unit)
+            rp_m1 = np.abs(self.rp(lam, unit)-1.0)
+            ip = self.ip(lam, unit)
             x  = lam
             assert unit in c.ALLOWED_LAM_UNITS
             if unit == 'kev': xlabel = "Energy (keV)"
