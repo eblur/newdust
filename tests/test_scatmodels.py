@@ -17,7 +17,7 @@ CMS   = composition.CmSilicate()
 A_UM  = 0.5  # um
 E_KEV = 2.0    # keV
 LAM   = 4500.  # angs
-THETA = np.logspace(-10.0, np.log10(np.pi), 1000)  # scattering angles (rad)
+THETA = np.logspace(-10.0, np.log10(np.pi), 1000)  # 0->pi scattering angles (rad)
 ASEC2RAD = (2.0 * np.pi) / (360.0 * 60. * 60.)     # rad / arcsec
 
 def test_rgscat():
@@ -53,7 +53,8 @@ def test_rgscat():
     assert test.Qabs(E_KEV, A_UM, CMD, unit='kev') == 0.0
 
 @pytest.mark.parametrize('cm',
-                         [composition.CmSilicate(),
+                         [composition.CmDrude(),
+                          composition.CmSilicate(),
                           composition.CmGraphite()])
 def test_mie(cm):
     test = scatmodels.Mie()
@@ -68,6 +69,6 @@ def test_mie(cm):
     # Test that the differential scattering cross section integrates to total
     TH_asec = THETA / ASEC2RAD  # rad * (arcsec/rad)
     test.calculate(LAM, A_UM, cm, unit='angs', theta=TH_asec)
-    dtot = trapz(test.diff * 2.0*np.pi*THETA, THETA)  # cm^2
+    dtot = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # cm^2
     sigsca = test.qsca * np.pi * (A_UM * c.micron2cm)**2  # cm^2
-    assert percent_diff(dtot, sigsca) <= 0.05
+    assert percent_diff(dtot, sigsca) <= 0.01
