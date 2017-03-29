@@ -34,13 +34,23 @@ class Mie(object):
     def __init__(self):
         self.stype = 'Mie'
         self.cite  = 'Mie scattering solution'
+        self.pars  = None  # parameters used in running the calculation: lam, a, cm, theta, unit
         self.qsca  = None
         self.qext  = None
         self.qback = None
         self.gsca  = None
         self.diff  = None
 
-    def calculate(self, lam, a, cm, unit='kev', theta=None):  # Takes single a and E argument
+    @property
+    def qabs(self):
+        if self.qext is None:
+            print("Error: Need to calculate cross sectins")
+            return 0.0
+        else:
+            return self.qext - self.qsca
+
+    def calculate(self, lam, a, cm, unit='kev', theta=0.0):  # Takes single a and E argument
+        self.pars = dict(zip(['lam','a','cm','theta','lam_unit'],[lam, a, cm, theta, unit]))
 
         if np.size(a) > 1:
             print('Error: Can only specify one value for a')
@@ -60,43 +70,9 @@ class Mie(object):
         self.gsca  = gsca
         self.diff  = Cdiff * geo  # cm^2 / ster
 
-    @property
-    def qabs(self):
-        if self.qext is None:
-            print("Error: Need to calculate cross sectins")
-            return 0.0
-        else:
-            return self.qext - self.qsca
+# ---------------- Helper function that does the actual calculation
 
-    def Qsca(self, recalc=False, **kwargs):
-        if self.qsca is None:
-            self.calculate(**kwargs)
-        elif recalc:
-            self.calculate(**kwargs)
-        return self.qsca
-
-    def Qext(self, recalc=False, **kwargs):
-        if self.qext is None:
-            self.calculate(**kwargs)
-        elif recalc:
-            self.calculate(**kwargs)
-        return self.qsca
-
-    def Qabs(self, recalc=False, **kwargs):
-        if self.qsca is None:
-            self.calculate(**kwargs)
-        elif recalc:
-            self.calculate(**kwargs)
-        return self.qext - self.qsca
-
-    def Diff(self, recalc=False, **kwargs):
-        if self.qsca is None:
-            self.calculate(**kwargs)
-        elif recalc:
-            self.calculate(**kwargs)
-        return self.diff
-
-def _mie_helper(x, refrel, theta=None):
+def _mie_helper(x, refrel, theta):
     indl90 = np.array([])  # Empty arrays indicate that there are no theta values set
     indg90 = np.array([])  # Do not have to check if theta != None throughout calculation
     s1     = np.array([])
@@ -107,22 +83,21 @@ def _mie_helper(x, refrel, theta=None):
     tau    = np.array([])
     amu    = np.array([])
 
-    if theta is not None:
-        if np.size(theta) == 1:
-            theta = np.array([theta])
+    if np.size(theta) == 1:
+        theta = np.array([theta])
 
-        theta_rad = theta * c.arcs2rad
-        amu       = np.abs(np.cos(theta_rad))
-        indl90    = np.where(theta_rad < np.pi/2.0)
-        indg90    = np.where(theta_rad >= np.pi/2.0)
+    theta_rad = theta * c.arcs2rad
+    amu       = np.abs(np.cos(theta_rad))
+    indl90    = np.where(theta_rad < np.pi/2.0)
+    indg90    = np.where(theta_rad >= np.pi/2.0)
 
-        nang  = np.size(theta)
-        s1    = np.zeros(nang, dtype='complex')
-        s2    = np.zeros(nang, dtype='complex')
-        pi    = np.zeros(nang, dtype='complex')
-        pi0   = np.zeros(nang, dtype='complex')
-        pi1   = np.zeros(nang, dtype='complex') + 1.0
-        tau   = np.zeros(nang, dtype='complex')
+    nang  = np.size(theta)
+    s1    = np.zeros(nang, dtype='complex')
+    s2    = np.zeros(nang, dtype='complex')
+    pi    = np.zeros(nang, dtype='complex')
+    pi0   = np.zeros(nang, dtype='complex')
+    pi1   = np.zeros(nang, dtype='complex') + 1.0
+    tau   = np.zeros(nang, dtype='complex')
 
     y      = x * refrel
     ymod   = np.abs(y)

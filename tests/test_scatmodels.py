@@ -24,33 +24,37 @@ def test_rgscat():
     test = scatmodels.RGscat()
 
     # total cross-section must asymptote to zero at high energy
-    assert np.exp(-test.Qsca(1.e10, A_UM, CMD, unit='kev')) == 1.0
+    test.calculate(1.e10, A_UM, CMD, unit='kev')
+    assert np.exp(-test.qsca) == 1.0
     # total cross-section must asymptote to infinity at low energy
-    assert np.exp(-test.Qsca(1.e-10, A_UM, CMD, unit='kev')) == 0.0
+    test.calculate(1.e-10, A_UM, CMD, unit='kev')
+    assert np.exp(-test.qsca) == 0.0
 
     # differential cross-section must sum to total cross-section
     TH_asec = THETA / ASEC2RAD  # rad * (arcsec/rad)
-    dsca = test.Diff(TH_asec, E_KEV, A_UM, CMD, unit='kev')  # cm^2 ster^-1
-    dtot = trapz(dsca * 2.0*np.pi*THETA, THETA)  # cm^2
-    sigsca = test.Qsca(E_KEV, A_UM, CMD, unit='kev') * np.pi * (A_UM * c.micron2cm)**2  # cm^2
+    test.calculate(E_KEV, A_UM, CMD, unit='kev', theta=TH_asec)
+    dtot   = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # cm^2
+    sigsca = test.qsca * np.pi * (A_UM * c.micron2cm)**2  # cm^2
     assert percent_diff(dtot, sigsca) <= 0.05
+
+    # Test that the absorption component for RG model is zero
+    assert test.qsca == test.qext
+    assert test.qabs == 0.0
 
     # Test E^-2 dependence of the total cross-section
     E2 = 2.0 * E_KEV
-    qsca1 = test.Qsca(E_KEV, A_UM, CMD, unit='kev')
-    qsca2 = test.Qsca(E2, A_UM, CMD, unit='kev')
+    qsca1 = test.qsca
+    test.calculate(E2, A_UM, CMD, unit='kev')
+    qsca2 = test.qsca
     assert percent_diff(qsca2, qsca1/4.0) <= 0.01
 
     # Test a^4 scattering cross section dependence on the grain size
     #  Qsca = sigma_sca / (pi a^2), so qsca dependence is a^2
     A2 = 2.0 * A_UM
-    qsca3 = test.Qsca(E_KEV, A2, CMD, unit='kev')
+    test.calculate(E_KEV, A2, CMD, unit='kev')
+    qsca3 = test.qsca
     assert percent_diff(qsca3, 4.0*qsca1) <= 0.01
 
-    # Test that the absorption component for RG model is zero
-    qext = test.Qext(E_KEV, A_UM, CMD, unit='kev')
-    assert qsca1 == qext
-    assert test.Qabs(E_KEV, A_UM, CMD, unit='kev') == 0.0
 
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),

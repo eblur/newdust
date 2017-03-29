@@ -4,15 +4,6 @@ from ... import constants as c
 __all__ = ['RGscat']
 
 CHARSIG       = 1.04 * 60.0  # characteristic scattering angle [arcsec E(keV)^-1 a(um)^-1]
-ALLOWED_UNITS = ['kev', 'angs']
-
-def _lam_cm(lam, unit='kev'):
-    assert unit in ALLOWED_UNITS
-    if unit == 'kev':
-        result  = c.hc / lam  # kev cm / kev
-    if unit == 'angs':
-        result  = c.angs2cm * lam  # cm/angs * angs
-    return result  # cm
 
 class RGscat(object):
     """
@@ -35,36 +26,33 @@ class RGscat(object):
     def __init__(self):
         self.stype = 'RGscat'
         self.cite  = 'Calculating RG-Drude approximation\nMauche & Gorenstein (1986), ApJ 302, 371\nSmith & Dwek (1998), ApJ, 503, 831'
+        self.pars  = None  # parameters used in running the calculation: lam, a, cm, theta, unit
+        self.qsca  = None
+        self.qext  = None
+        self.diff  = None
 
-    def Qsca(self, lam, a, cm, unit='kev'):
+    @property
+    def qabs(self):
+        return self.qext - self.qsca
+
+    def calculate(self, lam, a, cm, unit='kev', theta=0.0):
+        self.pars = dict(zip(['lam','a','cm','theta','lam_unit'],[lam, a, cm, theta, unit]))
+
         a_cm   = a * c.micron2cm
-        lam_cm = _lam_cm(lam, unit)
+        lam_cm = c._lam_cm(lam, unit)
 
         x    = 2.0 * np.pi * a_cm / lam_cm
 
-        mm1  = cm.rp(lam, unit=unit) + 1j * cm.ip(lam, unit=unit) - 1.0
-        return 2.0 * np.power(x, 2) * np.power(np.abs(mm1), 2)
+        mm1  = cm.cm(lam, unit) - 1.0
+        qsca = 2.0 * np.power(x, 2) * np.power(np.abs(mm1), 2)
 
-    def Qext(self, lam, a, cm, unit='kev'):
-        return self.Qsca(lam, a, cm, unit)
-
-    def Qabs(self, lam, a, cm, unit='kev'):
-        return 0.0
-
-    def Char(self, lam, a, unit='kev'):   # Standard deviation on scattering angle
-        lam_cm = _lam_cm(lam, unit)
-        E_kev  = c.hc / lam_cm            # kev cm / cm
-        return CHARSIG / (E_kev * a)      # arcsec
-
-    # Can take multiple theta, but should only use one 'a' value
-    # Can take multiple E, but should be same size as theta
-    def Diff(self, theta, lam, a, cm, unit='kev'):  # cm^2 ster^-1
-        a_cm   = a * c.micron2cm      # cm
-        lam_cm = _lam_cm(lam, unit)   # cm
-
-        x      = 2.0 * np.pi * a_cm / lam_cm
-        mm1    = cm.rp(lam, unit) + 1j * cm.ip(lam, unit) - 1
+        self.qsca = qsca
+        self.qext = qsca
 
         thdep  = 2./9. * np.exp(-np.power(theta/self.Char(lam, a, unit), 2) / 2.0)
         dsig   = 2.0 * a_cm**2 * x**4 * np.abs(mm1)**2
-        return dsig * thdep
+        self.diff = dsig * thdep  # cm^2 / ster
+
+    def Char(self, lam, a, unit='kev'):   # Standard deviation on scattering angle
+        E_kev  = c._lam_kev(lam, unit)
+        return CHARSIG / (E_kev * a)      # arcsec
