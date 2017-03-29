@@ -6,7 +6,6 @@ from newdust.graindist.composition import _find_cmfile
 
 __all__ = ['CmSilicate']
 
-ALLOWED_UNITS = ['kev', 'angs']
 RHO_SIL       = 3.8  # g cm^-3
 
 class CmSilicate(object):
@@ -33,30 +32,32 @@ class CmSilicate(object):
         D03file = _find_cmfile('CM_D03.pysav')
         D03vals = c.restore(D03file)      # look up file
 
-        lamvals = D03vals['Sil_lam']
+        lamvals = D03vals['Sil_lam']  # um
         revals  = D03vals['Sil_re']
         imvals  = D03vals['Sil_im']
 
-        lamEvals = c.hc / c.micron2cm / lamvals  # keV
-        rp  = interp1d(lamEvals, revals)
-        ip  = interp1d(lamEvals, imvals)
+        rp  = interp1d(lamvals * c.micron2cm, revals)
+        ip  = interp1d(lamvals * c.micron2cm, imvals)
         self.interps = (rp, ip)
 
+    def _interp_helper(self, lam_cm, interp):
+        # Returns zero for wavelengths not covered by the interpolation object
+        result = np.zeros(np.size(lam_cm))
+        if np.size(lam_cm) == 1:
+            if (lam_cm >= np.min(interp.x)) & (lam_cm <= np.max(interp.x)):
+                result = interp(lam_cm)
+            else:
+                ii = (lam_cm >= np.min(interp.x)) & (lam_cm <= np.max(interp.x))
+                result[ii] = interp(lam_cm[ii])
+        return result
+
     def rp(self, lam, unit='kev'):
-        assert unit in ALLOWED_UNITS
-        if unit == 'kev':
-            E = lam
-        if unit == 'angs':
-            E = c.hc_angs / lam
-        return self.interps[0](E)
+        lam_cm = c._lam_cm(lam, unit)
+        return self._interp_helper(lam_cm, self.interps[0])
 
     def ip(self, lam, unit='kev'):
-        assert unit in ALLOWED_UNITS
-        if unit == 'kev':
-            E = lam
-        if unit == 'angs':
-            E = c.hc_angs / lam
-        return self.interps[1](E)
+        lam_cm = c._lam_cm(lam, unit)
+        return self._interp_helper(lam_cm, self.interps[1])
 
     def cm(self, lam, unit='kev'):
         return self.rp(lam, unit=unit) + 1j * self.ip(lam, unit=unit)
@@ -71,7 +72,7 @@ class CmSilicate(object):
             rp_m1 = np.abs(self.rp(lam, unit=unit)-1.0)
             ip = self.ip(lam, unit=unit)
             x  = lam
-            assert unit in ALLOWED_UNITS
+            assert unit in c.ALLOWED_LAM_UNITS
             if unit == 'kev': xlabel = "Energy (keV)"
             if unit == 'angs': xlabel = "Wavelength (Angstroms)"
         if rppart:

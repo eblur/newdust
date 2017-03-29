@@ -3,7 +3,6 @@ from newdust import constants as c
 
 __all__ = ['CmDrude']
 
-ALLOWED_UNITS = ['kev', 'angs']
 RHO_DRUDE     = 3.0  # g cm^-3
 
 class CmDrude(object):
@@ -25,7 +24,7 @@ class CmDrude(object):
         self.citation = "Using the Drude approximation.\nBohren, C. F. & Huffman, D. R., 1983, Absorption and Scattering of Light by Small Particles (New York: Wiley)"
 
     def rp(self, lam, unit='kev'):
-        assert unit in ALLOWED_UNITS
+        assert unit in c.ALLOWED_LAM_UNITS
         if unit == 'angs':
             E = c.hc_angs / lam  # keV
         if unit == 'kev':
@@ -43,7 +42,7 @@ class CmDrude(object):
         return self.rp(lam, unit=unit) + 0j
 
     def plot(self, ax, lam, unit='kev', **kwargs):
-        assert unit in ALLOWED_UNITS
+        assert unit in c.ALLOWED_LAM_UNITS
         rp = self.rp(lam, unit=unit)
         ax.plot(lam, rp-1.0, **kwargs)
         ax.set_ylabel("m-1")

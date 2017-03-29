@@ -3,6 +3,9 @@ import math
 import numpy as np
 import scipy as sp
 
+# Allowed units for energy or wavelength arguments
+ALLOWED_LAM_UNITS = ['kev','angs']
+
 ##----------------------------------------------------------
 # Generic constants
 
@@ -66,6 +69,15 @@ def trapezoidal_int(x, y):
     dy = y[1:] - y[:-1]
     return np.sum(y[:-1]*dx + 0.5*dx*dy)
 
+# Convert energy or wavelength (angs) to cm
+
+def _lam_cm(lam, unit='kev'):
+    assert unit in ALLOWED_LAM_UNITS
+    if unit == 'kev':
+        result  = hc / lam  # kev cm / kev
+    if unit == 'angs':
+        result  = angs2cm * lam  # cm/angs * angs
+    return result  # cm
 
 #------- Save and restore functions, similar to IDL -------#
 # http://idl2python.blogspot.com/2010/10/save-and-restore-2.html
