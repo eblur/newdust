@@ -13,7 +13,7 @@ class RGscat(object):
     |
     | **ATTRIBUTES**
     | stype : string : 'RGscat'
-    | cite  : string : citation string
+    | citation : string : citation string
     | pars  : dict   : parameters used to run the calculation
     | qsca  : array  : scattering efficiency (unitless, per geometric area)
     | qext  : array  : extinction efficiency (unitless, per geometric area)
@@ -31,7 +31,7 @@ class RGscat(object):
 
     def __init__(self):
         self.stype = 'RGscat'
-        self.cite  = 'Calculating RG-Drude approximation\nMauche & Gorenstein (1986), ApJ 302, 371\nSmith & Dwek (1998), ApJ, 503, 831'
+        self.citation = 'Calculating RG-Drude approximation\nMauche & Gorenstein (1986), ApJ 302, 371\nSmith & Dwek (1998), ApJ, 503, 831'
         self.pars  = None  # parameters used in running the calculation: lam, a, cm, theta, unit
         self.qsca  = None
         self.qext  = None

@@ -19,7 +19,7 @@ class Mie(object):
     |
     | **ATTRIBUTES**
     | stype : string : 'RGscat'
-    | cite  : string : citation string
+    | citation : string : citation string
     | pars  : dict   : parameters used to run the calculation
     | qsca  : array  : scattering efficiency (unitless, per geometric area)
     | qext  : array  : extinction efficiency (unitless, per geometric area)
@@ -31,15 +31,13 @@ class Mie(object):
     | qabs  : array  : absorption efficiency (unitless, per geometric area)
     |
     | *functions*
-    | char( lam, a, unit= )
-    |    *returns* characteristc scattering angle [arcsec]
     | calculate( lam, a, cm, unit='kev', theta=0.0 )
     |    calculates the relevant values (qsca, qext, qback, gsca, diff)
     """
 
     def __init__(self):
         self.stype = 'Mie'
-        self.cite  = 'Mie scattering solution'
+        self.citation = 'Mie scattering algorithm from Bohren & HOffman\n*Absorption and Scattering of Light by Small Particles*'
         self.pars  = None  # parameters used in running the calculation: lam, a, cm, theta, unit
         self.qsca  = None
         self.qext  = None
