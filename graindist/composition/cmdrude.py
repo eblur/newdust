@@ -28,7 +28,10 @@ class CmDrude(object):
         assert unit in c.ALLOWED_LAM_UNITS
         lam_cm = c._lam_cm(lam, unit)
 
-        # Returns 1 if the wavelength supplied is too low energy (i.e. inappropriate for applying Drude)
+        mm1 = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(lam_cm, 2)
+        return mm1 + 1.0
+
+        '''# Returns 1 if the wavelength supplied is too low energy (i.e. inappropriate for applying Drude)
         mm1 = np.zeros(np.size(lam_cm))
         if (np.size(lam_cm) == 1):
             if lam_cm >= LAM_MAX:
@@ -38,7 +41,7 @@ class CmDrude(object):
         else:
             ii = (lam_cm <= LAM_MAX)
             mm1[ii] = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(lam_cm[ii], 2)
-        return mm1 + 1.0
+        return mm1 + 1.0'''
 
     def ip(self, lam, unit='kev'):
         if np.size(lam) > 1:
