@@ -50,3 +50,7 @@ def test_rgscat():
 
 def test_mie():
     test = scatmodels.Mie()
+    test.calculate(E_KEV, A_UM, CMD, unit='kev')
+
+    # total cross-section must asymptoted to zero at high energy
+    #assert np.exp(-test.Qsca(recalc=True, lam=1.e10, a=A_UM, cm=CMD)) == 1.0
