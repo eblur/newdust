@@ -51,6 +51,7 @@ Modules
    :maxdepth: 3
 
    graindist
+   extinction
 
 .. Indices and tables
     ==================

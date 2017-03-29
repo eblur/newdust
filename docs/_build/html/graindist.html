@@ -44,9 +44,8 @@
 <p>This module provides the essential <strong>GrainDist</strong> class, which contains
 information about the the grain size distribution, composition (e.g. Graphite vs
 Silicate), and shape.  Right now only spherical dust grain shapes are supported.</p>
-</div>
 <div class="section" id="graindist-class">
-<h1>GrainDist class<a class="headerlink" href="#graindist-class" title="Permalink to this headline">¶</a></h1>
+<h2>GrainDist class<a class="headerlink" href="#graindist-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="newdust.graindist.GrainDist">
 <em class="property">class </em><code class="descclassname">newdust.graindist.</code><code class="descname">GrainDist</code><span class="sig-paren">(</span><em>sizedist</em>, <em>composition</em>, <em>shape=&lt;newdust.graindist.shape.sphere.Sphere object&gt;</em>, <em>md=0.0001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/graindist.html#GrainDist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.GrainDist" title="Permalink to this definition">¶</a></dt>
@@ -61,12 +60,15 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
 <div class="line">a     : grain radii from size.a</div>
 <div class="line">ndens : number density from size.ndens using the other attributes as input</div>
 <div class="line">mdens : mass density as a function of grain size</div>
+<div class="line"><br /></div>
+<div class="line"><em>functions</em></div>
+<div class="line">plot(ax, kwargs) : Plots the number density of dust grains via size.plot()</div>
 </div>
 </dd></dl>
 
 </div>
 <div class="section" id="helper-functions">
-<h1>Helper functions<a class="headerlink" href="#helper-functions" title="Permalink to this headline">¶</a></h1>
+<h2>Helper functions<a class="headerlink" href="#helper-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="newdust.graindist.make_GrainDist">
 <code class="descclassname">newdust.graindist.</code><code class="descname">make_GrainDist</code><span class="sig-paren">(</span><em>sstring</em>, <em>cstring</em>, <em>amax=0.3</em>, <em>rho=None</em>, <em>md=0.0001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/graindist.html#make_GrainDist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.make_GrainDist" title="Permalink to this definition">¶</a></dt>
@@ -89,7 +91,7 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
 
 </div>
 <div class="section" id="supporting-modules">
-<h1>Supporting modules<a class="headerlink" href="#supporting-modules" title="Permalink to this headline">¶</a></h1>
+<h2>Supporting modules<a class="headerlink" href="#supporting-modules" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="sizedist.html">astrodust.graindist.sizedist</a><ul>
@@ -111,6 +113,7 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
 </ul>
 </div>
 </div>
+</div>
 
 
           </div>
@@ -120,10 +123,12 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">astrodust.graindist</a></li>
+<li><a class="reference internal" href="#">astrodust.graindist</a><ul>
 <li><a class="reference internal" href="#graindist-class">GrainDist class</a></li>
 <li><a class="reference internal" href="#helper-functions">Helper functions</a></li>
 <li><a class="reference internal" href="#supporting-modules">Supporting modules</a></li>
+</ul>
+</li>
 </ul>
 <div class="relations">
 <h3>Related Topics</h3>

@@ -22,7 +22,7 @@ class GrainDist(object):
     | mdens : mass density as a function of grain size
     |
     | *functions*
-    | plot(ax, **kwargs) : Plots the number density of dust grains via size.plot()
+    | plot(ax, kwargs) : Plots the number density of dust grains via size.plot()
     """
     def __init__(self, sizedist, composition, shape=SHAPE, md=MD_DEFAULT):
         self.size = sizedist

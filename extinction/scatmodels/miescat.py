@@ -18,17 +18,23 @@ class Mie(object):
     | See their book: *Absorption and Scattering of Light by Small Particles*
     |
     | **ATTRIBUTES**
-    | stype : string : 'Mie'
+    | stype : string : 'RGscat'
+    | cite  : string : citation string
+    | pars  : dict   : parameters used to run the calculation
+    | qsca  : array  : scattering efficiency (unitless, per geometric area)
+    | qext  : array  : extinction efficiency (unitless, per geometric area)
+    | qback : array  : back scattering efficiency (unitless, per geometric area)
+    | gsca  : array  : average scattering angle
+    | diff  : array  : differential scattering cross-section (cm^2 ster^-1)
     |
-    | **FUNCTIONS**
-    | getQs( a=1.0 [um], E=1.0 [keV], cm=cmi.CmDrude(), getQ='sca' ['ext','back','gsca','diff'], theta=None [arcsec] )
-    |     *returns* Efficiency factors depending on getQ [unitless or ster^-1]
-    | Qsca( E [keV], a=1.0 [um], cm=cmi.CmDrude() )
-    |     *returns* Scattering efficiency [unitless]
-    | Qext( E [keV], a=1.0 [um], cm=cmi.CmDrude() )
-    |     *returns* Extinction efficiency [unitless]
-    | Diff( theta [arcsec], E=1.0 [keV], a=1.0 [um], cm=cmi.CmDrude() )
-    |     *returns* Differential cross-section [cm^2 ster^-1]
+    | *properties*
+    | qabs  : array  : absorption efficiency (unitless, per geometric area)
+    |
+    | *functions*
+    | char( lam, a, unit= )
+    |    *returns* characteristc scattering angle [arcsec]
+    | calculate( lam, a, cm, unit='kev', theta=0.0 )
+    |    calculates the relevant values (qsca, qext, qback, gsca, diff)
     """
 
     def __init__(self):
@@ -70,7 +76,7 @@ class Mie(object):
         self.gsca  = gsca
         self.diff  = Cdiff * geo  # cm^2 / ster
 
-# ---------------- Helper function that does the actual calculation
+#---------------- Helper function that does the actual calculation
 
 def _mie_helper(x, refrel, theta):
     indl90 = np.array([])  # Empty arrays indicate that there are no theta values set

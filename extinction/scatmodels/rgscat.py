@@ -13,14 +13,20 @@ class RGscat(object):
     |
     | **ATTRIBUTES**
     | stype : string : 'RGscat'
+    | cite  : string : citation string
+    | pars  : dict   : parameters used to run the calculation
+    | qsca  : array  : scattering efficiency (unitless, per geometric area)
+    | qext  : array  : extinction efficiency (unitless, per geometric area)
+    | diff  : array  : differential scattering cross-section (cm^2 ster^-1)
+    |
+    | *properties*
+    | qabs  : array  : absorption efficiency (unitless, per geometric area)
     |
     | *functions*
-    | Qsca( lam, a, cm, unit= )
-    |    *returns* scattering efficiency [unitless]
-    | Char( lam, a, unit= )
-    |    *returns* characteristc scattering angle [arcsec keV um]
-    | Diff( theta, lam, a, cm, unit= )
-    |    *returns* differential scattering cross-section [cm^2 ster^-1]
+    | char( lam, a, unit='kev' )
+    |    *returns* characteristc scattering angle [arcsec]
+    | calculate( lam, a, cm, unit='kev', theta=0.0 )
+    |    calculates the relevant values (qsca, qext, diff)
     """
 
     def __init__(self):
@@ -49,10 +55,10 @@ class RGscat(object):
         self.qsca = qsca
         self.qext = qsca
 
-        thdep  = 2./9. * np.exp(-np.power(theta/self.Char(lam, a, unit), 2) / 2.0)
+        thdep  = 2./9. * np.exp(-np.power(theta/self.char(lam, a, unit), 2) / 2.0)
         dsig   = 2.0 * a_cm**2 * x**4 * np.abs(mm1)**2
         self.diff = dsig * thdep  # cm^2 / ster
 
-    def Char(self, lam, a, unit='kev'):   # Standard deviation on scattering angle
+    def char(self, lam, a, unit='kev'):   # Standard deviation on scattering angle
         E_kev  = c._lam_kev(lam, unit)
         return CHARSIG / (E_kev * a)      # arcsec

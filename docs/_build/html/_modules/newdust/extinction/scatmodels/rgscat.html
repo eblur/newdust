@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>newdust.extinction.scatmodels.rgscat &mdash; astrodust 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="astrodust 0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for newdust.extinction.scatmodels.rgscat</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">c</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RGscat&#39;</span><span class="p">]</span>
+
+<span class="n">CHARSIG</span>       <span class="o">=</span> <span class="mf">1.04</span> <span class="o">*</span> <span class="mf">60.0</span>  <span class="c1"># characteristic scattering angle [arcsec E(keV)^-1 a(um)^-1]</span>
+
+<div class="viewcode-block" id="RGscat"><a class="viewcode-back" href="../../../../scatmodels.html#newdust.extinction.scatmodels.RGscat">[docs]</a><span class="k">class</span> <span class="nc">RGscat</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    | RAYLEIGH-GANS scattering model.</span>
+<span class="sd">    | *see* Mauche &amp; Gorenstein (1986), ApJ 302, 371</span>
+<span class="sd">    | *see* Smith &amp; Dwek (1998), ApJ, 503, 831</span>
+<span class="sd">    |</span>
+<span class="sd">    | **ATTRIBUTES**</span>
+<span class="sd">    | stype : string : &#39;RGscat&#39;</span>
+<span class="sd">    | cite  : string : citation string</span>
+<span class="sd">    | pars  : dict   : parameters used to run the calculation</span>
+<span class="sd">    | qsca  : array  : scattering efficiency (unitless, per geometric area)</span>
+<span class="sd">    | qext  : array  : extinction efficiency (unitless, per geometric area)</span>
+<span class="sd">    | diff  : array  : differential scattering cross-section (cm^2 ster^-1)</span>
+<span class="sd">    |</span>
+<span class="sd">    | *properties*</span>
+<span class="sd">    | qabs  : array  : absorption efficiency (unitless, per geometric area)</span>
+<span class="sd">    |</span>
+<span class="sd">    | *functions*</span>
+<span class="sd">    | char( lam, a, unit=&#39;kev&#39; )</span>
+<span class="sd">    |    *returns* characteristc scattering angle [arcsec]</span>
+<span class="sd">    | calculate( lam, a, cm, unit=&#39;kev&#39;, theta=0.0 )</span>
+<span class="sd">    |    calculates the relevant values (qsca, qext, diff)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">=</span> <span class="s1">&#39;RGscat&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cite</span>  <span class="o">=</span> <span class="s1">&#39;Calculating RG-Drude approximation</span><span class="se">\n</span><span class="s1">Mauche &amp; Gorenstein (1986), ApJ 302, 371</span><span class="se">\n</span><span class="s1">Smith &amp; Dwek (1998), ApJ, 503, 831&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pars</span>  <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># parameters used in running the calculation: lam, a, cm, theta, unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qsca</span>  <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qext</span>  <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diff</span>  <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">qabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">qext</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">qsca</span>
+
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;kev&#39;</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="s1">&#39;lam&#39;</span><span class="p">,</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;cm&#39;</span><span class="p">,</span><span class="s1">&#39;theta&#39;</span><span class="p">,</span><span class="s1">&#39;lam_unit&#39;</span><span class="p">],[</span><span class="n">lam</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">unit</span><span class="p">]))</span>
+
+        <span class="n">a_cm</span>   <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">micron2cm</span>
+        <span class="n">lam_cm</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_lam_cm</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+
+        <span class="n">x</span>    <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">a_cm</span> <span class="o">/</span> <span class="n">lam_cm</span>
+
+        <span class="n">mm1</span>  <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">cm</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>
+        <span class="n">qsca</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mm1</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qsca</span> <span class="o">=</span> <span class="n">qsca</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qext</span> <span class="o">=</span> <span class="n">qsca</span>
+
+        <span class="n">thdep</span>  <span class="o">=</span> <span class="mf">2.</span><span class="o">/</span><span class="mf">9.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">char</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+        <span class="n">dsig</span>   <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">a_cm</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mm1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">dsig</span> <span class="o">*</span> <span class="n">thdep</span>  <span class="c1"># cm^2 / ster</span>
+
+    <span class="k">def</span> <span class="nf">char</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;kev&#39;</span><span class="p">):</span>   <span class="c1"># Standard deviation on scattering angle</span>
+        <span class="n">E_kev</span>  <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_lam_kev</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CHARSIG</span> <span class="o">/</span> <span class="p">(</span><span class="n">E_kev</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>      <span class="c1"># arcsec</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Lia Corrales.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
