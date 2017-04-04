@@ -48,7 +48,7 @@ class Mie(object):
     @property
     def qabs(self):
         if self.qext is None:
-            print("Error: Need to calculate cross sectins")
+            print("Error: Need to calculate cross sections")
             return 0.0
         else:
             return self.qext - self.qsca
@@ -56,56 +56,70 @@ class Mie(object):
     def calculate(self, lam, a, cm, unit='kev', theta=0.0):  # Takes single a and E argument
         self.pars = dict(zip(['lam','a','cm','theta','lam_unit'],[lam, a, cm, theta, unit]))
 
-        if np.size(a) > 1:
-            print('Error: Can only specify one value for a')
-            return
+        NE, NA, NTH = np.size(lam), np.size(a), np.size(theta)
 
-        refrel = cm.cm(lam, unit)  # dtype='complex'
-        lam_cm = c._lam_cm(lam, unit)
-        x      = (2.0 * np.pi * a*c.micron2cm) / lam_cm
+        # Deal with the 1d stuff first
+        # Make sure every variable is an array
+        lam   = c._make_array(lam)
+        a     = c._make_array(a)
+        th_1d = c._make_array(theta)
 
-        qsca, qext, qback, gsca, Cdiff = _mie_helper(x, refrel, theta=theta)
+        # Convert to the appropriate units
+        a_cm_1d   = a * c.micron2cm
+        lam_cm_1d = c._lam_cm(lam, unit)
+        refrel_1d = cm.cm(lam, unit)
 
-        geo   = np.pi * (a * c.micron2cm)**2  # Assumes spherical grains (implicit in Mie)
+        # Make everything NE x NA
+        a_cm   = np.repeat(a_cm_1d.reshape(1, NA), NE, axis=0)
+        lam_cm = np.repeat(lam_cm_1d.reshape(NE, 1), NA, axis=1)
+        refrel = np.repeat(refrel_1d.reshape(NE, 1), NA, axis=1)
+        x      = 2.0 * np.pi * a_cm / lam_cm
+
+        qsca, qext, qback, gsca, Cdiff = _mie_helper(x, refrel, theta=th_1d)
+
+        # Assumes spherical grains (implicit in Mie)
+        geo    = np.pi * a_cm**2  # NE x NA
+        geo_3d = np.repeat(geo.reshape(NE, NA, 1), NTH, axis=2)
 
         self.qsca  = qsca
         self.qext  = qext
         self.qback = qback
         self.gsca  = gsca
-        self.diff  = Cdiff * geo  # cm^2 / ster
+        self.diff  = Cdiff * geo_3d  # cm^2 / ster
 
 #---------------- Helper function that does the actual calculation
 
 def _mie_helper(x, refrel, theta):
-    indl90 = np.array([])  # Empty arrays indicate that there are no theta values set
-    indg90 = np.array([])  # Do not have to check if theta != None throughout calculation
-    s1     = np.array([])
-    s2     = np.array([])
-    pi     = np.array([])
-    pi0    = np.array([])
-    pi1    = np.array([])
-    tau    = np.array([])
-    amu    = np.array([])
+    # x and refrel are NE x NA
+    # need to make outputs that are NE x NA x NTH
+    assert np.shape(x) == np.shape(refrel)
+    assert len(np.shape(x)) <= 2
+    assert len(theta) >= 1
 
-    if np.size(theta) == 1:
-        theta = np.array([theta])
+    NE, NA = np.shape(x)
+    NTH    = len(theta)
 
-    theta_rad = theta * c.arcs2rad
+    # Make 3D array for the calculations on angular dependence
+    theta_3d  = np.repeat(
+        np.repeat(theta.reshape(1, 1, NTH), NE, axis=0),
+        NA, axis=1)
+    x_3d      = np.repeat(x.reshape(NE,NA,1), NTH, axis=2)
+
+    theta_rad = theta_3d * c.arcs2rad
     amu       = np.abs(np.cos(theta_rad))
-    indl90    = np.where(theta_rad < np.pi/2.0)
-    indg90    = np.where(theta_rad >= np.pi/2.0)
+    indl90    = (theta_rad < np.pi/2.0)
+    indg90    = (theta_rad >= np.pi/2.0)
 
-    nang  = np.size(theta)
-    s1    = np.zeros(nang, dtype='complex')
-    s2    = np.zeros(nang, dtype='complex')
-    pi    = np.zeros(nang, dtype='complex')
-    pi0   = np.zeros(nang, dtype='complex')
-    pi1   = np.zeros(nang, dtype='complex') + 1.0
-    tau   = np.zeros(nang, dtype='complex')
+    s1    = np.zeros(shape=(NA, NE, NTH), dtype='complex')
+    s2    = np.zeros(shape=(NA, NE, NTH), dtype='complex')
+    pi    = np.zeros(shape=(NA, NE, NTH), dtype='complex')
+    pi0   = np.zeros(shape=(NA, NE, NTH), dtype='complex')
+    pi1   = np.zeros(shape=(NA, NE, NTH), dtype='complex') + 1.0
+    tau   = np.zeros(shape=(NA, NE, NTH), dtype='complex')
 
     y      = x * refrel
     ymod   = np.abs(y)
-    nx     = np.size(x)
+    nx     = len(x.flatten())  # total number of NE x NA
 
     # *** Series expansion terminated after NSTOP terms
     # Logarithmic derivatives calculated from NMX on down
@@ -113,7 +127,7 @@ def _mie_helper(x, refrel, theta):
     xstop  = x + 4.0 * np.power(x, 0.3333) + 2.0
     test   = np.append(xstop, ymod)
     nmx    = np.max(test) + 15
-    nmx    = np.int64(nmx)
+    nmx    = np.int64(nmx)  # max number of iterations
 
     nstop  = xstop
 #   nmxx   = 150000
@@ -123,19 +137,19 @@ def _mie_helper(x, refrel, theta):
     # *** Logarithmic derivative D(J) calculated by downward recurrence
     # beginning with initial value (0.,0.) at J=NMX
 
-    d = np.zeros(shape=(nx,nmx+1), dtype='complex')
+    d = np.zeros(shape=(NE,NA,nmx+1), dtype='complex')  # NE x NA x nmx
     dold = np.zeros(nmx+1, dtype='complex')
     # Original code set size to nmxx.
     # I see that the array only needs to be slightly larger than nmx
 
     for n in np.arange(nmx-1)+1:  # for n=1, nmx-1 do begin
         en = nmx - n + 1
-        d[:,nmx-n]  = (en/y) - (1.0 / (d[:,nmx-n+1]+en/y))
+        d[:,:,nmx-n]  = (en/y) - (1.0 / (d[:,:,nmx-n+1]+en/y))
 
     # *** Riccati-Bessel functions with real argument X
     # calculated by upward recurrence
 
-    psi0 = np.cos(x)
+    psi0 = np.cos(x)  # NE x NA
     psi1 = np.sin(x)
     chi0 = -np.sin(x)
     chi1 = np.cos(x)
@@ -172,32 +186,26 @@ def _mie_helper(x, refrel, theta):
             an1 = an
             bn1 = bn
 
-        if nx > 1:
-            ig  = np.where(nstop >= n)
+        ig  = (nstop >= n)
 
-            psi    = np.zeros(nx)
-            chi    = np.zeros(nx)
+        psi    = np.zeros(shape=(NE,NA))
+        chi    = np.zeros(shape=(NE,NA))
 
-            psi[ig] = (2.0*en-1.0) * psi1[ig]/x[ig] - psi0[ig]
-            chi[ig] = (2.0*en-1.0) * chi1[ig]/x[ig] - chi0[ig]
-            xi      = psi - 1j * chi
+        psi[ig] = (2.0*en-1.0) * psi1[ig]/x[ig] - psi0[ig]
+        chi[ig] = (2.0*en-1.0) * chi1[ig]/x[ig] - chi0[ig]
+        xi      = psi - 1j * chi
 
-            an = np.zeros(nx, dtype='complex')
-            bn = np.zeros(nx, dtype='complex')
+        an = np.zeros(shape=(NE,NA), dtype='complex')
+        bn = np.zeros(shape=(NE,NA), dtype='complex')
 
-            an[ig] = (d[ig,n]/refrel[ig] + en/x[ig]) * psi[ig] - psi1[ig]
-            an[ig] = an[ig] / ((d[ig,n]/refrel[ig] + en/x[ig]) * xi[ig] - xi1[ig])
-            bn[ig] = (refrel[ig]*d[ig,n] + en / x[ig]) * psi[ig] - psi1[ig]
-            bn[ig] = bn[ig] / ((refrel[ig]*d[ig,n] + en/x[ig]) * xi[ig] - xi1[ig])
-        else:
-            psi = (2.0*en-1.0) * psi1/x - psi0
-            chi = (2.0*en-1.0) * chi1/x - chi0
-            xi  = psi - 1j * chi
+        d_n = d[:,:,n]
+        an[ig] = (d_n[ig] / refrel[ig] + en / x[ig]) * psi[ig] - psi1[ig]
+        an[ig] = an[ig] / ((d_n[ig] / refrel[ig] + en / x[ig]) * xi[ig] - xi1[ig])
+        bn[ig] = (refrel[ig] * d_n[ig] + en / x[ig]) * psi[ig] - psi1[ig]
+        bn[ig] = bn[ig] / ((refrel[ig] * d_n[ig] + en/x[ig]) * xi[ig] - xi1[ig])
 
-            an = (d[0,n]/refrel + en/x) * psi - psi1
-            an = an / ((d[0,n]/refrel + en/x) * xi - xi1)
-            bn = (refrel*d[0,n] + en / x) * psi - psi1
-            bn = bn / ((refrel*d[0,n] + en/x) * xi - xi1)
+        an_3d = np.repeat(an.reshape(NE,NA,1), NTH, axis=2)
+        bn_3d = np.repeat(bn.reshape(NE,NA,1), NTH, axis=2)
 
         # *** Augment sums for Qsca and g=<cos(theta)>
         # NOTE from LIA: In IDL version, bhmie casts double(an)
@@ -229,21 +237,17 @@ def _mie_helper(x, refrel, theta):
         tau = en * amu * pi - (en + 1.0) * pi0
 
         if np.size(indl90) != 0:
-            antmp = an
-            bntmp = bn
-            if nx > 1:
-                antmp = an[indl90]
-                bntmp = bn[indl90]  # For case where multiple E and theta are specified
-
-            s1[indl90]  = s1[indl90] + fn * (antmp * pi[indl90] + bntmp*tau[indl90])
-            s2[indl90]  = s2[indl90] + fn * (antmp * tau[indl90] + bntmp*pi[indl90])
+            antmp = an_3d[...,indl90]
+            bntmp = bn_3d[...,indl90]  # For case where multiple E and theta are specified
+            s1[...,indl90] = s1[...,indl90] + fn * (antmp * pi[...,indl90] + bntmp * tau[...,indl90])
+            s2[...,indl90] = s2[...,indl90] + fn * (antmp * tau[...,indl90] + bntmp * pi[...,indl90])
         #ENDIF
 
         pi_ext = pi1_ext
         tau_ext = en * 1.0 * pi_ext - (en + 1.0) * pi0_ext
 
-        s1_ext = s1_ext + fn * (an*pi_ext+bn*tau_ext)
-        s2_ext = s2_ext + fn * (bn*pi_ext+an*tau_ext)
+        s1_ext = s1_ext + fn * (an * pi_ext + bn * tau_ext)
+        s2_ext = s2_ext + fn * (bn * pi_ext + an * tau_ext)
 
         # *** Now do angles greater than 90 using PI and TAU from
         #     angles less than 90.
@@ -255,14 +259,10 @@ def _mie_helper(x, refrel, theta):
         # get around this?
 
         if np.size(indg90) != 0:
-            antmp = an
-            bntmp = bn
-            if nx > 1:
-                antmp = an[indg90]
-                bntmp = bn[indg90]  # For case where multiple E and theta are specified
-
-            s1[indg90]  = s1[indg90] + fn * p * (antmp * pi[indg90] - bntmp*tau[indg90])
-            s2[indg90]  = s2[indg90] + fn * p * (bntmp * pi[indg90] - antmp*tau[indg90])
+            antmp = an_3d[...,indg90]
+            bntmp = bn_3d[...,indg90]
+            s1[...,indg90] = s1[...,indg90] + fn * p * (antmp * pi[...,indg90] - bntmp * tau[...,indg90])
+            s2[...,indg90] = s2[...,indg90] + fn * p * (bntmp * pi[...,indg90] - antmp * tau[...,indg90])
         #ENDIF
 
         s1_back = s1_back + fn * p * (an * pi_ext - bn * tau_ext)
@@ -298,11 +298,10 @@ def _mie_helper(x, refrel, theta):
     qback = np.power(np.abs(s1_back)/x, 2) / np.pi
 
     Cdiff = 0.0
-    if theta is not None:
-        bad_theta = np.where(theta_rad > np.pi)  # Set to 0 values where theta > !pi
-        s1[bad_theta] = 0
-        s2[bad_theta] = 0
-        Cdiff = 0.5 * (np.power(np.abs(s1), 2) + np.power(np.abs(s2), 2)) / (np.pi * x*x)
+    bad_theta = np.where(np.abs(theta_rad) > np.pi)  # Set to 0 values where theta > !pi
+    s1[...,bad_theta] = 0
+    s2[...,bad_theta] = 0
+    Cdiff = 0.5 * (np.power(np.abs(s1), 2) + np.power(np.abs(s2), 2)) / (np.pi * np.power(x_3d,2))
 
     result = (qsca, qext, qback, gsca, Cdiff)
     return result
