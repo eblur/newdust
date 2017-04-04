@@ -110,12 +110,12 @@ def _mie_helper(x, refrel, theta):
     indl90    = (theta_rad < np.pi/2.0)
     indg90    = (theta_rad >= np.pi/2.0)
 
-    s1    = np.zeros(shape=(NA, NE, NTH), dtype='complex')
-    s2    = np.zeros(shape=(NA, NE, NTH), dtype='complex')
-    pi    = np.zeros(shape=(NA, NE, NTH), dtype='complex')
-    pi0   = np.zeros(shape=(NA, NE, NTH), dtype='complex')
-    pi1   = np.zeros(shape=(NA, NE, NTH), dtype='complex') + 1.0
-    tau   = np.zeros(shape=(NA, NE, NTH), dtype='complex')
+    s1    = np.zeros(shape=(NE, NA, NTH), dtype='complex')
+    s2    = np.zeros(shape=(NE, NA, NTH), dtype='complex')
+    pi    = np.zeros(shape=(NE, NA, NTH), dtype='complex')
+    pi0   = np.zeros(shape=(NE, NA, NTH), dtype='complex')
+    pi1   = np.zeros(shape=(NE, NA, NTH), dtype='complex') + 1.0
+    tau   = np.zeros(shape=(NE, NA, NTH), dtype='complex')
 
     y      = x * refrel
     ymod   = np.abs(y)
