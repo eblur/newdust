@@ -81,17 +81,17 @@ def test_mie(cm):
                           scatmodels.Mie()])
 def test_dimensions(sm):
     NE, NA, NTH = 2, 20, len(TH_asec)
-    LAMVALS = np.linspace(1000.,5000.,NE)
-    AVALS   = np.linspace(0.1, 0.5, NA)
+    LAMVALS = np.linspace(1000.,5000.,NE)  # angs
+    AVALS   = np.linspace(0.1, 0.5, NA)    # um
     sm.calculate(LAMVALS, AVALS, composition.CmSilicate(), unit='angs', theta=TH_asec)
     assert np.shape(sm.qsca) == (NE, NA)
     assert np.shape(sm.qext) == (NE, NA)
     assert np.shape(sm.qabs) == (NE, NA)
     assert np.shape(sm.diff) == (NE, NA, NTH)
 
-    dtot1 = trapz(sm.diff[0,0,:]*2.0*np.pi*np.sin(THETA), THETA)
-    dtot2 = trapz(sm.diff[-1,-1,:]*2.0,np.pi*np.sin(THETA), THETA)
-    ssca1 = sm.qsca[0,0] * np.pi * (AVALS[0] * c.micron2cm)**2
-    ssca2 = sm.qsca[-1,-1] * np.pi * (AVALS[-1] * c.micron2cm)**2
+    dtot1 = trapz(sm.diff[0,0,:] * 2.0*np.pi*np.sin(THETA), THETA)
+    dtot2 = trapz(sm.diff[-1,-1,:] * 2.0*np.pi*np.sin(THETA), THETA)
+    ssca1 = sm.qsca[0,0] * np.pi * (AVALS[0] * 1.e-4)**2
+    ssca2 = sm.qsca[-1,-1] * np.pi * (AVALS[-1] * 1.e-4)**2
     assert percent_diff(dtot1, ssca1) <= 0.05
     assert percent_diff(dtot2, ssca2) <= 0.05
