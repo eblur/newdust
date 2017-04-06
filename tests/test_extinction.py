@@ -35,3 +35,4 @@ def test_calculations(gd, sm):
     assert np.shape(test.tau_ext) == (NE,)
     assert np.shape(test.tau_sca) == (NE,)
     assert np.shape(test.tau_abs) == (NE,)
+    assert all(percent_diff(test.tau_ext, test.tau_abs + test.tau_sca) <= 0.01)
