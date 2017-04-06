@@ -20,6 +20,8 @@ class GrainDist(object):
     | a     : grain radii from size.a
     | ndens : number density from size.ndens using the other attributes as input
     | mdens : mass density as a function of grain size
+    | cgeo  : physical cross-sectional area based on grain shape
+    | vol   : physical grain volume based on grain shape
     |
     | *functions*
     | plot(ax, kwargs) : Plots the number density of dust grains via size.plot()
@@ -42,6 +44,14 @@ class GrainDist(object):
     def mdens(self):
         mg = self.shape.vol(self.a) * self.comp.rho  # mass of each dust grain [g]
         return self.ndens * mg
+
+    @property
+    def cgeo(self):
+        return self.shape.cgeo(self.a)
+
+    @property
+    def vol(self):
+        return self.shape.vol(self.a)
 
     def plot(self, ax=None, **kwargs):
         if isinstance(self.size, sizedist.Grain):
