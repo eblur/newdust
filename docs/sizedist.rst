@@ -10,7 +10,9 @@ Abstract Class: *Sizedist*
 
 Abstract class *Sizedist* must contain attributes:
 
-- `a` (an array)
+- `dtype` : a string description
+
+- `a` : an array
 
 - `ndens` (md, rho, shape) returns number density of dust grains [e.g. cm^-2 um^-1]
 

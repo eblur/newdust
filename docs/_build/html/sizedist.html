@@ -50,7 +50,8 @@
 <h2>Abstract Class: <em>Sizedist</em><a class="headerlink" href="#abstract-class-sizedist" title="Permalink to this headline">¶</a></h2>
 <p>Abstract class <em>Sizedist</em> must contain attributes:</p>
 <ul class="simple">
-<li><cite>a</cite> (an array)</li>
+<li><cite>dtype</cite> : a string description</li>
+<li><cite>a</cite> : an array</li>
 <li><cite>ndens</cite> (md, rho, shape) returns number density of dust grains [e.g. cm^-2 um^-1]</li>
 <li><cite>mdens</cite> (md, rho, shape) returns mass density of dust grains [e.g. g cm^-2 um^-1]</li>
 </ul>
@@ -63,6 +64,7 @@
 <dd><div class="line-block">
 <div class="line"><strong>ATTRIBUTES</strong></div>
 <div class="line">a   : scalar [micron]</div>
+<div class="line">dtype : &#8216;Grain&#8217;</div>
 <div class="line"><br /></div>
 <div class="line"><em>functions</em></div>
 <div class="line">ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density of dust grains</div>
@@ -85,6 +87,7 @@
 <div class="line">p   : scalar for power law dn/da propto a^-p</div>
 <div class="line">NA  : int : number of a values to use</div>
 <div class="line">log : boolean : False (default), True = use log-spaced a values</div>
+<div class="line">dtype : &#8216;Powerlaw&#8217;</div>
 <div class="line"><br /></div>
 <div class="line"><strong>ATTRIBUTES</strong></div>
 <div class="line-block">
@@ -117,7 +120,7 @@
 <div class="line"><br /></div>
 <div class="line"><strong>ATTRIBUTES</strong></div>
 <div class="line-block">
-<div class="line">acut, p, a</div>
+<div class="line">acut, p, a, dtype</div>
 <div class="line"><br /></div>
 </div>
 <div class="line"><em>functions</em></div>

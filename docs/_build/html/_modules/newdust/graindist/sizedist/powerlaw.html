@@ -71,6 +71,7 @@
 <span class="sd">    | p   : scalar for power law dn/da \propto a^-p</span>
 <span class="sd">    | NA  : int : number of a values to use</span>
 <span class="sd">    | log : boolean : False (default), True = use log-spaced a values</span>
+<span class="sd">    | dtype : &#39;Powerlaw&#39;</span>
 <span class="sd">    |</span>
 <span class="sd">    | **ATTRIBUTES**</span>
 <span class="sd">    |   amin, amax, p, a</span>
@@ -85,6 +86,7 @@
 <span class="sd">    | plot(ax, md, rho=3.0, *kwargs*) : plots (dn/da) a^4 [cm^-2 um^3]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="n">AMIN</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="n">AMAX</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">PDIST</span><span class="p">,</span> <span class="n">na</span><span class="o">=</span><span class="n">NA</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;Powerlaw&#39;</span>
         <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">amin</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">amax</span><span class="p">),</span> <span class="n">na</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

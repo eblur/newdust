@@ -60,6 +60,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    | **ATTRIBUTES**</span>
 <span class="sd">    | a   : scalar [micron]</span>
+<span class="sd">    | dtype : &#39;Grain&#39;</span>
 <span class="sd">    |</span>
 <span class="sd">    | *functions*</span>
 <span class="sd">    | ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density of dust grains</span>
@@ -69,6 +70,7 @@
 <span class="sd">    |   shape = dust grain shape (default spherical)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rad</span><span class="o">=</span><span class="n">AMICRON</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;Grain&#39;</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">a</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rad</span><span class="p">])</span>
 
