@@ -1,7 +1,11 @@
 import numpy as np
 from scipy.integrate import trapz
 
-__all__ = ['Extinction']
+import scatmodels
+
+__all__ = ['Extinction','make_Extinction']
+
+ALLOWED_SCATM = ['RG','Mie']
 
 class Extinction(object):
     """
@@ -43,3 +47,18 @@ class Extinction(object):
             self.tau_ext = trapz(geo_2d * self.scatm.qext, gdist.a, axis=1)
             self.tau_sca = trapz(geo_2d * self.scatm.qsca, gdist.a, axis=1)
             self.tau_abs = trapz(geo_2d * self.scatm.qabs, gdist.a, axis=1)
+
+#---------- Helper functions
+
+def make_Extinction(estring):
+    """
+    | Return an Extinction object with a particular scattering model
+    |
+    | **INPUTS**
+    | estring : 'RG' or 'Mie'
+    """
+    assert estring in ALLOWED_SCATM
+    if estring == 'RG':
+        return Extinction(scatmodels.RGscat())
+    if estring == 'Mie':
+        return Extinction(scatmodels.Mie())

@@ -10,6 +10,11 @@ Extinction class
 
 .. autoclass:: newdust.extinction.Extinction
 
+Helper functions
+----------------
+
+.. autofunction:: newdust.extinction.make_Extinction
+
 Supporting modules
 ------------------
 

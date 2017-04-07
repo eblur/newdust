@@ -24,6 +24,15 @@ GRAIN   = graindist.make_GrainDist('Grain','Drude')
 RG  = extinction.scatmodels.RGscat()
 MIE = extinction.scatmodels.Mie()
 
+ALLOWED_SCATM = ['RG', 'Mie']
+
+# Test the helper function that returns and Extinction object
+@pytest.mark.parametrize('estring', ALLOWED_SCATM)
+def test_Extinction(estring):
+    test = extinction.make_Extinction(estring)
+    assert isinstance(test, extinction.Extinction)
+
+# Test that all the computations can run
 @pytest.mark.parametrize(('gd','sm'),
                          [(MRN_SIL, RG), (MRN_SIL, MIE),
                           (MRN_DRU, RG), (MRN_DRU, MIE),

@@ -42,7 +42,11 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">trapz</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Extinction&#39;</span><span class="p">]</span>
+<span class="kn">import</span> <span class="nn">scatmodels</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Extinction&#39;</span><span class="p">,</span><span class="s1">&#39;make_Extinction&#39;</span><span class="p">]</span>
+
+<span class="n">ALLOWED_SCATM</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RG&#39;</span><span class="p">,</span><span class="s1">&#39;Mie&#39;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Extinction"><a class="viewcode-back" href="../../../extinction.html#newdust.extinction.Extinction">[docs]</a><span class="k">class</span> <span class="nc">Extinction</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -84,6 +88,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span> <span class="o">=</span> <span class="n">trapz</span><span class="p">(</span><span class="n">geo_2d</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qext</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tau_sca</span> <span class="o">=</span> <span class="n">trapz</span><span class="p">(</span><span class="n">geo_2d</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qsca</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span> <span class="o">=</span> <span class="n">trapz</span><span class="p">(</span><span class="n">geo_2d</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qabs</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<span class="c1">#---------- Helper functions</span>
+
+<div class="viewcode-block" id="make_Extinction"><a class="viewcode-back" href="../../../extinction.html#newdust.extinction.make_Extinction">[docs]</a><span class="k">def</span> <span class="nf">make_Extinction</span><span class="p">(</span><span class="n">estring</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    | Return an Extinction object with a particular scattering model</span>
+<span class="sd">    |</span>
+<span class="sd">    | **INPUTS**</span>
+<span class="sd">    | estring : &#39;RG&#39; or &#39;Mie&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">estring</span> <span class="ow">in</span> <span class="n">ALLOWED_SCATM</span>
+    <span class="k">if</span> <span class="n">estring</span> <span class="o">==</span> <span class="s1">&#39;RG&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Extinction</span><span class="p">(</span><span class="n">scatmodels</span><span class="o">.</span><span class="n">RGscat</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">estring</span> <span class="o">==</span> <span class="s1">&#39;Mie&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Extinction</span><span class="p">(</span><span class="n">scatmodels</span><span class="o">.</span><span class="n">Mie</span><span class="p">())</span></div>
 </pre></div>
 
           </div>
