@@ -3,9 +3,10 @@ import numpy as np
 import graindist
 import extinction
 
-__all__ = ['GrainPop']
+__all__ = ['GrainPop','make_MRN','make_MRN_drude']
 
 UNIT_LABELS = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
+AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
 
 class GrainPop(object):
     """
@@ -14,12 +15,15 @@ class GrainPop(object):
     | To initialize, input a list of tuples of GrainDist and Extinction pairs.
     | Keywords to describe each tuple are optional.  Default of keys=*None* will use integer index values as keys.
     |
+    | Can add a string describing the Grain population using the `description` keyword
+    |
     | **ATTRIBUTES**
     | gdist : GrainDist object
     | ext   : Extinction object
     | keys  : Key words to access GrainDist and Extinction tuples [default is to use integer index]
     | lam   : wavelength / energy grid for which the calculation was run
     | unit  : unit for the wavelength / energy grid
+    | description : a string describing the grain population
     |
     | *properties*
     | tau_ext : Total extinction optical depth
@@ -32,7 +36,8 @@ class GrainPop(object):
     | plot(ax, keyword, **kwargs) plots the extinction property specified by keyword
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     """
-    def __init__(self, pars, keys=None):
+    def __init__(self, pars, keys=None, description='Custom'):
+        self.description  = description
         self.lam   = None
         self.unit  = None
         self.gdist = []
@@ -126,3 +131,23 @@ class GrainPop(object):
         else:
             assert key in self.keys
             _print(key)
+
+#---------- Basic helper functions for fast production of GrainPop objects
+
+def make_MRN(amin=AMIN, amax=AMAX, p=P):
+    pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
+    mrn_gra = graindist.GrainDist(pl, graindist.composition.CmGraphite())
+    mrn_sil = graindist.GrainDist(pl, graindist.composition.CmSilicate())
+    ext_gra = extinction.make_Extinction('Mie')
+    ext_sil = extinction.make_Extinction('Mie')
+    keys = ['gra','sil']
+    pars = [(mrn_gra, ext_gra), (mrn_sil, ext_sil)]
+    return GrainPop(pars, keys=keys, description='MRN')
+
+def make_MRN_drude(amin=AMIN, amax=AMAX, p=P):
+    pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
+    mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude())
+    ext_rgd = extinction.make_Extinction('RG')
+    keys = ['RGD']
+    pars = [(mrn_dru, ext_rgd)]
+    return GrainPop(pars, keys=keys, description='MRN_drude')
