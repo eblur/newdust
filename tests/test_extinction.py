@@ -45,3 +45,19 @@ def test_calculations(gd, sm):
     assert np.shape(test.tau_sca) == (NE,)
     assert np.shape(test.tau_abs) == (NE,)
     assert all(percent_diff(test.tau_ext, test.tau_abs + test.tau_sca) <= 0.01)
+
+# Make sure that doubling the dust mass doubles the extinction
+@pytest.mark.parametrize('estring', ALLOWED_SCATM)
+def test_mass_double(estring):
+    gd1 = graindist.make_GrainDist('Powerlaw','Silicate')
+    gd2 = graindist.make_GrainDist('Powerlaw', 'Silicate')
+    gd2.md = 2.0 * gd1.md
+
+    sm1 = extinction.make_Extinction(estring)
+    sm1.calculate(gd1, LAMVALS, unit='angs')
+    sm2 = extinction.make_Extinction(estring)
+    sm2.calculate(gd2, LAMVALS, unit='angs')
+
+    assert all(percent_diff(sm2.tau_ext, 2.0 * sm1.tau_ext) <= 0.01)
+    assert all(percent_diff(sm2.tau_abs, 2.0 * sm1.tau_abs) <= 0.01)
+    assert all(percent_diff(sm2.tau_sca, 2.0 * sm1.tau_sca) <= 0.01)
