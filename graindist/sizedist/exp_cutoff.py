@@ -33,7 +33,7 @@ class ExpCutoff(object):
     | nfold : number of e-foldings to go beyond acut
     |
     | **ATTRIBUTES**
-    |   acut, p, a
+    |   acut, p, a, dtype
     |
     | *functions*
     | ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density (dn/da) [cm^-2 um^-1]
@@ -45,6 +45,7 @@ class ExpCutoff(object):
     | plot(ax, md, rho=3.0, *kwargs*) : plots (dn/da) a^4 [cm^-2 um^3]
     """
     def __init__(self, amin=AMIN, acut=ACUT, p=PDIST, na=NA, log=False, nfold=NFOLD):
+        self.dtype = 'ExpCutoff'
         self.acut = acut
         if log:
             self.a = np.logspace(np.log10(amin), np.log10(acut * nfold), na)

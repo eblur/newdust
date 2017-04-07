@@ -11,7 +11,8 @@ class GrainPop(object):
     """
     | A dust grain population.  Can contain multiple dust grain size distributions (GrainDist) and extinction models (Extinction).
     |
-    | To initialize, give a list of tuples of GrainDist and Extinction pairs.  Keywords to describe each tuple are optional.  Default of *None* will use integer index values as keys.
+    | To initialize, input a list of tuples of GrainDist and Extinction pairs.
+    | Keywords to describe each tuple are optional.  Default of keys=*None* will use integer index values as keys.
     |
     | **ATTRIBUTES**
     | gdist : GrainDist object
@@ -21,12 +22,15 @@ class GrainPop(object):
     | unit  : unit for the wavelength / energy grid
     |
     | *properties*
-    | tau_ext : Total extinction
-    | tau_sca : Total scattering
-    | tau_abs : Total absorption
+    | tau_ext : Total extinction optical depth
+    | tau_sca : Total scattering optical depth
+    | tau_abs : Total absorption optical depth
     |
     | *functions*
-    | __getitem__(key): Returns a tuple containing gdist and ext for the keys specified
+    | __getitem__(key) Returns a tuple containing gdist and ext for the keys specified
+    | calculate_ext(lam, unit='kev', **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit
+    | plot(ax, keyword, **kwargs) plots the extinction property specified by keyword
+    |   - ``keyword`` options are "ext", "sca", "abs", "all"
     """
     def __init__(self, pars, keys=None):
         self.lam   = None
@@ -109,3 +113,16 @@ class GrainPop(object):
             ax.set_xlabel(UNIT_LABELS[self.unit])
             ax.set_ylabel(r"$\tau$")
             ax.legend(**kwargs)
+
+    def info(self, key=None):
+        def _print(k):
+            gd, ex = self[k]
+            print("Grain Distribution of type %s" % gd.size.dtype)
+            print("Extinction uses scattering model %s" % ex.scatm.stype)
+        if key is None:
+            for k in self.keys:
+                print("Grain population %s:" % str(k))
+                _print(k)
+        else:
+            assert key in self.keys
+            _print(key)

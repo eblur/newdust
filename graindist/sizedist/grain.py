@@ -19,6 +19,7 @@ class Grain(object):
     """
     | **ATTRIBUTES**
     | a   : scalar [micron]
+    | dtype : 'Grain'
     |
     | *functions*
     | ndens(md, rho=3.0, shape=shape.Sphere()) : returns number density of dust grains
@@ -28,6 +29,7 @@ class Grain(object):
     |   shape = dust grain shape (default spherical)
     """
     def __init__(self, rad=AMICRON):
+        self.dtype = 'Grain'
         assert np.size(rad) == 1
         self.a   = np.array([rad])
 

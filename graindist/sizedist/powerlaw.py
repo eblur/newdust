@@ -30,6 +30,7 @@ class Powerlaw(object):
     | p   : scalar for power law dn/da \propto a^-p
     | NA  : int : number of a values to use
     | log : boolean : False (default), True = use log-spaced a values
+    | dtype : 'Powerlaw'
     |
     | **ATTRIBUTES**
     |   amin, amax, p, a
@@ -44,6 +45,7 @@ class Powerlaw(object):
     | plot(ax, md, rho=3.0, *kwargs*) : plots (dn/da) a^4 [cm^-2 um^3]
     """
     def __init__(self, amin=AMIN, amax=AMAX, p=PDIST, na=NA, log=False):
+        self.dtype = 'Powerlaw'
         if log:
             self.a = np.logspace(np.log10(amin), np.log10(amax), na)
         else:
