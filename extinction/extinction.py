@@ -9,13 +9,15 @@ class Extinction(object):
     |
     | **ATTRIBUTES**
     | scatm   : The scattering model used
-    | tau_sca
-    | tau_abs
-    | tau_ext (calculated form tau_sca and tau_abs)
+    | tau_sca : Optical depth to scattering as a function of wavelength / energy
+    | tau_abs : Optical depth to absorption as a function of wavelength / energy
+    | tau_ext : Total extinction optical depth as a function of wavelength / energy
     |
     | *functions*
-    | calculate(gdist, lam, unit='kev')
-    |   runs the scattering model calculation using and integrates over grain size distribution to get tau_sca, abs, and ext
+    | calculate(gdist, lam, unit = "kev")
+    |   runs the scattering model calculation using and integrates over grain size distribution to get tau_sca, tau_abs, and tau_ext
+    |   - ``gdist`` is an astrodust.graindist.GrainDist object
+    |   - ``lam`` is the wavelength (unit = "angs") or energy (unit = "kev")
     """
 
     def __init__(self, scatm):
