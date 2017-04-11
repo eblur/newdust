@@ -46,6 +46,10 @@ class GrainDist(object):
         return self.ndens * mg
 
     @property
+    def rho(self):
+        return self.comp.rho
+
+    @property
     def cgeo(self):
         return self.shape.cgeo(self.a)
 

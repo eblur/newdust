@@ -44,6 +44,13 @@ class SingleGrainPop(object):
     def plot_ext(self, ax, keyword, **kwargs):
         self.ext.plot(ax, keyword, **kwargs)
 
+    def info(self):
+        print("Grain Population: %s" % self.description)
+        print("Size distribution: %s" % self.gdist.size.dtype)
+        print("Extinction calculated with: %s" % self.ext.scatm.stype)
+        print("Grain composition: %s" % self.gdist.comp.cmtype)
+        print("rho = %.2f g cm^-3, M_d = %.2e g cm^-2" % (self.gdist.rho, self.gdist.md))
+
 class GrainPop(object):
     def __init__(self, gpoplist, keys=None, description='Custom_GrainPopDict'):
         assert isinstance(gpoplist, list)
@@ -52,10 +59,13 @@ class GrainPop(object):
         else:
             self.keys = keys
         self.description = description
-        self.gpops    = gpoplist
+        self.gpoplist    = gpoplist
+        for k in self.keys:
+            i = self.keys.index(k)
+            self.gpoplist[i].description = str(self.keys[i])
 
     def calculate_ext(self, lam, unit='kev', **kwargs):
-        for gp in self.gpops:
+        for gp in self.gpoplist:
             gp.calculate_ext(lam, unit=unit, **kwargs)
         self.lam = lam
         self.lam_unit = unit
@@ -63,12 +73,12 @@ class GrainPop(object):
     def __getitem__(self, key):
         assert key in self.keys
         k = self.keys.index(key)
-        return self.gpops[k]
+        return self.gpoplist[k]
 
     @property
     def tau_ext(self):
         result = 0.0
-        for gp in self.gpops:
+        for gp in self.gpoplist:
             if gp.ext.tau_ext is None:
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
@@ -79,7 +89,7 @@ class GrainPop(object):
     @property
     def tau_sca(self):
         result = 0.0
-        for gp in self.gpops:
+        for gp in self.gpoplist:
             if gp.ext.tau_sca is None:
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
@@ -90,7 +100,7 @@ class GrainPop(object):
     @property
     def tau_abs(self):
         result = 0.0
-        for gp in self.gpops:
+        for gp in self.gpoplist:
             if gp.ext.tau_abs is None:
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
@@ -120,19 +130,14 @@ class GrainPop(object):
             ax.set_ylabel(r"$\tau$")
             ax.legend(**kwargs)
 
-
     def info(self, key=None):
-        def _print(k):
-            gd, ex = self[k]
-            print("Grain Distribution of type %s" % gd.size.dtype)
-            print("Extinction uses scattering model %s" % ex.scatm.stype)
         if key is None:
-            for k in self.keys:
-                print("Grain population %s:" % str(k))
-                _print(k)
+            for gp in self.gpoplist:
+                gp.info()
+                print("\n")
         else:
             assert key in self.keys
-            _print(key)
+            self[key].info()
 
 
 #---------- Basic helper functions for fast production of GrainPop objects
