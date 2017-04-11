@@ -1,12 +1,12 @@
 import numpy as np
-
 import graindist
 import extinction
 
 __all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
 
+MD_DEFAULT    = 1.e-4  # g cm^-2
 AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
-UNIT_LABELS = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
+UNIT_LABELS   = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
 class SingleGrainPop(object):
     """
@@ -63,6 +63,8 @@ class GrainPop(object):
         for k in self.keys:
             i = self.keys.index(k)
             self.gpoplist[i].description = str(self.keys[i])
+        self.lam = None
+        self.lam_unit = None
 
     def calculate_ext(self, lam, unit='kev', **kwargs):
         for gp in self.gpoplist:
@@ -128,13 +130,14 @@ class GrainPop(object):
             ax.plot(self.lam, self.tau_abs, 'r:', label='Absorption')
             ax.set_xlabel(UNIT_LABELS[self.lam_unit])
             ax.set_ylabel(r"$\tau$")
+            ax.set_title(self.description)
             ax.legend(**kwargs)
 
     def info(self, key=None):
         if key is None:
             for gp in self.gpoplist:
-                gp.info()
                 print("\n")
+                gp.info()
         else:
             assert key in self.keys
             self[key].info()
@@ -142,20 +145,28 @@ class GrainPop(object):
 
 #---------- Basic helper functions for fast production of GrainPop objects
 
-def make_MRN(amin=AMIN, amax=AMAX, p=P):
-    pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
-    mrn_gra = graindist.GrainDist(pl, graindist.composition.CmGraphite())
-    mrn_sil = graindist.GrainDist(pl, graindist.composition.CmSilicate())
-    ext_gra = extinction.make_Extinction('Mie')
-    ext_sil = extinction.make_Extinction('Mie')
-    keys = ['gra','sil']
-    pars = [(mrn_gra, ext_gra), (mrn_sil, ext_sil)]
-    return GrainPop(pars, keys=keys, description='MRN')
+def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6):
+    md_sil  = fsil * md
+    # Graphite grain assumption: 1/3 paralel and 2/3 perpendicular
+    md_gra_para = (1.0 - fsil) * md * (1.0/3.0)
+    md_gra_perp = (1.0 - fsil) * md * (2.0/3.0)
 
-def make_MRN_drude(amin=AMIN, amax=AMAX, p=P):
     pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
-    mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude())
+
+    mrn_sil = graindist.GrainDist(pl, graindist.composition.CmSilicate(), md=md_sil)
+    mrn_gra_para = graindist.GrainDist(pl, graindist.composition.CmGraphite(orient='para'), md=md_gra_para)
+    mrn_gra_perp = graindist.GrainDist(pl, graindist.composition.CmGraphite(orient='perp'), md=md_gra_perp)
+
+    gplist = [SingleGrainPop(mrn_sil, extinction.make_Extinction('Mie')),
+              SingleGrainPop(mrn_gra_para, extinction.make_Extinction('Mie')),
+              SingleGrainPop(mrn_gra_perp, extinction.make_Extinction('Mie'))]
+    keys = ['sil','gra_para','gra_perp']
+    return GrainPop(gplist, keys=keys, description='MRN')
+
+def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT):
+    pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
+    mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude(), md=md)
     ext_rgd = extinction.make_Extinction('RG')
     keys = ['RGD']
     pars = [(mrn_dru, ext_rgd)]
-    return GrainPop(pars, keys=keys, description='MRN_drude')
+    return GrainPop(pars, keys=keys, description='MRN_rgd')
