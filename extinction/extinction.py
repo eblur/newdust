@@ -6,16 +6,19 @@ import scatmodels
 __all__ = ['Extinction','make_Extinction']
 
 ALLOWED_SCATM = ['RG','Mie']
+UNIT_LABELS = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
 class Extinction(object):
     """
     | An extinction object contains information about the extinction properties of a particular dust population
     |
     | **ATTRIBUTES**
-    | scatm   : The scattering model used
-    | tau_sca : Optical depth to scattering as a function of wavelength / energy
-    | tau_abs : Optical depth to absorption as a function of wavelength / energy
-    | tau_ext : Total extinction optical depth as a function of wavelength / energy
+    | scatm    : The scattering model used
+    | lam      : The wavelength / energy grid used for calculation
+    | lam_unit : The unit on the wavelength ('angs') or energy ('kev')
+    | tau_sca  : Optical depth to scattering as a function of wavelength / energy
+    | tau_abs  : Optical depth to absorption as a function of wavelength / energy
+    | tau_ext  : Total extinction optical depth as a function of wavelength / energy
     |
     | *functions*
     | calculate(gdist, lam, unit = "kev")
@@ -25,16 +28,19 @@ class Extinction(object):
     """
 
     def __init__(self, scatm):
-        self.scatm = scatm
-        self.tau_sca = None
-        self.tau_abs = None
-        self.tau_ext = None
+        self.scatm    = scatm
+        self.tau_sca  = None
+        self.tau_abs  = None
+        self.tau_ext  = None
+        self.lam      = None
+        self.lam_unit = None
 
     # Outputs should all be single arrays of length NE
     def calculate(self, gdist, lam, unit='kev', theta=0.0):
         self.scatm.calculate(lam, gdist.a, gdist.comp, unit=unit, theta=theta)
+        self.lam      = lam
+        self.lam_unit = unit
         NE, NA = np.shape(self.scatm.qext)
-
         # In single size grain case
         if len(gdist.a) == 1:
             self.tau_ext = gdist.ndens * self.scatm.qext[:,0] * gdist.cgeo
@@ -47,6 +53,29 @@ class Extinction(object):
             self.tau_ext = trapz(geo_2d * self.scatm.qext, gdist.a, axis=1)
             self.tau_sca = trapz(geo_2d * self.scatm.qsca, gdist.a, axis=1)
             self.tau_abs = trapz(geo_2d * self.scatm.qabs, gdist.a, axis=1)
+
+    def plot(self, ax, keyword, **kwargs):
+        assert keyword in ['ext','sca','abs','all']
+        if keyword == 'ext':
+            ax.plot(self.lam, self.tau_ext, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{ext}$")
+        if keyword == 'sca':
+            ax.plot(self.lam, self.tau_sca, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{sca}$")
+        if keyword == 'abs':
+            ax.plot(self.lam, self.tau_abs, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{abs}$")
+        if keyword == 'all':
+            ax.plot(self.lam, self.tau_ext, 'k-', lw=2, label='Extinction')
+            ax.plot(self.lam, self.tau_sca, 'r--', label='Scattering')
+            ax.plot(self.lam, self.tau_abs, 'r:', label='Absorption')
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau$")
+            ax.legend(**kwargs)
+
 
 #---------- Helper functions
 
