@@ -68,7 +68,7 @@ ALLOWED_SIZES = ['Grain','Powerlaw','ExpCutoff']
 ALLOWED_COMPS = ['Drude','Silicate','Graphite']
 AMAX = 0.3  # um
 
-def make_GrainDist(sstring, cstring, amax=AMAX, rho=None, md=MD_DEFAULT):
+def make_GrainDist(sstring, cstring, amax=AMAX, rho=None, md=MD_DEFAULT, **kwargs):
     """
     | A shortcut function for creating GrainDist objects
     |
@@ -81,15 +81,16 @@ def make_GrainDist(sstring, cstring, amax=AMAX, rho=None, md=MD_DEFAULT):
     |   *ExpCutoff:* defines the *acut* value
     | rho     : if defined, will alter the rho keyword in composition
     | md      : dust mass column (g cm^-2)
+    | **kwargs : extra input to the size dist functions
     """
     assert sstring in ALLOWED_SIZES
     assert cstring in ALLOWED_COMPS
     if sstring == 'Grain':
         sdist = sizedist.Grain(rad=amax)
     if sstring == 'Powerlaw':
-        sdist = sizedist.Powerlaw(amax=amax)
+        sdist = sizedist.Powerlaw(amax=amax, **kwargs)
     if sstring == 'ExpCutoff':
-        sdist = sizedist.ExpCutoff(acut=amax)
+        sdist = sizedist.ExpCutoff(acut=amax, **kwargs)
     if cstring == 'Drude':
         if rho is not None: cmi = composition.CmDrude(rho=rho)
         else: cmi = composition.CmDrude()
