@@ -6,6 +6,7 @@ import extinction
 __all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
 
 AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
+UNIT_LABELS = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
 class SingleGrainPop(object):
     """
@@ -55,12 +56,14 @@ class GrainPop(object):
 
     def calculate_ext(self, lam, unit='kev', **kwargs):
         for gp in self.gpops:
-            gp.ext.calculate_ext(lam, unit=unit, **kwargs)
+            gp.calculate_ext(lam, unit=unit, **kwargs)
+        self.lam = lam
+        self.lam_unit = unit
 
     def __getitem__(self, key):
         assert key in self.keys
-        dtemp = dict(zip(self.keys, self.gpops))
-        return dtemp[key]
+        k = self.keys.index(key)
+        return self.gpops[k]
 
     @property
     def tau_ext(self):
@@ -70,7 +73,7 @@ class GrainPop(object):
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
             else:
-                result += gp.tau_ext
+                result += gp.ext.tau_ext
         return result
 
     @property
@@ -81,7 +84,7 @@ class GrainPop(object):
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
             else:
-                result += gp.tau_sca
+                result += gp.ext.tau_sca
         return result
 
     @property
@@ -92,8 +95,31 @@ class GrainPop(object):
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
             else:
-                result += gp.tau_abs
+                result += gp.ext.tau_abs
         return result
+
+    def plot_ext(self, ax, keyword, **kwargs):
+        assert keyword in ['all','ext','sca','abs']
+        if keyword == 'ext':
+            ax.plot(self.lam, self.tau_ext, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{ext}$")
+        if keyword == 'sca':
+            ax.plot(self.lam, self.tau_sca, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{sca}$")
+        if keyword == 'abs':
+            ax.plot(self.lam, self.tau_abs, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{abs}$")
+        if keyword == 'all':
+            ax.plot(self.lam, self.tau_ext, 'k-', lw=2, label='Extinction')
+            ax.plot(self.lam, self.tau_sca, 'r--', label='Scattering')
+            ax.plot(self.lam, self.tau_abs, 'r:', label='Absorption')
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau$")
+            ax.legend(**kwargs)
+
 
     def info(self, key=None):
         def _print(k):
