@@ -25,6 +25,8 @@ class Extinction(object):
     |   runs the scattering model calculation using and integrates over grain size distribution to get tau_sca, tau_abs, and tau_ext
     |   - ``gdist`` is an astrodust.graindist.GrainDist object
     |   - ``lam`` is the wavelength (unit = "angs") or energy (unit = "kev")
+    | plot(ax, keyword) plots the extinction property specified by keyword
+    |   - ``keyword`` options are "ext", "sca", "abs", "all"
     """
 
     def __init__(self, scatm):

@@ -53,10 +53,12 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
 <div class="line">An extinction object contains information about the extinction properties of a particular dust population</div>
 <div class="line"><br /></div>
 <div class="line"><strong>ATTRIBUTES</strong></div>
-<div class="line">scatm   : The scattering model used</div>
-<div class="line">tau_sca : Optical depth to scattering as a function of wavelength / energy</div>
-<div class="line">tau_abs : Optical depth to absorption as a function of wavelength / energy</div>
-<div class="line">tau_ext : Total extinction optical depth as a function of wavelength / energy</div>
+<div class="line">scatm    : The scattering model used</div>
+<div class="line">lam      : The wavelength / energy grid used for calculation</div>
+<div class="line">lam_unit : The unit on the wavelength (&#8216;angs&#8217;) or energy (&#8216;kev&#8217;)</div>
+<div class="line">tau_sca  : Optical depth to scattering as a function of wavelength / energy</div>
+<div class="line">tau_abs  : Optical depth to absorption as a function of wavelength / energy</div>
+<div class="line">tau_ext  : Total extinction optical depth as a function of wavelength / energy</div>
 <div class="line"><br /></div>
 <div class="line"><em>functions</em></div>
 <div class="line">calculate(gdist, lam, unit = &#8220;kev&#8221;)</div>
@@ -64,6 +66,10 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
 <div class="line">runs the scattering model calculation using and integrates over grain size distribution to get tau_sca, tau_abs, and tau_ext</div>
 <div class="line">- <code class="docutils literal"><span class="pre">gdist</span></code> is an astrodust.graindist.GrainDist object</div>
 <div class="line">- <code class="docutils literal"><span class="pre">lam</span></code> is the wavelength (unit = &#8220;angs&#8221;) or energy (unit = &#8220;kev&#8221;)</div>
+</div>
+<div class="line">plot(ax, keyword) plots the extinction property specified by keyword</div>
+<div class="line-block">
+<div class="line">- <code class="docutils literal"><span class="pre">keyword</span></code> options are &#8220;ext&#8221;, &#8220;sca&#8221;, &#8220;abs&#8221;, &#8220;all&#8221;</div>
 </div>
 </div>
 </dd></dl>

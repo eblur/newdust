@@ -47,35 +47,43 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Extinction&#39;</span><span class="p">,</span><span class="s1">&#39;make_Extinction&#39;</span><span class="p">]</span>
 
 <span class="n">ALLOWED_SCATM</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RG&#39;</span><span class="p">,</span><span class="s1">&#39;Mie&#39;</span><span class="p">]</span>
+<span class="n">UNIT_LABELS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;kev&#39;</span><span class="p">:</span><span class="s1">&#39;Energy (keV)&#39;</span><span class="p">,</span> <span class="s1">&#39;angs&#39;</span><span class="p">:</span><span class="s1">&#39;Wavelength (angs)&#39;</span><span class="p">}</span>
 
 <div class="viewcode-block" id="Extinction"><a class="viewcode-back" href="../../../extinction.html#newdust.extinction.Extinction">[docs]</a><span class="k">class</span> <span class="nc">Extinction</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    | An extinction object contains information about the extinction properties of a particular dust population</span>
 <span class="sd">    |</span>
 <span class="sd">    | **ATTRIBUTES**</span>
-<span class="sd">    | scatm   : The scattering model used</span>
-<span class="sd">    | tau_sca : Optical depth to scattering as a function of wavelength / energy</span>
-<span class="sd">    | tau_abs : Optical depth to absorption as a function of wavelength / energy</span>
-<span class="sd">    | tau_ext : Total extinction optical depth as a function of wavelength / energy</span>
+<span class="sd">    | scatm    : The scattering model used</span>
+<span class="sd">    | lam      : The wavelength / energy grid used for calculation</span>
+<span class="sd">    | lam_unit : The unit on the wavelength (&#39;angs&#39;) or energy (&#39;kev&#39;)</span>
+<span class="sd">    | tau_sca  : Optical depth to scattering as a function of wavelength / energy</span>
+<span class="sd">    | tau_abs  : Optical depth to absorption as a function of wavelength / energy</span>
+<span class="sd">    | tau_ext  : Total extinction optical depth as a function of wavelength / energy</span>
 <span class="sd">    |</span>
 <span class="sd">    | *functions*</span>
 <span class="sd">    | calculate(gdist, lam, unit = &quot;kev&quot;)</span>
 <span class="sd">    |   runs the scattering model calculation using and integrates over grain size distribution to get tau_sca, tau_abs, and tau_ext</span>
 <span class="sd">    |   - ``gdist`` is an astrodust.graindist.GrainDist object</span>
 <span class="sd">    |   - ``lam`` is the wavelength (unit = &quot;angs&quot;) or energy (unit = &quot;kev&quot;)</span>
+<span class="sd">    | plot(ax, keyword) plots the extinction property specified by keyword</span>
+<span class="sd">    |   - ``keyword`` options are &quot;ext&quot;, &quot;sca&quot;, &quot;abs&quot;, &quot;all&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scatm</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span> <span class="o">=</span> <span class="n">scatm</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tau_sca</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span>    <span class="o">=</span> <span class="n">scatm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau_sca</span>  <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span>  <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span>  <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span>      <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="c1"># Outputs should all be single arrays of length NE</span>
     <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdist</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;kev&#39;</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">comp</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span>      <span class="o">=</span> <span class="n">lam</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span> <span class="o">=</span> <span class="n">unit</span>
         <span class="n">NE</span><span class="p">,</span> <span class="n">NA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qext</span><span class="p">)</span>
-
         <span class="c1"># In single size grain case</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span> <span class="o">=</span> <span class="n">gdist</span><span class="o">.</span><span class="n">ndens</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qext</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">gdist</span><span class="o">.</span><span class="n">cgeo</span>
@@ -87,7 +95,30 @@
             <span class="n">geo_2d</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">geo_fac</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NA</span><span class="p">),</span> <span class="n">NE</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># NE x NA</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span> <span class="o">=</span> <span class="n">trapz</span><span class="p">(</span><span class="n">geo_2d</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qext</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tau_sca</span> <span class="o">=</span> <span class="n">trapz</span><span class="p">(</span><span class="n">geo_2d</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qsca</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span> <span class="o">=</span> <span class="n">trapz</span><span class="p">(</span><span class="n">geo_2d</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qabs</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span> <span class="o">=</span> <span class="n">trapz</span><span class="p">(</span><span class="n">geo_2d</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">qabs</span><span class="p">,</span> <span class="n">gdist</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ext&#39;</span><span class="p">,</span><span class="s1">&#39;sca&#39;</span><span class="p">,</span><span class="s1">&#39;abs&#39;</span><span class="p">,</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;ext&#39;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">UNIT_LABELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$\tau_{ext}$&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;sca&#39;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_sca</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">UNIT_LABELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$\tau_{sca}$&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;abs&#39;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">UNIT_LABELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$\tau_{abs}$&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span><span class="p">,</span> <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Extinction&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_sca</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Scattering&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span><span class="p">,</span> <span class="s1">&#39;r:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Absorption&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">UNIT_LABELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$\tau$&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
 <span class="c1">#---------- Helper functions</span>
 
