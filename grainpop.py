@@ -154,6 +154,8 @@ class GrainPop(object):
 #---------- Basic helper functions for fast production of GrainPop objects
 
 def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6):
+    assert fsil != 0.0
+    assert fsil != 1.0
     md_sil  = fsil * md
     # Graphite grain assumption: 1/3 paralel and 2/3 perpendicular
     md_gra_para = (1.0 - fsil) * md * (1.0/3.0)
