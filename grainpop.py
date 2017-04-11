@@ -3,121 +3,97 @@ import numpy as np
 import graindist
 import extinction
 
-__all__ = ['GrainPop','make_MRN','make_MRN_drude']
+__all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
 
-UNIT_LABELS = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
 
-class GrainPop(object):
+class SingleGrainPop(object):
     """
-    | A dust grain population.  Can contain multiple dust grain size distributions (GrainDist) and extinction models (Extinction).
-    |
-    | To initialize, input a list of tuples of GrainDist and Extinction pairs.
-    | Keywords to describe each tuple are optional.  Default of keys=*None* will use integer index values as keys.
-    |
+    | A single dust grain population.
     | Can add a string describing the Grain population using the `description` keyword
     |
     | **ATTRIBUTES**
     | gdist : GrainDist object
     | ext   : Extinction object
-    | keys  : Key words to access GrainDist and Extinction tuples [default is to use integer index]
-    | lam   : wavelength / energy grid for which the calculation was run
-    | unit  : unit for the wavelength / energy grid
     | description : a string describing the grain population
     |
     | *properties*
-    | tau_ext : Total extinction optical depth
-    | tau_sca : Total scattering optical depth
-    | tau_abs : Total absorption optical depth
+    | tau_ext : Total extinction optical depth as a function of wavelength / energy
+    | tau_sca : Total scattering optical depth as a function of wavelength / energy
+    | tau_abs : Total absorption optical depth as a function of wavelength / energy
     |
     | *functions*
     | __getitem__(key) Returns a tuple containing gdist and ext for the keys specified
     | calculate_ext(lam, unit='kev', **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit
-    | plot(ax, keyword, **kwargs) plots the extinction property specified by keyword
+    | plot_sizes(ax, **kwargs) plots the size distribution (see *astrodust.graindist.sizedist.plot*)
+    | plot_ext(ax, keyword, **kwargs) plots the extinction property specified by keyword
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     """
-    def __init__(self, pars, keys=None, description='Custom'):
+    def __init__(self, graindist, extinction, description='Custom'):
         self.description  = description
-        self.lam   = None
-        self.unit  = None
-        self.gdist = []
-        self.ext   = []
-        assert isinstance(pars, list)
-        for p in pars:
-            assert isinstance(p, tuple)
-            gd, ex = p
-            self.gdist.append(gd)
-            self.ext.append(ex)
+        self.gdist        = graindist
+        self.ext          = extinction
+
+    def calculate_ext(self, lam, unit='kev', **kwargs):
+        self.ext.calculate(self.gdist, lam, unit=unit, **kwargs)
+
+    def plot_sizes(self, ax=None, **kwargs):
+        self.gdist.plot(ax, **kwargs)
+
+    def plot_ext(self, ax, keyword, **kwargs):
+        self.ext.plot(ax, keyword, **kwargs)
+
+class GrainPop(object):
+    def __init__(self, gpoplist, keys=None, description='Custom_GrainPopDict'):
+        assert isinstance(gpoplist, list)
         if keys is None:
-            self.keys = list(range(len(pars)))
+            self.keys = list(range(len(gpoplist)))
         else:
             self.keys = keys
+        self.description = description
+        self.gpops    = gpoplist
+
+    def calculate_ext(self, lam, unit='kev', **kwargs):
+        for gp in self.gpops:
+            gp.ext.calculate_ext(lam, unit=unit, **kwargs)
 
     def __getitem__(self, key):
         assert key in self.keys
-        k = self.keys.index(key)
-        return (self.gdist[k], self.ext[k])
-
-    def calculate_ext(self, lam, unit='kev', **kwargs):
-        for i in range(len(self.gdist)):
-            self.ext[i].calculate(self.gdist[i], lam, unit=unit, **kwargs)
-        self.lam  = lam
-        self.unit = unit
+        dtemp = dict(zip(self.keys, self.gpops))
+        return dtemp[key]
 
     @property
     def tau_ext(self):
         result = 0.0
-        for ee in self.ext:
-            if ee.tau_ext is None:
+        for gp in self.gpops:
+            if gp.ext.tau_ext is None:
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
             else:
-                result += ee.tau_ext
+                result += gp.tau_ext
         return result
 
     @property
     def tau_sca(self):
         result = 0.0
-        for ee in self.ext:
-            if ee.tau_sca is None:
+        for gp in self.gpops:
+            if gp.ext.tau_sca is None:
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
             else:
-                result += ee.tau_sca
+                result += gp.tau_sca
         return result
 
     @property
     def tau_abs(self):
         result = 0.0
-        for ee in self.ext:
-            if ee.tau_abs is None:
+        for gp in self.gpops:
+            if gp.ext.tau_abs is None:
                 print("ERROR: Extinction properties need to be calculated")
                 return 0.0
             else:
-                result += ee.tau_abs
+                result += gp.tau_abs
         return result
-
-    def plot_ext(self, ax, keyword, **kwargs):
-        assert keyword in ['ext','sca','abs','all']
-        if keyword == 'ext':
-            ax.plot(self.lam, self.tau_ext, **kwargs)
-            ax.set_xlabel(UNIT_LABELS[self.unit])
-            ax.set_ylabel(r"$\tau_{ext}$")
-        if keyword == 'sca':
-            ax.plot(self.lam, self.tau_sca, **kwargs)
-            ax.set_xlabel(UNIT_LABELS[self.unit])
-            ax.set_ylabel(r"$\tau_{sca}$")
-        if keyword == 'abs':
-            ax.plot(self.lam, self.tau_abs, **kwargs)
-            ax.set_xlabel(UNIT_LABELS[self.unit])
-            ax.set_ylabel(r"$\tau_{abs}$")
-        if keyword == 'all':
-            ax.plot(self.lam, self.tau_ext, 'k-', lw=2, label='Extinction')
-            ax.plot(self.lam, self.tau_sca, 'r--', label='Scattering')
-            ax.plot(self.lam, self.tau_abs, 'r:', label='Absorption')
-            ax.set_xlabel(UNIT_LABELS[self.unit])
-            ax.set_ylabel(r"$\tau$")
-            ax.legend(**kwargs)
 
     def info(self, key=None):
         def _print(k):
@@ -131,6 +107,7 @@ class GrainPop(object):
         else:
             assert key in self.keys
             _print(key)
+
 
 #---------- Basic helper functions for fast production of GrainPop objects
 
