@@ -78,6 +78,13 @@ class GrainPop(object):
         return self.gpoplist[k]
 
     @property
+    def md(self):
+        result = 0.0
+        for gp in self.gpoplist:
+            result += gp.gdist.md
+        return result
+
+    @property
     def tau_ext(self):
         result = 0.0
         for gp in self.gpoplist:
@@ -135,8 +142,9 @@ class GrainPop(object):
 
     def info(self, key=None):
         if key is None:
+            print("General information for %s dust grain population" % self.description)
             for gp in self.gpoplist:
-                print("\n")
+                print("---")
                 gp.info()
         else:
             assert key in self.keys
@@ -160,13 +168,12 @@ def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6):
     gplist = [SingleGrainPop(mrn_sil, extinction.make_Extinction('Mie')),
               SingleGrainPop(mrn_gra_para, extinction.make_Extinction('Mie')),
               SingleGrainPop(mrn_gra_perp, extinction.make_Extinction('Mie'))]
-    keys = ['sil','gra_para','gra_perp']
+    keys   = ['sil','gra_para','gra_perp']
     return GrainPop(gplist, keys=keys, description='MRN')
 
 def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT):
     pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
     mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude(), md=md)
-    ext_rgd = extinction.make_Extinction('RG')
-    keys = ['RGD']
-    pars = [(mrn_dru, ext_rgd)]
-    return GrainPop(pars, keys=keys, description='MRN_rgd')
+    gplist  = [SingleGrainPop(mrn_dru, extinction.make_Extinction('RG'))]
+    keys    = ['RGD']
+    return GrainPop(gplist, keys=keys, description='MRN_rgd')
