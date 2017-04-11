@@ -18,17 +18,12 @@ class SingleGrainPop(object):
     | ext   : Extinction object
     | description : a string describing the grain population
     |
-    | *properties*
-    | tau_ext : Total extinction optical depth as a function of wavelength / energy
-    | tau_sca : Total scattering optical depth as a function of wavelength / energy
-    | tau_abs : Total absorption optical depth as a function of wavelength / energy
-    |
     | *functions*
-    | __getitem__(key) Returns a tuple containing gdist and ext for the keys specified
     | calculate_ext(lam, unit='kev', **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit
-    | plot_sizes(ax, **kwargs) plots the size distribution (see *astrodust.graindist.sizedist.plot*)
-    | plot_ext(ax, keyword, **kwargs) plots the extinction property specified by keyword
+    | plot_sizes(ax, **kwargs) plots the size distribution (see *astrodust.graindist.sizedist*)
+    | plot_ext(ax, keyword, **kwargs) plots the extinction properties (see *astrodust.extinction*)
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
+    | info() prints information about the population of dust grains
     """
     def __init__(self, graindist, extinction, description='Custom'):
         self.description  = description
@@ -52,6 +47,30 @@ class SingleGrainPop(object):
         print("rho = %.2f g cm^-3, M_d = %.2e g cm^-2" % (self.gdist.rho, self.gdist.md))
 
 class GrainPop(object):
+    """
+    | A collection of dust grain distributions (SingeGrainPop).
+    | Can add a string describing this Grain population using the `description` keyword
+    |
+    | **ATTRIBUTES**
+    | keys     : A list of keys corresponding to each SingleGrainPop (default: list of integers starting with 0)
+    | gpoplist : A list of SingleGrainPop objects
+    | description : A string describing this collection
+    | lam      : The energy / wavelength used for calculating extinction
+    | lam_unit : The unit for energy ('kev') or wavelength ('angs') used for calculating extinction
+    |
+    | *properties*
+    | tau_ext : Total extinction optical depth as a function of wavelength / energy
+    | tau_sca : Total scattering optical depth as a function of wavelength / energy
+    | tau_abs : Total absorption optical depth as a function of wavelength / energy
+    |
+    | *functions*
+    | __getitem__(key) will return the SingleGrainPop indexed by ``key``
+    | calculate_ext(lam, unit='kev', **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit
+    | plot_ext(ax, keyword, **kwargs) plots the extinction properties (see *astrodust.extinction*)
+    |   - ``keyword`` options are "ext", "sca", "abs", "all"
+    | info(key=None) prints information about the SingleGrainPop indexed by ``key``
+    |   - if ``key`` is *None*, information about every grain population will be printed to screen
+    """
     def __init__(self, gpoplist, keys=None, description='Custom_GrainPopDict'):
         assert isinstance(gpoplist, list)
         if keys is None:
@@ -87,33 +106,30 @@ class GrainPop(object):
     @property
     def tau_ext(self):
         result = 0.0
-        for gp in self.gpoplist:
-            if gp.ext.tau_ext is None:
-                print("ERROR: Extinction properties need to be calculated")
-                return 0.0
-            else:
+        if self.lam is None:
+            print("ERROR: Extinction properties need to be calculated")
+        else:
+            for gp in self.gpoplist:
                 result += gp.ext.tau_ext
         return result
 
     @property
     def tau_sca(self):
         result = 0.0
-        for gp in self.gpoplist:
-            if gp.ext.tau_sca is None:
-                print("ERROR: Extinction properties need to be calculated")
-                return 0.0
-            else:
+        if self.lam is None:
+            print("ERROR: Extinction properties need to be calculated")
+        else:
+            for gp in self.gpoplist:
                 result += gp.ext.tau_sca
         return result
 
     @property
     def tau_abs(self):
         result = 0.0
-        for gp in self.gpoplist:
-            if gp.ext.tau_abs is None:
-                print("ERROR: Extinction properties need to be calculated")
-                return 0.0
-            else:
+        if self.lam is None:
+            print("ERROR: Extinction properties need to be calculated")
+        else:
+            for gp in self.gpoplist:
                 result += gp.ext.tau_abs
         return result
 
