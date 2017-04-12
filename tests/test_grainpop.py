@@ -42,3 +42,16 @@ def test_GrainPop_calculation():
     assert np.shape(test.tau_sca) == (NE,)
     assert np.shape(test.tau_abs) == (NE,)
     assert any(percent_diff(test.tau_ext, test.tau_sca + test.tau_abs) <= 0.01)
+
+@pytest.mark.parametrize('fsil', [0.0, 0.4, 1.0])
+def test_make_MRN(fsil):
+    test = make_MRN(fsil=fsil, md=MD)
+    assert isinstance(test, GrainPop)
+    assert percent_diff(test.md, MD) <= 0.1
+    if fsil == 0.0:
+        assert test['sil'].gdist.md == 0.0
+    if fsil == 1.0:
+        assert test['sil'].gdist.md == MD
+    # Test that doubling the mass doubles the extinction
+    test2 = make_MRN(fsil=fsil, md=2.0*MD)
+    assert percent_diff(test2.tau_ext, 2.0*test.tau_ext) <= 0.01
