@@ -25,7 +25,12 @@ class SingleGrainPop(object):
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     | info() prints information about the population of dust grains
     """
-    def __init__(self, graindist, extinction, description='Custom'):
+    def __init__():
+        self.a     = None
+        self.ndens = None
+        self.rho = sdist.com
+        self.md  = md
+        self.
         self.description  = description
         self.gdist        = graindist
         self.ext          = extinction
