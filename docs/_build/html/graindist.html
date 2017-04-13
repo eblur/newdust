@@ -25,8 +25,9 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="astrodust 0.1 documentation" href="index.html" />
+    <link rel="up" title="astrodust.grainpop" href="grainpop.html" />
     <link rel="next" title="astrodust.graindist.sizedist" href="sizedist.html" />
-    <link rel="prev" title="Home doc page for eblur/dust" href="index.html" />
+    <link rel="prev" title="astrodust.grainpop" href="grainpop.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -73,7 +74,7 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
 <h2>Helper functions<a class="headerlink" href="#helper-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="newdust.graindist.make_GrainDist">
-<code class="descclassname">newdust.graindist.</code><code class="descname">make_GrainDist</code><span class="sig-paren">(</span><em>sstring</em>, <em>cstring</em>, <em>amax=0.3</em>, <em>rho=None</em>, <em>md=0.0001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/graindist.html#make_GrainDist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.make_GrainDist" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">newdust.graindist.</code><code class="descname">make_GrainDist</code><span class="sig-paren">(</span><em>sstring</em>, <em>cstring</em>, <em>amax=0.3</em>, <em>rho=None</em>, <em>md=0.0001</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newdust/graindist/graindist.html#make_GrainDist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newdust.graindist.make_GrainDist" title="Permalink to this definition">¶</a></dt>
 <dd><div class="line-block">
 <div class="line">A shortcut function for creating GrainDist objects</div>
 <div class="line"><br /></div>
@@ -88,6 +89,7 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
 </div>
 <div class="line">rho     : if defined, will alter the rho keyword in composition</div>
 <div class="line">md      : dust mass column (g cm^-2)</div>
+<div class="line"><a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs : extra input to the size dist functions</div>
 </div>
 </dd></dl>
 
@@ -136,8 +138,10 @@ Silicate), and shape.  Right now only spherical dust grain shapes are supported.
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Home doc page for <em>eblur/dust</em></a></li>
+  <li><a href="grainpop.html">astrodust.grainpop</a><ul>
+      <li>Previous: <a href="grainpop.html" title="previous chapter">astrodust.grainpop</a></li>
       <li>Next: <a href="sizedist.html" title="next chapter">astrodust.graindist.sizedist</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

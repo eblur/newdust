@@ -14,16 +14,21 @@ class SingleGrainPop(object):
     | Can add a string describing the Grain population using the `description` keyword
     |
     | **ATTRIBUTES**
+    | description : a string describing the grain population
     | gdist : GrainDist object
     | ext   : Extinction object
-    | description : a string describing the grain population
+    |
+    | *The following attributes are inherited form the GrainDist object*
+    | a, ndens, mdens, cgeo, vol
+    | *The following attributes are inherited from the Extinction object*
+    | lam, lam_unit, tau_ext, tau_sca, tau_abs
     |
     | *functions*
     | calculate_ext(lam, unit='kev', **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit
     | plot_sizes(ax, **kwargs) plots the size distribution (see *astrodust.graindist.sizedist*)
     | plot_ext(ax, keyword, **kwargs) plots the extinction properties (see *astrodust.extinction*)
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
-    | info() prints information about the population of dust grains
+    | info() prints information about the dust grain properties
     """
     def __init__(self, graindist, extinction, description='Custom'):
         self.description  = description

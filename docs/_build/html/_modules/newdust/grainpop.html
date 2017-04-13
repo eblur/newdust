@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>newdust.grainpop &mdash; astrodust 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="astrodust 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for newdust.grainpop</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">graindist</span>
+<span class="kn">import</span> <span class="nn">extinction</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SingleGrainPop&#39;</span><span class="p">,</span><span class="s1">&#39;GrainPop&#39;</span><span class="p">,</span><span class="s1">&#39;make_MRN&#39;</span><span class="p">,</span><span class="s1">&#39;make_MRN_drude&#39;</span><span class="p">]</span>
+
+<span class="n">MD_DEFAULT</span>    <span class="o">=</span> <span class="mf">1.e-4</span>  <span class="c1"># g cm^-2</span>
+<span class="n">AMIN</span><span class="p">,</span> <span class="n">AMAX</span><span class="p">,</span> <span class="n">P</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">3.5</span>  <span class="c1"># um, um, unitless</span>
+<span class="n">UNIT_LABELS</span>   <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;kev&#39;</span><span class="p">:</span><span class="s1">&#39;Energy (keV)&#39;</span><span class="p">,</span> <span class="s1">&#39;angs&#39;</span><span class="p">:</span><span class="s1">&#39;Wavelength (angs)&#39;</span><span class="p">}</span>
+
+<div class="viewcode-block" id="SingleGrainPop"><a class="viewcode-back" href="../../grainpop.html#newdust.grainpop.SingleGrainPop">[docs]</a><span class="k">class</span> <span class="nc">SingleGrainPop</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    | A single dust grain population.</span>
+<span class="sd">    | Can add a string describing the Grain population using the `description` keyword</span>
+<span class="sd">    |</span>
+<span class="sd">    | **ATTRIBUTES**</span>
+<span class="sd">    | description : a string describing the grain population</span>
+<span class="sd">    | gdist : GrainDist object</span>
+<span class="sd">    | ext   : Extinction object</span>
+<span class="sd">    |</span>
+<span class="sd">    | *The following attributes are inherited form the GrainDist object*</span>
+<span class="sd">    | a, ndens, mdens, cgeo, vol</span>
+<span class="sd">    | *The following attributes are inherited from the Extinction object*</span>
+<span class="sd">    | lam, lam_unit, tau_ext, tau_sca, tau_abs</span>
+<span class="sd">    |</span>
+<span class="sd">    | *functions*</span>
+<span class="sd">    | calculate_ext(lam, unit=&#39;kev&#39;, **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit</span>
+<span class="sd">    | plot_sizes(ax, **kwargs) plots the size distribution (see *astrodust.graindist.sizedist*)</span>
+<span class="sd">    | plot_ext(ax, keyword, **kwargs) plots the extinction properties (see *astrodust.extinction*)</span>
+<span class="sd">    |   - ``keyword`` options are &quot;ext&quot;, &quot;sca&quot;, &quot;abs&quot;, &quot;all&quot;</span>
+<span class="sd">    | info() prints information about the dust grain properties</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graindist</span><span class="p">,</span> <span class="n">extinction</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Custom&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span>  <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span>        <span class="o">=</span> <span class="n">graindist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ext</span>          <span class="o">=</span> <span class="n">extinction</span>
+
+    <span class="c1"># Hard code inheritance. This is annoying.</span>
+    <span class="c1"># Inheritance from gdist</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">a</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ndens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">ndens</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mdens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">mdens</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cgeo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">cgeo</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">vol</span>
+
+    <span class="c1"># Inheritance from extinction</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tau_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">tau_ext</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tau_sca</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">tau_sca</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tau_abs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">tau_abs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">lam</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lam_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">lam_unit</span>
+
+    <span class="c1"># Calculating the extinction properties</span>
+    <span class="k">def</span> <span class="nf">calculate_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;kev&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Plotting things</span>
+    <span class="k">def</span> <span class="nf">plot_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">plot_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Printing information</span>
+    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Grain Population: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Size distribution: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Extinction calculated with: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">scatm</span><span class="o">.</span><span class="n">stype</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Grain composition: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">comp</span><span class="o">.</span><span class="n">cmtype</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho = </span><span class="si">%.2f</span><span class="s2"> g cm^-3, M_d = </span><span class="si">%.2e</span><span class="s2"> g cm^-2&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">rho</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">md</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GrainPop"><a class="viewcode-back" href="../../grainpop.html#newdust.grainpop.GrainPop">[docs]</a><span class="k">class</span> <span class="nc">GrainPop</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    | A collection of dust grain distributions (SingeGrainPop).</span>
+<span class="sd">    | Can add a string describing this Grain population using the `description` keyword</span>
+<span class="sd">    |</span>
+<span class="sd">    | **ATTRIBUTES**</span>
+<span class="sd">    | keys     : A list of keys corresponding to each SingleGrainPop (default: list of integers starting with 0)</span>
+<span class="sd">    | gpoplist : A list of SingleGrainPop objects</span>
+<span class="sd">    | description : A string describing this collection</span>
+<span class="sd">    | lam      : The energy / wavelength used for calculating extinction</span>
+<span class="sd">    | lam_unit : The unit for energy (&#39;kev&#39;) or wavelength (&#39;angs&#39;) used for calculating extinction</span>
+<span class="sd">    |</span>
+<span class="sd">    | *properties*</span>
+<span class="sd">    | tau_ext : Total extinction optical depth as a function of wavelength / energy</span>
+<span class="sd">    | tau_sca : Total scattering optical depth as a function of wavelength / energy</span>
+<span class="sd">    | tau_abs : Total absorption optical depth as a function of wavelength / energy</span>
+<span class="sd">    |</span>
+<span class="sd">    | *functions*</span>
+<span class="sd">    | __getitem__(key) will return the SingleGrainPop indexed by ``key``</span>
+<span class="sd">    | calculate_ext(lam, unit=&#39;kev&#39;, **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit</span>
+<span class="sd">    | plot_ext(ax, keyword, **kwargs) plots the extinction properties (see *astrodust.extinction*)</span>
+<span class="sd">    |   - ``keyword`` options are &quot;ext&quot;, &quot;sca&quot;, &quot;abs&quot;, &quot;all&quot;</span>
+<span class="sd">    | info(key=None) prints information about the SingleGrainPop indexed by ``key``</span>
+<span class="sd">    |   - if ``key`` is *None*, information about every grain population will be printed to screen</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gpoplist</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Custom_GrainPopDict&#39;</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gpoplist</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keys</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gpoplist</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="n">keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span>    <span class="o">=</span> <span class="n">gpoplist</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">calculate_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;kev&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">gp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span><span class="p">:</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">calculate_ext</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span> <span class="o">=</span> <span class="n">unit</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">md</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">gp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">gp</span><span class="o">.</span><span class="n">gdist</span><span class="o">.</span><span class="n">md</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tau_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ERROR: Extinction properties need to be calculated&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">gp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">gp</span><span class="o">.</span><span class="n">tau_ext</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tau_sca</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ERROR: Extinction properties need to be calculated&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">gp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">gp</span><span class="o">.</span><span class="n">tau_sca</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tau_abs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ERROR: Extinction properties need to be calculated&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">gp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">gp</span><span class="o">.</span><span class="n">tau_abs</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">plot_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="s1">&#39;ext&#39;</span><span class="p">,</span><span class="s1">&#39;sca&#39;</span><span class="p">,</span><span class="s1">&#39;abs&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;ext&#39;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">UNIT_LABELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$\tau_{ext}$&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;sca&#39;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_sca</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">UNIT_LABELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$\tau_{sca}$&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;abs&#39;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">UNIT_LABELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$\tau_{abs}$&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_ext</span><span class="p">,</span> <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Extinction&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_sca</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Scattering&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_abs</span><span class="p">,</span> <span class="s1">&#39;r:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Absorption&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">UNIT_LABELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_unit</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$\tau$&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;General information for </span><span class="si">%s</span><span class="s2"> dust grain population&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">gp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpoplist</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;---&quot;</span><span class="p">)</span>
+                <span class="n">gp</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">()</span></div>
+
+
+<span class="c1">#---------- Basic helper functions for fast production of GrainPop objects</span>
+
+<span class="k">def</span> <span class="nf">make_MRN</span><span class="p">(</span><span class="n">amin</span><span class="o">=</span><span class="n">AMIN</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="n">AMAX</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">md</span><span class="o">=</span><span class="n">MD_DEFAULT</span><span class="p">,</span> <span class="n">fsil</span><span class="o">=</span><span class="mf">0.6</span><span class="p">):</span>
+    <span class="c1">#assert fsil != 0.0</span>
+    <span class="c1">#assert fsil != 1.0</span>
+    <span class="n">md_sil</span>  <span class="o">=</span> <span class="n">fsil</span> <span class="o">*</span> <span class="n">md</span>
+    <span class="c1"># Graphite grain assumption: 1/3 parallel and 2/3 perpendicular</span>
+    <span class="n">md_gra_para</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">fsil</span><span class="p">)</span> <span class="o">*</span> <span class="n">md</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span>
+    <span class="n">md_gra_perp</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">fsil</span><span class="p">)</span> <span class="o">*</span> <span class="n">md</span> <span class="o">*</span> <span class="p">(</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span>
+
+    <span class="n">pl</span>      <span class="o">=</span> <span class="n">graindist</span><span class="o">.</span><span class="n">sizedist</span><span class="o">.</span><span class="n">Powerlaw</span><span class="p">(</span><span class="n">amin</span><span class="o">=</span><span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="n">amax</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="n">mrn_sil</span> <span class="o">=</span> <span class="n">graindist</span><span class="o">.</span><span class="n">GrainDist</span><span class="p">(</span><span class="n">pl</span><span class="p">,</span> <span class="n">graindist</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">CmSilicate</span><span class="p">(),</span> <span class="n">md</span><span class="o">=</span><span class="n">md_sil</span><span class="p">)</span>
+    <span class="n">mrn_gra_para</span> <span class="o">=</span> <span class="n">graindist</span><span class="o">.</span><span class="n">GrainDist</span><span class="p">(</span><span class="n">pl</span><span class="p">,</span> <span class="n">graindist</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">CmGraphite</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;para&#39;</span><span class="p">),</span> <span class="n">md</span><span class="o">=</span><span class="n">md_gra_para</span><span class="p">)</span>
+    <span class="n">mrn_gra_perp</span> <span class="o">=</span> <span class="n">graindist</span><span class="o">.</span><span class="n">GrainDist</span><span class="p">(</span><span class="n">pl</span><span class="p">,</span> <span class="n">graindist</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">CmGraphite</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;perp&#39;</span><span class="p">),</span> <span class="n">md</span><span class="o">=</span><span class="n">md_gra_perp</span><span class="p">)</span>
+
+    <span class="n">gplist</span> <span class="o">=</span> <span class="p">[</span><span class="n">SingleGrainPop</span><span class="p">(</span><span class="n">mrn_sil</span><span class="p">,</span> <span class="n">extinction</span><span class="o">.</span><span class="n">make_Extinction</span><span class="p">(</span><span class="s1">&#39;Mie&#39;</span><span class="p">)),</span>
+              <span class="n">SingleGrainPop</span><span class="p">(</span><span class="n">mrn_gra_para</span><span class="p">,</span> <span class="n">extinction</span><span class="o">.</span><span class="n">make_Extinction</span><span class="p">(</span><span class="s1">&#39;Mie&#39;</span><span class="p">)),</span>
+              <span class="n">SingleGrainPop</span><span class="p">(</span><span class="n">mrn_gra_perp</span><span class="p">,</span> <span class="n">extinction</span><span class="o">.</span><span class="n">make_Extinction</span><span class="p">(</span><span class="s1">&#39;Mie&#39;</span><span class="p">))]</span>
+    <span class="n">keys</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sil&#39;</span><span class="p">,</span><span class="s1">&#39;gra_para&#39;</span><span class="p">,</span><span class="s1">&#39;gra_perp&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">GrainPop</span><span class="p">(</span><span class="n">gplist</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;MRN&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">make_MRN_drude</span><span class="p">(</span><span class="n">amin</span><span class="o">=</span><span class="n">AMIN</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="n">AMAX</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">md</span><span class="o">=</span><span class="n">MD_DEFAULT</span><span class="p">):</span>
+    <span class="n">pl</span>      <span class="o">=</span> <span class="n">graindist</span><span class="o">.</span><span class="n">sizedist</span><span class="o">.</span><span class="n">Powerlaw</span><span class="p">(</span><span class="n">amin</span><span class="o">=</span><span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="n">amax</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">mrn_dru</span> <span class="o">=</span> <span class="n">graindist</span><span class="o">.</span><span class="n">GrainDist</span><span class="p">(</span><span class="n">pl</span><span class="p">,</span> <span class="n">graindist</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">CmDrude</span><span class="p">(),</span> <span class="n">md</span><span class="o">=</span><span class="n">md</span><span class="p">)</span>
+    <span class="n">gplist</span>  <span class="o">=</span> <span class="p">[</span><span class="n">SingleGrainPop</span><span class="p">(</span><span class="n">mrn_dru</span><span class="p">,</span> <span class="n">extinction</span><span class="o">.</span><span class="n">make_Extinction</span><span class="p">(</span><span class="s1">&#39;RG&#39;</span><span class="p">))]</span>
+    <span class="n">keys</span>    <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RGD&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">GrainPop</span><span class="p">(</span><span class="n">gplist</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;MRN_rgd&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Lia Corrales.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -50,6 +50,7 @@ Modules
 .. toctree::
    :maxdepth: 3
 
+   grainpop
    graindist
    extinction
 
