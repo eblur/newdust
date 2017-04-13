@@ -26,6 +26,19 @@ test1.calculate_ext(LAMVALS, unit='angs', theta=THETA)
 test2 = SingleGrainPop(TEST_SDIST, RG)
 test2.calculate_ext(EVALS, unit='kev', theta=THETA)
 
+def test_SingleGrainPop():
+    assert len(test1.a) == NA
+    assert len(test1.ndens) == NA
+    assert len(test1.mdens) == NA
+    assert len(test1.cgeo) == NA
+    assert len(test1.vol) == NA
+    assert test1.lam_unit == 'angs'
+    assert test2.lam_unit == 'kev'
+    assert len(test1.lam) == NE
+    assert len(test1.tau_ext) == NE
+    assert len(test1.tau_abs) == NE
+    assert len(test1.tau_sca) == NE
+
 def test_GrainPop_keys():
     test = GrainPop([test1, test2])
     assert test[0].description == '0'
@@ -45,13 +58,21 @@ def test_GrainPop_calculation():
 
 @pytest.mark.parametrize('fsil', [0.0, 0.4, 1.0])
 def test_make_MRN(fsil):
-    test = make_MRN(fsil=fsil, md=MD)
-    assert isinstance(test, GrainPop)
-    assert percent_diff(test.md, MD) <= 0.1
+    test3 = make_MRN(fsil=fsil, md=MD)
+    assert isinstance(test3, GrainPop)
+    assert percent_diff(test3.md, MD) <= 0.1
     if fsil == 0.0:
-        assert test['sil'].gdist.md == 0.0
+        assert test3['sil'].gdist.md == 0.0
     if fsil == 1.0:
-        assert test['sil'].gdist.md == MD
+        assert test3['sil'].gdist.md == MD
     # Test that doubling the mass doubles the extinction
-    test2 = make_MRN(fsil=fsil, md=2.0*MD)
-    assert percent_diff(test2.tau_ext, 2.0*test.tau_ext) <= 0.01
+    test4 = make_MRN(fsil=fsil, md=2.0*MD)
+    assert percent_diff(test4.tau_ext, 2.0*test3.tau_ext) <= 0.01
+
+def test_make_MRN_drude():
+    test3 = make_MRN_drude(md=MD)
+    assert isinstance(test3, GrainPop)
+    assert percent_diff(test3.md, MD) <= 0.1
+    # Test that doubling the mass doubles the extinction
+    test4 = make_MRN_drude(md=2.0*MD)
+    assert percent_diff(test4.tau_ext, 2.0*test3.tau_ext) <= 0.01

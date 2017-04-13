@@ -25,25 +25,66 @@ class SingleGrainPop(object):
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     | info() prints information about the population of dust grains
     """
-    def __init__():
-        self.a     = None
-        self.ndens = None
-        self.rho = sdist.com
-        self.md  = md
-        self.
+    def __init__(self, graindist, extinction, description='Custom'):
         self.description  = description
         self.gdist        = graindist
         self.ext          = extinction
 
+    # Hard code inheritance. This is annoying.
+    # Inheritance from gdist
+    @property
+    def a(self):
+        return self.gdist.a
+
+    @property
+    def ndens(self):
+        return self.gdist.ndens
+
+    @property
+    def mdens(self):
+        return self.gdist.mdens
+
+    @property
+    def cgeo(self):
+        return self.gdist.cgeo
+
+    @property
+    def vol(self):
+        return self.gdist.vol
+
+    # Inheritance from extinction
+    @property
+    def tau_ext(self):
+        return self.ext.tau_ext
+
+    @property
+    def tau_sca(self):
+        return self.ext.tau_sca
+
+    @property
+    def tau_abs(self):
+        return self.ext.tau_abs
+
+    @property
+    def lam(self):
+        return self.ext.lam
+
+    @property
+    def lam_unit(self):
+        return self.ext.lam_unit
+
+    # Calculating the extinction properties
     def calculate_ext(self, lam, unit='kev', **kwargs):
         self.ext.calculate(self.gdist, lam, unit=unit, **kwargs)
 
+    # Plotting things
     def plot_sizes(self, ax=None, **kwargs):
         self.gdist.plot(ax, **kwargs)
 
     def plot_ext(self, ax, keyword, **kwargs):
         self.ext.plot(ax, keyword, **kwargs)
 
+    # Printing information
     def info(self):
         print("Grain Population: %s" % self.description)
         print("Size distribution: %s" % self.gdist.size.dtype)
@@ -115,7 +156,7 @@ class GrainPop(object):
             print("ERROR: Extinction properties need to be calculated")
         else:
             for gp in self.gpoplist:
-                result += gp.ext.tau_ext
+                result += gp.tau_ext
         return result
 
     @property
@@ -125,7 +166,7 @@ class GrainPop(object):
             print("ERROR: Extinction properties need to be calculated")
         else:
             for gp in self.gpoplist:
-                result += gp.ext.tau_sca
+                result += gp.tau_sca
         return result
 
     @property
@@ -135,7 +176,7 @@ class GrainPop(object):
             print("ERROR: Extinction properties need to be calculated")
         else:
             for gp in self.gpoplist:
-                result += gp.ext.tau_abs
+                result += gp.tau_abs
         return result
 
     def plot_ext(self, ax, keyword, **kwargs):
