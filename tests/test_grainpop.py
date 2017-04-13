@@ -55,10 +55,3 @@ def test_make_MRN(fsil):
     # Test that doubling the mass doubles the extinction
     test2 = make_MRN(fsil=fsil, md=2.0*MD)
     assert percent_diff(test2.tau_ext, 2.0*test.tau_ext) <= 0.01
-
-def test_make_MRN_drude():
-    test  = make_MRN_drude(md=MD)
-    assert isinstance(test, GrainPop)
-    # Test that doubling the mass doubles the extinction
-    test2 = make_MRN_drude(md=2.0*MD)
-    assert percent_diff(test2.tau_ext, 2.0*test.tau_ext) <= 0.01
