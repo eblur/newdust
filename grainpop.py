@@ -6,12 +6,12 @@ __all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
 
 MD_DEFAULT    = 1.e-4  # g cm^-2
 AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
+RHO_AVG       = 3.0  # g cm^-3
 UNIT_LABELS   = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
 class SingleGrainPop(object):
     """
-    | A single dust grain population.
-    | Can add a string describing the Grain population using the `description` keyword
+    | A single dust grain population. Can add a string describing the Grain population using the *description* keyword
     |
     | **ATTRIBUTES**
     | description : a string describing the grain population
@@ -221,8 +221,17 @@ class GrainPop(object):
 #---------- Basic helper functions for fast production of GrainPop objects
 
 def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6):
-    #assert fsil != 0.0
-    #assert fsil != 1.0
+    """
+    | Returns a GrainPop describing an MRN dust grain size distribution, which is a mixture of silicate and graphite grains.
+    | Applies the 1/3 parallel, 2/3 perpendicular assumption of graphite grain orientations.
+    |
+    | **INPUTS**
+    | amin : minimum grain size in microns
+    | amax : maximum grain size in microns
+    | p    : power law slope for grain size distribution
+    | md   : dust mass column [g cm^-2]
+    | fsil : fraction of dust mass in silicate grains
+    """
     md_sil  = fsil * md
     # Graphite grain assumption: 1/3 parallel and 2/3 perpendicular
     md_gra_para = (1.0 - fsil) * md * (1.0/3.0)
@@ -240,7 +249,18 @@ def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6):
     keys   = ['sil','gra_para','gra_perp']
     return GrainPop(gplist, keys=keys, description='MRN')
 
-def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT):
+def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT):
+    """
+    | Returns a GrainPop describing an MRN dust grain size distribution, and uses the Drude approximation,
+    | which approximates the dust grain as a sphere of free electrons
+    |
+    | **INPUTS**
+    | amin : minimum grain size in microns
+    | amax : maximum grain size in microns
+    | p    : power law slope for grain size distribution
+    | rho  : density of dust grain material [g cm^-3]
+    | md   : dust mass column [g cm^-2]
+    """
     pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
     mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude(), md=md)
     gplist  = [SingleGrainPop(mrn_dru, extinction.make_Extinction('RG'))]

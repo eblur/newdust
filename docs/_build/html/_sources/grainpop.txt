@@ -19,7 +19,8 @@ Class structures
 Helper functions
 ----------------
 
-.. autofunction:: newdust.extinction.make_Extinction
+.. autofunction:: newdust.grainpop.make_MRN
+.. autofunction:: newdust.grainpop.make_MRN_drude
 
 See also
 --------
