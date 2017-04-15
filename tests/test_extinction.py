@@ -8,9 +8,8 @@ from newdust import graindist
 from newdust import extinction
 from . import percent_diff
 
-NE, NA, NTH = 2, 20, 1000
+NE, NTH = 2, 1000
 LAMVALS = np.linspace(1000.,5000.,NE)  # angs
-AVALS   = np.linspace(0.1, 0.5, NA)    # um
 
 THETA    = np.logspace(-10.0, np.log10(np.pi), NTH)  # 0->pi scattering angles (rad)
 ASEC2RAD = (2.0 * np.pi) / (360.0 * 60. * 60.)     # rad / arcsec
@@ -44,6 +43,7 @@ def test_calculations(gd, sm):
     assert np.shape(test.tau_ext) == (NE,)
     assert np.shape(test.tau_sca) == (NE,)
     assert np.shape(test.tau_abs) == (NE,)
+    assert np.shape(test.diff) == (NE, len(gd.a), NTH)
     assert all(percent_diff(test.tau_ext, test.tau_abs + test.tau_sca) <= 0.01)
 
 # Make sure that doubling the dust mass doubles the extinction

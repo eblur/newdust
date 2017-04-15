@@ -2,6 +2,7 @@ import numpy as np
 from scipy.integrate import trapz
 
 import scatmodels
+from .. import constants as c
 
 __all__ = ['Extinction','make_Extinction']
 
@@ -19,6 +20,7 @@ class Extinction(object):
     | tau_sca  : Optical depth to scattering as a function of wavelength / energy
     | tau_abs  : Optical depth to absorption as a function of wavelength / energy
     | tau_ext  : Total extinction optical depth as a function of wavelength / energy
+    | diff     : The differential scattering cross section [cm^2 / arcsec^2]
     |
     | *functions*
     | calculate(gdist, lam, unit = "kev")
@@ -34,6 +36,7 @@ class Extinction(object):
         self.tau_sca  = None
         self.tau_abs  = None
         self.tau_ext  = None
+        self.diff     = None  # cm^2 / arcsec^2
         self.lam      = None
         self.lam_unit = None
 
@@ -55,6 +58,7 @@ class Extinction(object):
             self.tau_ext = trapz(geo_2d * self.scatm.qext, gdist.a, axis=1)
             self.tau_sca = trapz(geo_2d * self.scatm.qsca, gdist.a, axis=1)
             self.tau_abs = trapz(geo_2d * self.scatm.qabs, gdist.a, axis=1)
+        self.diff    = self.scatm.diff * c.arcs2rad**2  # cm^2 arcsec^-2  # NE x NA x NTH
 
     def plot(self, ax, keyword, **kwargs):
         assert keyword in ['ext','sca','abs','all']
