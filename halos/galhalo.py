@@ -5,7 +5,7 @@ from halo import *
 from ..grainpop import *
 from .. import constants as c
 
-__all__ = ['GalHalo','Ihalo','path_diff','uniformISM','screenISM']
+__all__ = ['UniformGalHalo','ScreenGalHalo','path_diff','uniformISM','screenISM']
 
 ANGLES = np.logspace(0.0, 3.5, np.int(3.5/0.05))
 
@@ -93,7 +93,7 @@ def uniformISM(halo, gpop, nx=500):
     assert isinstance(gpop, SingleGrainPop)
 
     NE, NA     = np.size(halo.lam), np.size(gpop.a)
-    halo.htype = UniformGalHalo(md=gpop.md)
+    halo.htype = UniformGalHalo(md=gpop.mdens)
     halo.norm_int = np.zeros(shape=(NE, np.size(halo.theta)))
 
     xgrid      = np.linspace(0.0, 1.0, nx)
