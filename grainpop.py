@@ -78,6 +78,10 @@ class SingleGrainPop(object):
     def lam_unit(self):
         return self.ext.lam_unit
 
+    @property
+    def diff(self):
+        return self.ext.diff
+
     # Calculating the extinction properties
     def calculate_ext(self, lam, unit='kev', **kwargs):
         self.ext.calculate(self.gdist, lam, unit=unit, **kwargs)

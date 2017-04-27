@@ -33,19 +33,19 @@ class Extinction(object):
 
     def __init__(self, scatm):
         self.scatm    = scatm
-        self.tau_sca  = None
-        self.tau_abs  = None
-        self.tau_ext  = None
-        self.diff     = None  # cm^2 / arcsec^2
-        self.lam      = None
-        self.lam_unit = None
+        self.tau_sca  = None  # NE
+        self.tau_abs  = None  # NE
+        self.tau_ext  = None  # NE
+        self.diff     = None  # NE x NA x NTH [cm^2 / arcsec^2]
+        self.lam      = None  # NE
+        self.lam_unit = None  # string
 
     # Outputs should all be single arrays of length NE
     def calculate(self, gdist, lam, unit='kev', theta=0.0):
         self.scatm.calculate(lam, gdist.a, gdist.comp, unit=unit, theta=theta)
         self.lam      = lam
         self.lam_unit = unit
-        NE, NA = np.shape(self.scatm.qext)
+        NE, NA, NTH = np.shape(self.scatm.diff)
         # In single size grain case
         if len(gdist.a) == 1:
             self.tau_ext = gdist.ndens * self.scatm.qext[:,0] * gdist.cgeo
@@ -58,7 +58,15 @@ class Extinction(object):
             self.tau_ext = trapz(geo_2d * self.scatm.qext, gdist.a, axis=1)
             self.tau_sca = trapz(geo_2d * self.scatm.qsca, gdist.a, axis=1)
             self.tau_abs = trapz(geo_2d * self.scatm.qabs, gdist.a, axis=1)
-        self.diff    = self.scatm.diff * c.arcs2rad**2  # cm^2 arcsec^-2  # NE x NA x NTH
+
+        # NE x NA x NTH
+        agrid        = np.repeat(
+            np.repeat(gdist.a.reshape(1, NA, 1), NE, axis=0),
+            NTH, axis=2)
+        ndgrid       = np.repeat(
+            np.repeat(gdist.ndens.reshape(1, NA, 1), NE, axis=0),
+            NTH, axis=2)
+        self.diff    = trapz(self.scatm.diff * ndgrid, agrid, axis=1) * c.arcs2rad**2  # cm^2 arcsec^-2  # NE x NA x NTH
 
     def plot(self, ax, keyword, **kwargs):
         assert keyword in ['ext','sca','abs','all']
