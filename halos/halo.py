@@ -5,6 +5,7 @@ from scipy.integrate import trapz
 __all__ = ['Halo']
 
 ALLOWED_FTYPE = ['abs','ext']
+ALLOWED_FUNIT = ['cgs','phot','count','none']
 
 class Halo(object):
     """
@@ -18,6 +19,7 @@ class Halo(object):
     | norm_int
     | taux
     | fabs
+    | funit
     | intensity
     |
     | *properties*
@@ -38,17 +40,22 @@ class Halo(object):
         self.norm_int  = None   # NE x NTH, arcsec^-2
         self.taux      = None   # NE, unitless
         self.fabs      = None   # NE, bin integrated flux [e.g. phot/cm^2/s, NOT phot/cm^2/s/keV]
+        self.funit     = None
         self.intensity = None   # NTH, flux x arcsec^-2
 
-    def calculate_intensity(self, flux, ftype='abs'):
+    def calculate_intensity(self, flux, ftype='abs', funit='none'):
         assert self.norm_int is not None
         assert ftype in ALLOWED_FTYPE
+        assert funit in ALLOWED_FUNIT
         if ftype == 'abs':
             fabs = flux
         if ftype == 'ext':
             fabs = flux * np.exp(self.taux)
         self.fabs = fabs
-        self.intensity = np.sum(self.norm_int * fabs, axis=0)
+        NE, NTH = np.shape(self.norm_int)
+        fa_grid = np.repeat(fabs.reshape(NE,1), NTH, axis=1)
+        self.fa_grid = fa_grid
+        self.intensity = np.sum(self.norm_int * fa_grid, axis=0)
 
     @property
     def fext(self):
