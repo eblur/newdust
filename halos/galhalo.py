@@ -96,10 +96,9 @@ def uniformISM(halo, gpop, nx=500):
     halo.htype = UniformGalHalo(md=gpop.mdens)
     halo.norm_int = np.zeros(shape=(NE, np.size(halo.theta)))
 
-    xgrid      = np.linspace(0.0, 1.0, nx)
-    xvals      = xgrid[::-1]
+    xgrid      = np.linspace(1.0/nx, 1.0, nx)
     xmesh      = np.repeat(
-        np.repeat(xvals.reshape(1, 1, nx), NE, axis=0),
+        np.repeat(xgrid.reshape(1, 1, nx), NE, axis=0),
         NA, axis=1)
     ndmesh     = np.repeat(
         np.repeat(gpop.ndens.reshape(1, NA, 1), NE, axis=0),
@@ -108,22 +107,23 @@ def uniformISM(halo, gpop, nx=500):
     assert np.shape(ndmesh) == (NE, NA, nx)
     i_th = 0
     for al in halo.theta:
-        thscat = al / xvals  # nx
+        thscat = al / xgrid  # nx, goes from small to large angle
         gpop.calculate_ext(halo.lam, unit=halo.lam_unit, theta=thscat)
         dsig   = gpop.diff  # NE x NA x nx, [cm^2 arcsec^-2]
-        itemp  = np.power(xmesh, -2.0) * dsig * ndmesh  # NE x NA, [um^-1 arcsec^-2]
+        itemp  = dsig * ndmesh / xmesh**2  # NE x NA x nx, [um^-1 arcsec^-2]
 
-        intx      = trapz(itemp, xvals, axis=2)  # NE x NA, [um^-1 arcsec^-2]
+        intx      = trapz(itemp, xgrid, axis=2)  # NE x NA, [um^-1 arcsec^-2]
         intensity = trapz(intx, gpop.a, axis=1)  # NE, [arcsec^-2]
         halo.norm_int[:,i_th] = intensity
         i_th += 1
+
+    halo.taux  = gpop.tau_sca
 
     #thsca_grid = np.min(halo.theta) / xgrid[::-1]  # scattering angles go from min obs angle -> inf [arcsec]
     #agrid      = np.repeat(gpop.a.reshape(1, NA, 1), NE, axis=0)  # NE x NA
     #gpop.calculate_ext(halo.lam, unit=halo.lam_unit, theta=thsca_grid)
     #dscat      = interp  ## Need to figure out multi-dimensional interpolation
 
-    halo.taux  = gpop.tau_sca
 
 def screenISM(halo, x=0.5):
     """
