@@ -253,7 +253,7 @@ def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6):
     keys   = ['sil','gra_para','gra_perp']
     return GrainPop(gplist, keys=keys, description='MRN')
 
-def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT):
+def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT, **kwargs):
     """
     | Returns a GrainPop describing an MRN dust grain size distribution, and uses the Drude approximation,
     | which approximates the dust grain as a sphere of free electrons
@@ -265,7 +265,7 @@ def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT):
     | rho  : density of dust grain material [g cm^-3]
     | md   : dust mass column [g cm^-2]
     """
-    pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
+    pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p, **kwargs)
     mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude(), md=md)
     gplist  = [SingleGrainPop(mrn_dru, extinction.make_Extinction('RG'))]
     keys    = ['RGD']
