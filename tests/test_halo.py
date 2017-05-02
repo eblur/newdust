@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from scipy.integrate import trapz
 
@@ -22,12 +23,17 @@ def test_Halo_dimensions():
 
 # ---- Test Galactic Halo stuff ---- #
 
-def test_galhalo_uniform():
-    test = Halo(EVALS, THVALS, unit='kev')
+UNI_HALO = Halo(EVALS, THVALS, unit='kev')
+SCR_HALO = Halo(EVALS, THVALS, unit='kev')
 
-    # Test that the function runs
-    galhalo.uniformISM(test, GPOP)
-    assert isinstance(test.htype, galhalo.UniformGalHalo)
+# Test that calculations run
+def test_galhalo_uniform():
+    galhalo.uniformISM(UNI_HALO, GPOP)
+    assert isinstance(UNI_HALO.htype, galhalo.UniformGalHalo)
+
+@pytest.mark.parametrize('test', [UNI_HALO])
+def test_halos_general(test):
+    # Test basic shape properties of outputs
     assert np.shape(test.norm_int) == (NE, NTH)
     assert np.shape(test.taux) == (NE,)
 
