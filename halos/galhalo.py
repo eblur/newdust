@@ -125,7 +125,7 @@ def uniformISM(halo, gpop, nx=500):
     #dscat      = interp  ## Need to figure out multi-dimensional interpolation
 
 
-def screenISM(halo, x=0.5):
+def screenISM(halo, gpop, x=0.5):
     """
     | Calculate the X-ray scattering intensity for dust in an
     | infinitesimally thin wall somewhere on the line of sight.
@@ -141,6 +141,7 @@ def screenISM(halo, x=0.5):
     """
     assert isinstance(halo, Halo)
     assert isinstance(gpop, SingleGrainPop)
+    assert x != 0.0
 
     NE, NA, NTH = np.size(halo.lam), np.size(gpop.a), np.size(halo.theta)
     halo.htype = ScreenGalHalo(md=gpop.mdens, x=x)

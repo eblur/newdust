@@ -31,7 +31,16 @@ def test_galhalo_uniform():
     galhalo.uniformISM(UNI_HALO, GPOP)
     assert isinstance(UNI_HALO.htype, galhalo.UniformGalHalo)
 
-@pytest.mark.parametrize('test', [UNI_HALO])
+@pytest.mark.parametrize('x', [1.0, 0.5])
+def test_galhalo_screen(x):
+    galhalo.screenISM(SCR_HALO, GPOP, x=x)
+    assert isinstance(SCR_HALO.htype, galhalo.ScreenGalHalo)
+    # Observed angle should be equal to scattering angle when x = 1,
+    # so halo should match differential scattering cross section integrated over dust grain size distributions
+    if x == 1.0:
+        assert all(np.abs(SCR_HALO.norm_int - GPOP.ext.int_diff) < 0.01)
+
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
 def test_halos_general(test):
     # Test basic shape properties of outputs
     assert np.shape(test.norm_int) == (NE, NTH)
