@@ -62,12 +62,6 @@ class Extinction(object):
         # NE x NA x NTH
         self.diff     = self.scatm.diff * c.arcs2rad**2  # NE x NA x NTH, [cm^2 arcsec^-2]
 
-    def int_diff(self, gdist):
-        """ Returns differential cross-section integrated over grain size distribution """
-        assert self.lam is not None
-        NE, NA, NTH  = np.shape(self.scatm.diff)
-        assert np.size(gdist.a) == NA
-
         agrid        = np.repeat(
             np.repeat(gdist.a.reshape(1, NA, 1), NE, axis=0),
             NTH, axis=2)
@@ -75,8 +69,8 @@ class Extinction(object):
             np.repeat(gdist.ndens.reshape(1, NA, 1), NE, axis=0),
             NTH, axis=2)
 
-        result = trapz(self.scatm.diff * ndgrid, agrid, axis=1) * c.arcs2rad**2
-        return result  # NE x NTH, [arcsec^-2]
+        int_diff = trapz(self.scatm.diff * ndgrid, agrid, axis=1) * c.arcs2rad**2
+        self.int_diff = int_diff  # NE x NTH, [arcsec^-2]
 
     def plot(self, ax, keyword, **kwargs):
         assert keyword in ['ext','sca','abs','all']
