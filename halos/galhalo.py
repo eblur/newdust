@@ -133,15 +133,10 @@ def screenISM(halo, gpop, x=0.5):
     | **MODIFIES**
     | halo.htype, halo.taux, halo.norm_int
     |
-    | **INPUTS**
-    | halo : Halo object
-    | xg   : float : distance FROM source / distance between source and observer
-    | NH   : float : column density [cm^-2]
-    | d2g  : float : dust-to-gass mass ratio
     """
     assert isinstance(halo, Halo)
     assert isinstance(gpop, SingleGrainPop)
-    assert x != 0.0
+    assert x != 0.0  # not allowed
 
     NE, NA, NTH = np.size(halo.lam), np.size(gpop.a), np.size(halo.theta)
     halo.htype = ScreenGalHalo(md=gpop.mdens, x=x)
