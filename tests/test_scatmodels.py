@@ -55,6 +55,9 @@ def test_rgscat():
     qsca3 = test.qsca
     assert percent_diff(qsca3, 4.0*qsca1) <= 0.01
 
+    # Test that differential cross section goes to zero at large ANGLES
+    test.calculate(E_KEV, A_UM, CMD, unit='kev', theta=1.e10)
+    assert test.diff == 0.0
 
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),
