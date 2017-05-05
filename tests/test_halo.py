@@ -101,3 +101,14 @@ def test_halo_slices(test):
     # Test the values of the halo slices
     assert np.all(percent_diff(np.append(h1.taux,h2.taux), test.taux) == 0.0)
     assert np.all(percent_diff(np.append(h1.lam,h2.lam), test.lam) == 0.0)
+
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+def test_halo_index(test):
+    i = 0
+    tt = test[0]
+    assert isinstance(tt, Halo)
+    assert np.size(tt.lam) == 1
+    assert tt.lam == test.lam[i]
+    assert tt.taux == test.taux[i]
+    assert np.shape(tt.norm_int) == (1, NTH)
+    assert np.shape(tt.intensity) == (NTH,)
