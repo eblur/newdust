@@ -62,14 +62,17 @@ class Extinction(object):
         # NE x NA x NTH
         self.diff     = self.scatm.diff * c.arcs2rad**2  # NE x NA x NTH, [cm^2 arcsec^-2]
 
-        agrid        = np.repeat(
-            np.repeat(gdist.a.reshape(1, NA, 1), NE, axis=0),
-            NTH, axis=2)
-        ndgrid       = np.repeat(
-            np.repeat(gdist.ndens.reshape(1, NA, 1), NE, axis=0),
-            NTH, axis=2)
+        if np.size(gdist.a) == 1:
+            int_diff = np.sum(self.scatm.diff * gdist.ndens[0] * c.arcs2rad**2, axis=1)
+        else:
+            agrid        = np.repeat(
+                np.repeat(gdist.a.reshape(1, NA, 1), NE, axis=0),
+                NTH, axis=2)
+            ndgrid       = np.repeat(
+                np.repeat(gdist.ndens.reshape(1, NA, 1), NE, axis=0),
+                NTH, axis=2)
+            int_diff = trapz(self.scatm.diff * ndgrid, agrid, axis=1) * c.arcs2rad**2
 
-        int_diff = trapz(self.scatm.diff * ndgrid, agrid, axis=1) * c.arcs2rad**2
         self.int_diff = int_diff  # NE x NTH, [arcsec^-2]
 
     def plot(self, ax, keyword, **kwargs):
