@@ -41,7 +41,7 @@ def test_galhalo_screen(x):
         test = np.abs(SCR_HALO.norm_int - GPOP.ext.int_diff)
         assert np.all(test < 0.01)
 
-"""@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
 def test_halos_general(test):
     # Test basic shape properties of outputs
     assert np.shape(test.norm_int) == (NE, NTH)
@@ -78,9 +78,9 @@ def test_halos_general(test):
     assert all(percent_diff(test.fext, FEXT) <= 0.01)
     assert all(percent_diff(fh1, test.fhalo) <= 0.01)
     assert percent_diff(pfa1, test.percent_fabs) <= 0.01
-    assert percent_diff(pfe1, test.percent_fext) <= 0.01"""
+    assert percent_diff(pfe1, test.percent_fext) <= 0.01
 
-"""@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
 def test_halo_slices(test):
     # Test the halo slice functions
     # Split the energy values in half
@@ -93,9 +93,11 @@ def test_halo_slices(test):
     # Test that the slices return Halo objects
     assert isinstance(h1, Halo)
     assert isinstance(h2, Halo)
-    # Test the
-    assert all(percent_diff(np.append(h1.taux,h2.taux), test.taux))
+    # Test the sizes of things
     assert np.size(h1.lam) == N1
     assert np.size(h2.lam) == N2
-    assert np.shape(h1.norm_int) == (NE, NTH)
-    assert np.shape(h2.norm_int) == (NE, NTH)"""
+    assert np.shape(h1.norm_int) == (N1, NTH)
+    assert np.shape(h2.norm_int) == (N2, NTH)
+    # Test the values of the halo slices
+    assert np.all(percent_diff(np.append(h1.taux,h2.taux), test.taux) == 0.0)
+    assert np.all(percent_diff(np.append(h1.lam,h2.lam), test.lam) == 0.0)

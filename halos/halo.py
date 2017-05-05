@@ -94,18 +94,19 @@ class Halo(object):
         enclosed = trapz(I_grid * 2.0 * np.pi * th_grid, th_grid)
         return enclosed / fh_tot
 
-    def __getitem__(self, i):
+    def _get_lam_index(self, i):
+        assert isinstance(i, int)
         result = Halo(self.lam[i], self.theta, unit=self.lam_unit)
         if self.norm_int is not None:
             result.htype    = self.htype
-            result.norm_int = self.norm_int[i,...]
+            result.norm_int = np.array([self.norm_int[i,...]])
             result.taux     = self.taux[i]
         if self.fabs is not None:
-            result.calculate_intensity(self.fabs[i], ftype='abs')
+            flux = np.array([self.fabs[i]])
+            result.calculate_intensity(flux, ftype='abs')
         return result
 
-    def __slice__(self, lmin, lmax):
-        ii = (self.lam >= lmin) & (self.lam < lmax)
+    def _get_lam_slice(self, ii):
         result = Halo(self.lam[ii], self.theta, unit=self.lam_unit)
         if self.norm_int is not None:
             result.htype    = self.htype
@@ -114,3 +115,18 @@ class Halo(object):
         if self.fabs is not None:
             result.calculate_intensity(self.fabs[ii], ftype='abs')
         return result
+
+    # http://stackoverflow.com/questions/2936863/python-implementing-slicing-in-getitem
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self._get_lam_index(key)
+        if isinstance(key, slice):
+            lmin = key.start
+            lmax = key.stop
+            if lmin is None:
+                ii = (self.lam < lmax)
+            elif lmax is None:
+                ii = (self.lam >= lmin)
+            else:
+                ii = (self.lam >= lmin) & (self.lam < lmax)
+            return self._get_lam_slice(ii)
