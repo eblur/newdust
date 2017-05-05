@@ -38,9 +38,10 @@ def test_galhalo_screen(x):
     # Observed angle should be equal to scattering angle when x = 1,
     # so halo should match differential scattering cross section integrated over dust grain size distributions
     if x == 1.0:
-        assert all(np.abs(SCR_HALO.norm_int - GPOP.ext.int_diff) < 0.01)
+        test = np.abs(SCR_HALO.norm_int - GPOP.ext.int_diff)
+        assert np.all(test < 0.01)
 
-@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+"""@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
 def test_halos_general(test):
     # Test basic shape properties of outputs
     assert np.shape(test.norm_int) == (NE, NTH)
@@ -77,4 +78,24 @@ def test_halos_general(test):
     assert all(percent_diff(test.fext, FEXT) <= 0.01)
     assert all(percent_diff(fh1, test.fhalo) <= 0.01)
     assert percent_diff(pfa1, test.percent_fabs) <= 0.01
-    assert percent_diff(pfe1, test.percent_fext) <= 0.01
+    assert percent_diff(pfe1, test.percent_fext) <= 0.01"""
+
+"""@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+def test_halo_slices(test):
+    # Test the halo slice functions
+    # Split the energy values in half
+    EMID = (EVALS[-1] - EVALS[0]) / 2.0
+    i1 = (EVALS < EMID)
+    i2 = (EVALS >= EMID)
+    N1, N2 = np.size(EVALS[i1]), np.size(EVALS[i2])
+    h1 = test[0:EMID]
+    h2 = test[EMID:]
+    # Test that the slices return Halo objects
+    assert isinstance(h1, Halo)
+    assert isinstance(h2, Halo)
+    # Test the
+    assert all(percent_diff(np.append(h1.taux,h2.taux), test.taux))
+    assert np.size(h1.lam) == N1
+    assert np.size(h2.lam) == N2
+    assert np.shape(h1.norm_int) == (NE, NTH)
+    assert np.shape(h2.norm_int) == (NE, NTH)"""

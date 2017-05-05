@@ -94,12 +94,22 @@ class Halo(object):
         enclosed = trapz(I_grid * 2.0 * np.pi * th_grid, th_grid)
         return enclosed / fh_tot
 
+    def __getitem__(self, i):
+        result = Halo(self.lam[i], self.theta, unit=self.lam_unit)
+        if self.norm_int is not None:
+            result.htype    = self.htype
+            result.norm_int = self.norm_int[i,...]
+            result.taux     = self.taux[i]
+        if self.fabs is not None:
+            result.calculate_intensity(self.fabs[i], ftype='abs')
+        return result
+
     def __slice__(self, lmin, lmax):
-        ii = (self.lam >= lmin) & (self.lam <= lmax)
+        ii = (self.lam >= lmin) & (self.lam < lmax)
         result = Halo(self.lam[ii], self.theta, unit=self.lam_unit)
         if self.norm_int is not None:
             result.htype    = self.htype
-            result.norm_int = self.norm_int[ii, :]
+            result.norm_int = self.norm_int[ii,...]
             result.taux     = self.taux[ii]
         if self.fabs is not None:
             result.calculate_intensity(self.fabs[ii], ftype='abs')
