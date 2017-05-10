@@ -30,7 +30,7 @@ class Halo(object):
     |
     | *methods*
     | ecf(th, n)
-    | __slice__(lmin, lmax)
+    | __getitem__(lmin, lmax)
     """
     def __init__(self, lam, theta, unit='kev'):
         self.lam       = lam    # length NE
