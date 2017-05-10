@@ -77,18 +77,6 @@ class Halo(object):
         assert self.fabs is not None
         return np.sum(self.fhalo) / np.sum(self.fext)
 
-    def _get_lam_index(self, i):
-        assert isinstance(i, int)
-        result = Halo(self.lam[i], self.theta, unit=self.lam_unit)
-        if self.norm_int is not None:
-            result.htype    = self.htype
-            result.norm_int = np.array([self.norm_int[i,...]])
-            result.taux     = self.taux[i]
-        if self.fabs is not None:
-            flux = np.array([self.fabs[i]])
-            result.calculate_intensity(flux, ftype='abs')
-        return result
-
     # http://stackoverflow.com/questions/2936863/python-implementing-slicing-in-getitem
     def __getitem__(self, key):
         if isinstance(key, int):
@@ -112,6 +100,18 @@ class Halo(object):
             result.taux     = self.taux[ii]
         if self.fabs is not None:
             result.calculate_intensity(self.fabs[ii], ftype='abs')
+        return result
+
+    def _get_lam_index(self, i):
+        assert isinstance(i, int)
+        result = Halo(self.lam[i], self.theta, unit=self.lam_unit)
+        if self.norm_int is not None:
+            result.htype    = self.htype
+            result.norm_int = np.array([self.norm_int[i,...]])
+            result.taux     = self.taux[i]
+        if self.fabs is not None:
+            flux = np.array([self.fabs[i]])
+            result.calculate_intensity(flux, ftype='abs')
         return result
 
     def ecf(self, th, n, log=False):
