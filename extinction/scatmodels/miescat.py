@@ -144,7 +144,7 @@ def _mie_helper(x, refrel, theta):
 
     for n in range(1,nmx):  # for n=1, nmx-1 do begin
         en = nmx - n + 1
-        d[:,:,nmx-n]  = (en/y) - (1.0 / (d[:,:,nmx-n+1]+en/y))
+        d[...,nmx-n]  = (en/y) - (1.0 / (d[...,nmx-n+1]+en/y))
 
     # *** Riccati-Bessel functions with real argument X
     # calculated by upward recurrence
@@ -198,7 +198,7 @@ def _mie_helper(x, refrel, theta):
         an = np.zeros(shape=(NE,NA), dtype='complex')
         bn = np.zeros(shape=(NE,NA), dtype='complex')
 
-        d_n = d[:,:,n]
+        d_n = d[...,n]
         an[ig] = (d_n[ig] / refrel[ig] + en / x[ig]) * psi[ig] - psi1[ig]
         an[ig] = an[ig] / ((d_n[ig] / refrel[ig] + en / x[ig]) * xi[ig] - xi1[ig])
         bn[ig] = (refrel[ig] * d_n[ig] + en / x[ig]) * psi[ig] - psi1[ig]
