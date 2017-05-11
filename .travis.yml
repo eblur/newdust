@@ -1,11 +1,7 @@
-%%file .travis.yml
-
 language: python
 python:
   - "2.7"
 # command to install dependencies
-install: "pip install numpy"  #uncomment this if your code depends on numpy or similar
-install: "pip install astropy"
-install: "pip install scipy"
+install: "pip install numpy astropy scipy"  #uncomment this if your code depends on numpy or similar
 # command to run tests
 script: pytest
