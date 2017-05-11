@@ -142,7 +142,7 @@ def _mie_helper(x, refrel, theta):
     # Original code set size to nmxx.
     # I see that the array only needs to be slightly larger than nmx
 
-    for n in np.arange(nmx-1)+1:  # for n=1, nmx-1 do begin
+    for n in range(1,nmx):  # for n=1, nmx-1 do begin
         en = nmx - n + 1
         d[:,:,nmx-n]  = (en/y) - (1.0 / (d[:,:,nmx-n+1]+en/y))
 
