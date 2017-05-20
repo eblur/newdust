@@ -32,11 +32,11 @@ class Extinction(object):
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     """
 
-    def __init__(self, scatm):
-        assert scatm in ALLOWED_SCATM
-        if scatm == 'RG':
+    def __init__(self, stype):
+        assert stype in ALLOWED_SCATM
+        if stype == 'RG':
             self.scatm = scatmodels.RGscat()
-        if scatm == 'Mie':
+        if stype == 'Mie':
             self.scatm = scatmodels.Mie()
 
         self.tau_sca  = None  # NE
