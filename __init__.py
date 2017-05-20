@@ -1,4 +1,4 @@
 import constants
 from . import graindist
-from . import extinction
+from . import scatmodels
 from grainpop import *

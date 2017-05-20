@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import trapz
 
 import graindist
-import extinction
+import scatmodels
 import constants as c
 
 __all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
@@ -41,9 +41,9 @@ class SingleGrainPop(object):
         self.gdist        = graindist
         assert stype in ALLOWED_SCATM
         if stype == 'RG':
-            self.scatm = extinction.scatmodels.RGscat()
+            self.scatm = scatmodels.RGscat()
         if stype == 'Mie':
-            self.scatm = extinction.scatmodels.Mie()
+            self.scatm = scatmodels.Mie()
 
         self.lam      = None  # NE
         self.lam_unit = None  # string

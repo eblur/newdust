@@ -1,5 +1,5 @@
 import numpy as np
-from ... import constants as c
+from .. import constants as c
 
 __all__ = ['Mie']
 

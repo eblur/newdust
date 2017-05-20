@@ -4,7 +4,7 @@ from scipy.integrate import trapz
 
 from newdust.grainpop import *
 from newdust.graindist import *
-from newdust.extinction import *
+from newdust.scatmodels import *
 from . import percent_diff
 
 MD = 1.e-5  # g cm^-2

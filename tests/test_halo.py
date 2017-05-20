@@ -38,7 +38,7 @@ def test_galhalo_screen(x):
     # Observed angle should be equal to scattering angle when x = 1,
     # so halo should match differential scattering cross section integrated over dust grain size distributions
     if x == 1.0:
-        test = np.abs(SCR_HALO.norm_int - GPOP.ext.int_diff)
+        test = np.abs(SCR_HALO.norm_int - GPOP.int_diff)
         assert np.all(test < 0.01)
 
 @pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])

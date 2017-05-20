@@ -5,7 +5,7 @@ import pytest
 
 from newdust import constants as c
 from newdust.graindist import composition
-from newdust.extinction import scatmodels
+from newdust import scatmodels
 from . import percent_diff
 
 # -- Some Notes (March 27, 2017) -- Lia
