@@ -1,3 +1,4 @@
+import numpy as np
 import shape
 import sizedist
 import composition
@@ -61,7 +62,11 @@ class GrainDist(object):
         if isinstance(self.size, sizedist.Grain):
             print("Number density of dust grains = %.2e cm^-2" % self.ndens)
         else:
-            self.size.plot(ax, md=self.md, rho=self.comp.rho, shape=self.shape, **kwargs)
+            ax.plot(self.a, self.ndens * np.power(self.a, 4), **kwargs)
+            ax.set_xlabel("Radius (um)")
+            ax.set_ylabel("$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)")
+            ax.set_xscale('log')
+            ax.set_yscale('log')
 
 #-- Helper functions
 ALLOWED_SIZES = ['Grain','Powerlaw','ExpCutoff']

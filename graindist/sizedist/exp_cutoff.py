@@ -64,10 +64,3 @@ class ExpCutoff(object):
         nd = self.ndens(md, rho, shape)  # dn/da [cm^-2 um^-1]
         mg = shape.vol(self.a) * rho     # grain mass for each radius [g]
         return nd * mg  # g cm^-2 um^-1
-
-    def plot(self, ax, md, rho=RHO, shape=SHAPE, **kwargs):
-        ax.plot(self.a, self.ndens(md, rho, shape) * np.power(self.a, 4), **kwargs)
-        ax.set_xlabel("Radius (um)")
-        ax.set_ylabel("$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)")
-        ax.set_xscale('log')
-        ax.set_yscale('log')

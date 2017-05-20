@@ -14,7 +14,7 @@ UNIT_LABELS   = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
 ALLOWED_SCATM = ['RG','Mie']
 
-# Make this a subclass of GrainDist
+# Make this a subclass of GrainDist at some point
 class SingleGrainPop(object):
     """
     | A single dust grain population. Can add a string describing the Grain population using the *description* keyword
@@ -109,7 +109,7 @@ class SingleGrainPop(object):
         return self.gdist.vol
 
     # Plotting things
-    def plot_sizes(self, ax=None, **kwargs):
+    def plot_sdist(self, ax=None, **kwargs):
         self.gdist.plot(ax, **kwargs)
 
     def plot_ext(self, ax, keyword, **kwargs):
