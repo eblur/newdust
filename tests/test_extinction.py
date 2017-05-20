@@ -20,9 +20,6 @@ MRN_DRU = graindist.make_GrainDist('Powerlaw','Drude')
 EXP_SIL = graindist.make_GrainDist('ExpCutoff','Silicate')
 GRAIN   = graindist.make_GrainDist('Grain','Drude')
 
-RG  = extinction.scatmodels.RGscat()
-MIE = extinction.scatmodels.Mie()
-
 ALLOWED_SCATM = ['RG', 'Mie']
 
 # Test the helper function that returns and Extinction object
@@ -33,10 +30,10 @@ def test_Extinction(estring):
 
 # Test that all the computations can run
 @pytest.mark.parametrize(('gd','sm'),
-                         [(MRN_SIL, RG), (MRN_SIL, MIE),
-                          (MRN_DRU, RG), (MRN_DRU, MIE),
-                          (EXP_SIL, RG), (EXP_SIL, MIE),
-                          (GRAIN, RG), (GRAIN, MIE)])
+                         [(MRN_SIL, 'RG'), (MRN_SIL, 'Mie'),
+                          (MRN_DRU, 'RG'), (MRN_DRU, 'Mie'),
+                          (EXP_SIL, 'RG'), (EXP_SIL, 'Mie'),
+                          (GRAIN, 'RG'), (GRAIN, 'Mie')])
 def test_calculations(gd, sm):
     test = extinction.Extinction(sm)
     test.calculate(gd, LAMVALS, unit='angs', theta=TH_asec)
