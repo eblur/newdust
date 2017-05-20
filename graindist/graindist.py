@@ -5,7 +5,10 @@ import composition
 
 MD_DEFAULT = 1.e-4  # g cm^-2
 RHO        = 3.0    # g cm^-3
-SHAPE      = shape.Sphere()
+AMAX = 0.3  # um
+
+ALLOWED_SIZES = ['Grain','Powerlaw','ExpCutoff']
+ALLOWED_COMPS = ['Drude','Silicate','Graphite']
 
 __all__ = ['GrainDist','make_GrainDist']
 
@@ -27,11 +30,11 @@ class GrainDist(object):
     | *functions*
     | plot(ax, kwargs) : Plots the number density of dust grains via size.plot()
     """
-    def __init__(self, sizedist, composition, shape=SHAPE, md=MD_DEFAULT):
-        self.size = sizedist
-        self.comp = composition
-        self.shape = shape
+    def __init__(self, dtype, cmtype, shape=shape.Sphere(), md=MD_DEFAULT):
         self.md    = md
+        self.size  = dtype
+        self.comp  = cmtype
+        self.shape = shape
 
     @property
     def a(self):
@@ -69,17 +72,14 @@ class GrainDist(object):
             ax.set_yscale('log')
 
 #-- Helper functions
-ALLOWED_SIZES = ['Grain','Powerlaw','ExpCutoff']
-ALLOWED_COMPS = ['Drude','Silicate','Graphite']
-AMAX = 0.3  # um
-
-def make_GrainDist(sstring, cstring, amax=AMAX, rho=None, md=MD_DEFAULT, **kwargs):
+def make_GrainDist(dtype, cmtype, amax=AMAX, rho=None, md=MD_DEFAULT, **kwargs):
     """
     | A shortcut function for creating GrainDist objects
     |
     | **INPUTS**
-    | sstring : 'Grain', 'Powerlaw' or 'ExpCutoff' (defines the grain size distribution)
-    | cstring : 'Drude', 'Silicate' or 'Graphite' (defines the composition)
+    | dtype   : 'Grain', 'Powerlaw' or 'ExpCutoff' (defines the grain size distribution)
+    | cmtype  : 'Drude', 'Silicate' or 'Graphite' (defines the composition)
+    | shape   :
     | amax    : Defines the grain size distribution properties
     |   *Grain:* defines the singular grain size
     |   *Powerlaw:* defines the maximum grain size
@@ -88,21 +88,23 @@ def make_GrainDist(sstring, cstring, amax=AMAX, rho=None, md=MD_DEFAULT, **kwarg
     | md      : dust mass column (g cm^-2)
     | **kwargs : extra input to the size dist functions
     """
-    assert sstring in ALLOWED_SIZES
-    assert cstring in ALLOWED_COMPS
-    if sstring == 'Grain':
+    assert dtype in ALLOWED_SIZES
+    if dtype == 'Grain':
         sdist = sizedist.Grain(rad=amax)
-    if sstring == 'Powerlaw':
+    if dtype == 'Powerlaw':
         sdist = sizedist.Powerlaw(amax=amax, **kwargs)
-    if sstring == 'ExpCutoff':
+    if dtype == 'ExpCutoff':
         sdist = sizedist.ExpCutoff(acut=amax, **kwargs)
-    if cstring == 'Drude':
+
+    assert cmtype in ALLOWED_COMPS
+    if cmtype == 'Drude':
         if rho is not None: cmi = composition.CmDrude(rho=rho)
         else: cmi = composition.CmDrude()
-    if cstring == 'Silicate':
+    if cmtype == 'Silicate':
         if rho is not None: cmi = composition.CmSilicate(rho=rho)
         else: cmi = composition.CmSilicate()
-    if cstring == 'Graphite':
+    if cmtype == 'Graphite':
         if rho is not None: cmi = composition.CmGraphite(rho=rho)
         else: cmi = composition.CmGraphite()
+
     return GrainDist(sdist, cmi, md=md)
