@@ -11,8 +11,8 @@ MD = 1.e-5  # g cm^-2
 RHO = 3.0   # g c^-3
 
 TEST_SDIST = make_GrainDist('Powerlaw','Silicate', md=MD, rho=RHO)
-MIE  = make_Extinction('Mie')
-RG   = make_Extinction('RG')
+MIE  = Extinction('Mie')
+RG   = Extinction('RG')
 
 NE, NA, NTH = 50, np.size(TEST_SDIST.a), 30
 THETA   = np.logspace(0, 4, NTH)

@@ -28,7 +28,7 @@ ALLOWED_SCATM = ['RG', 'Mie']
 # Test the helper function that returns and Extinction object
 @pytest.mark.parametrize('estring', ALLOWED_SCATM)
 def test_Extinction(estring):
-    test = extinction.make_Extinction(estring)
+    test = extinction.Extinction(estring)
     assert isinstance(test, extinction.Extinction)
 
 # Test that all the computations can run
@@ -53,9 +53,9 @@ def test_mass_double(estring):
     gd2 = graindist.make_GrainDist('Powerlaw', 'Silicate')
     gd2.md = 2.0 * gd1.md
 
-    sm1 = extinction.make_Extinction(estring)
+    sm1 = extinction.Extinction(estring)
     sm1.calculate(gd1, LAMVALS, unit='angs')
-    sm2 = extinction.make_Extinction(estring)
+    sm2 = extinction.Extinction(estring)
     sm2.calculate(gd2, LAMVALS, unit='angs')
 
     assert all(percent_diff(sm2.tau_ext, 2.0 * sm1.tau_ext) <= 0.01)

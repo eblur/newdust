@@ -4,7 +4,7 @@ from scipy.integrate import trapz
 import scatmodels
 from .. import constants as c
 
-__all__ = ['Extinction','make_Extinction']
+__all__ = ['Extinction']
 
 ALLOWED_SCATM = ['RG','Mie']
 UNIT_LABELS = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
@@ -14,13 +14,14 @@ class Extinction(object):
     | An extinction object contains information about the extinction properties of a particular dust population
     |
     | **ATTRIBUTES**
-    | scatm    : The scattering model used
+    | scatm    : string : The scattering model to use ('RG' or 'Mie')
     | lam      : The wavelength / energy grid used for calculation
     | lam_unit : The unit on the wavelength ('angs') or energy ('kev')
     | tau_sca  : Optical depth to scattering as a function of wavelength / energy
     | tau_abs  : Optical depth to absorption as a function of wavelength / energy
     | tau_ext  : Total extinction optical depth as a function of wavelength / energy
     | diff     : The differential scattering cross section [cm^2 / arcsec^2]
+    | int_diff : GrainDist integrated differential scattering cross section [arcsec^2]
     |
     | *functions*
     | calculate(gdist, lam, unit = "kev")
@@ -32,11 +33,17 @@ class Extinction(object):
     """
 
     def __init__(self, scatm):
-        self.scatm    = scatm
+        assert scatm in ALLOWED_SCATM
+        if scatm == 'RG':
+            self.scatm = scatmodels.RGscat()
+        if scatm == 'Mie':
+            self.scatm = scatmodels.Mie()
+
         self.tau_sca  = None  # NE
         self.tau_abs  = None  # NE
         self.tau_ext  = None  # NE
         self.diff     = None  # NE x NA x NTH [cm^2 / arcsec^2]
+        self.int_diff = None  # NE x NTH [arcsec^2]
         self.lam      = None  # NE
         self.lam_unit = None  # string
 
@@ -96,19 +103,3 @@ class Extinction(object):
             ax.set_xlabel(UNIT_LABELS[self.lam_unit])
             ax.set_ylabel(r"$\tau$")
             ax.legend(**kwargs)
-
-
-#---------- Helper functions
-
-def make_Extinction(estring):
-    """
-    | Return an Extinction object with a particular scattering model
-    |
-    | **INPUTS**
-    | estring : 'RG' or 'Mie'
-    """
-    assert estring in ALLOWED_SCATM
-    if estring == 'RG':
-        return Extinction(scatmodels.RGscat())
-    if estring == 'Mie':
-        return Extinction(scatmodels.Mie())
