@@ -90,11 +90,14 @@ def _lam_kev(lam, unit='kev'):
 # Make sure that a scalar number is stored as an array
 def _make_array(scalar):
     result = scalar
-    try:
-        len(scalar)
-    except:
+    if isinstance(scalar, list):
         result = np.array([scalar])
-        assert len(result) == 1
+    else:
+        try:
+            len(scalar)
+        except:
+            result = np.array([scalar])
+            assert len(result) == 1
     return result
 
 #------- Save and restore functions, similar to IDL -------#

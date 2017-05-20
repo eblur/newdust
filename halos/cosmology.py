@@ -4,8 +4,7 @@ from halo import *
 from ..grainpop import *
 from .. import constants as c
 
-NZ = 100
-ALLOWED_UNITS = ['kev','angs']
+NZ = 500
 
 __all__ = ['Cosmology']
 
@@ -64,8 +63,8 @@ class Cosmology(object):
         D_cm = self.dchi(z) * (1.e9 * c.pc2cm)  # distance to object, in cm
         return self.cosmdens * D_cm  # g cm^-2
 
-    # This needs to be rewritten to avoid energy for loop
-    def cosm_taux(self, z, gpop, lam=[1.0], unit='kev', nz=NZ):
+'''    # This needs to be rewritten to avoid energy for loop
+    def cosm_taux(self, z, gpop, lam=np.array([1.0]), unit='kev', nz=NZ):
         """
         | Calculates the optical depth from dust distributed uniformly in the IGM
         |
@@ -79,9 +78,14 @@ class Cosmology(object):
         | optical depth to X-ray scattering
         | = kappa * cosmdens * (1+z)^2 c dz / hfac
         """
-        zvals     = np.linspace(0.0, z, nz)
+        ## NEEDS TO BE UPDATED  -- May 8, 2017
+        zvals = np.linspace(0.0, z, nz)
         assert unit in ALLOWED_UNITS
-        if unit = 'kev'
+        if np.size(lam) > 1:
+            if unit == 'kev':
+                lam_z = lam
+        lam   = np.linspace(halo.lam[0], halo.lam[-1], nz)
+
         for ener in E:
             Evals     = ener * (1.0 + zvals)
             gpop.calculate_ext(Evals, unit='kev')
@@ -90,7 +94,7 @@ class Cosmology(object):
             integrand = kappa * md * np.power(1+zvals, 2) * \
                 c.cperh0 * (c.h0/cosm.h0) / hfac
             result    = np.append(result, c.intz( zvals, integrand ))
-        return result
+        return result'''
 
 
 #-----------------------------------------------------
