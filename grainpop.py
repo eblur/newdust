@@ -1,6 +1,9 @@
 import numpy as np
+from scipy.integrate import trapz
+
 import graindist
 import extinction
+import constants as c
 
 __all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
 
@@ -9,6 +12,9 @@ AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
 RHO_AVG       = 3.0  # g cm^-3
 UNIT_LABELS   = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
+ALLOWED_SCATM = ['RG','Mie']
+
+# Make this a subclass of GrainDist
 class SingleGrainPop(object):
     """
     | A single dust grain population. Can add a string describing the Grain population using the *description* keyword
@@ -16,7 +22,7 @@ class SingleGrainPop(object):
     | **ATTRIBUTES**
     | description : a string describing the grain population
     | gdist : GrainDist object
-    | ext   : Extinction object
+    | stype : string : Scattering model to use
     |
     | *The following attributes are inherited form the GrainDist object*
     | a, ndens, mdens, cgeo, vol
@@ -30,12 +36,57 @@ class SingleGrainPop(object):
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     | info() prints information about the dust grain properties
     """
-    def __init__(self, graindist, extinction, description='Custom'):
+    def __init__(self, graindist, stype, description='Custom'):
         self.description  = description
         self.gdist        = graindist
-        self.ext          = extinction
+        assert stype in ALLOWED_SCATM
+        if stype == 'RG':
+            self.scatm = extinction.scatmodels.RGscat()
+        if stype == 'Mie':
+            self.scatm = extinction.scatmodels.Mie()
 
-    # Hard code inheritance. This is annoying.
+        self.lam      = None  # NE
+        self.lam_unit = None  # string
+        self.tau_sca  = None  # NE
+        self.tau_abs  = None  # NE
+        self.tau_ext  = None  # NE
+        self.diff     = None  # NE x NA x NTH [cm^2 / arcsec^2]
+        self.int_diff = None  # NE x NTH [arcsec^2], differential xsect integrated over grain size
+
+    def calculate_ext(self, lam, unit='kev', theta=0.0):
+        self.scatm.calculate(lam, self.gdist.a, self.gdist.comp, unit=unit, theta=theta)
+        self.lam      = lam
+        self.lam_unit = unit
+        NE, NA, NTH = np.shape(self.scatm.diff)
+        # In single size grain case
+        if len(self.gdist.a) == 1:
+            self.tau_ext = self.gdist.ndens * self.scatm.qext[:,0] * self.gdist.cgeo
+            self.tau_sca = self.gdist.ndens * self.scatm.qsca[:,0] * self.gdist.cgeo
+            self.tau_abs = self.gdist.ndens * self.scatm.qabs[:,0] * self.gdist.cgeo
+        # Otherwise, integrate over grain size (axis=1)
+        else:
+            geo_fac = self.gdist.ndens * self.gdist.cgeo  # array of length NA, unit is um^-1
+            geo_2d  = np.repeat(geo_fac.reshape(1, NA), NE, axis=0)  # NE x NA
+            self.tau_ext = trapz(geo_2d * self.scatm.qext, self.gdist.a, axis=1)
+            self.tau_sca = trapz(geo_2d * self.scatm.qsca, self.gdist.a, axis=1)
+            self.tau_abs = trapz(geo_2d * self.scatm.qabs, self.gdist.a, axis=1)
+
+        # NE x NA x NTH
+        self.diff     = self.scatm.diff * c.arcs2rad**2  # NE x NA x NTH, [cm^2 arcsec^-2]
+
+        if np.size(self.gdist.a) == 1:
+            int_diff = np.sum(self.scatm.diff * self.gdist.ndens[0] * c.arcs2rad**2, axis=1)
+        else:
+            agrid        = np.repeat(
+                np.repeat(self.gdist.a.reshape(1, NA, 1), NE, axis=0),
+                NTH, axis=2)
+            ndgrid       = np.repeat(
+                np.repeat(self.gdist.ndens.reshape(1, NA, 1), NE, axis=0),
+                NTH, axis=2)
+            int_diff = trapz(self.scatm.diff * ndgrid, agrid, axis=1) * c.arcs2rad**2
+
+        self.int_diff = int_diff  # NE x NTH, [arcsec^-2]
+
     # Inheritance from gdist
     @property
     def a(self):
@@ -57,47 +108,42 @@ class SingleGrainPop(object):
     def vol(self):
         return self.gdist.vol
 
-    # Inheritance from extinction
-    @property
-    def tau_ext(self):
-        return self.ext.tau_ext
-
-    @property
-    def tau_sca(self):
-        return self.ext.tau_sca
-
-    @property
-    def tau_abs(self):
-        return self.ext.tau_abs
-
-    @property
-    def lam(self):
-        return self.ext.lam
-
-    @property
-    def lam_unit(self):
-        return self.ext.lam_unit
-
-    @property
-    def diff(self):
-        return self.ext.diff
-
-    # Calculating the extinction properties
-    def calculate_ext(self, lam, unit='kev', **kwargs):
-        self.ext.calculate(self.gdist, lam, unit=unit, **kwargs)
-
     # Plotting things
     def plot_sizes(self, ax=None, **kwargs):
         self.gdist.plot(ax, **kwargs)
 
     def plot_ext(self, ax, keyword, **kwargs):
-        self.ext.plot(ax, keyword, **kwargs)
+        assert keyword in ['ext','sca','abs','all']
+        try:
+            assert self.lam is not None
+        except:
+            print("Need to run calculate_ext")
+            pass
+        if keyword == 'ext':
+            ax.plot(self.lam, self.tau_ext, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{ext}$")
+        if keyword == 'sca':
+            ax.plot(self.lam, self.tau_sca, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{sca}$")
+        if keyword == 'abs':
+            ax.plot(self.lam, self.tau_abs, **kwargs)
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau_{abs}$")
+        if keyword == 'all':
+            ax.plot(self.lam, self.tau_ext, 'k-', lw=2, label='Extinction')
+            ax.plot(self.lam, self.tau_sca, 'r--', label='Scattering')
+            ax.plot(self.lam, self.tau_abs, 'r:', label='Absorption')
+            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.set_ylabel(r"$\tau$")
+            ax.legend(**kwargs)
 
     # Printing information
     def info(self):
         print("Grain Population: %s" % self.description)
         print("Size distribution: %s" % self.gdist.size.dtype)
-        print("Extinction calculated with: %s" % self.ext.scatm.stype)
+        print("Extinction calculated with: %s" % self.scatm.stype)
         print("Grain composition: %s" % self.gdist.comp.cmtype)
         print("rho = %.2f g cm^-3, M_d = %.2e g cm^-2" % (self.gdist.rho, self.gdist.md))
 
@@ -247,9 +293,9 @@ def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6):
     mrn_gra_para = graindist.GrainDist(pl, graindist.composition.CmGraphite(orient='para'), md=md_gra_para)
     mrn_gra_perp = graindist.GrainDist(pl, graindist.composition.CmGraphite(orient='perp'), md=md_gra_perp)
 
-    gplist = [SingleGrainPop(mrn_sil, extinction.Extinction('Mie')),
-              SingleGrainPop(mrn_gra_para, extinction.Extinction('Mie')),
-              SingleGrainPop(mrn_gra_perp, extinction.Extinction('Mie'))]
+    gplist = [SingleGrainPop(mrn_sil, 'Mie'),
+              SingleGrainPop(mrn_gra_para, 'Mie'),
+              SingleGrainPop(mrn_gra_perp, 'Mie')]
     keys   = ['sil','gra_para','gra_perp']
     return GrainPop(gplist, keys=keys, description='MRN')
 
@@ -267,6 +313,6 @@ def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT, **kwar
     """
     pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p, **kwargs)
     mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude(), md=md)
-    gplist  = [SingleGrainPop(mrn_dru, extinction.Extinction('RG'))]
+    gplist  = [SingleGrainPop(mrn_dru, 'RG')]
     keys    = ['RGD']
     return GrainPop(gplist, keys=keys, description='MRN_rgd')

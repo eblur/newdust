@@ -11,8 +11,6 @@ MD = 1.e-5  # g cm^-2
 RHO = 3.0   # g c^-3
 
 TEST_SDIST = make_GrainDist('Powerlaw','Silicate', md=MD, rho=RHO)
-MIE  = Extinction('Mie')
-RG   = Extinction('RG')
 
 NE, NA, NTH = 50, np.size(TEST_SDIST.a), 30
 THETA   = np.logspace(0, 4, NTH)
@@ -20,10 +18,10 @@ LAMVALS = np.linspace(1000., 5000., NE)  # angs
 EVALS   = np.logspace(-1, 1, NE)  # kev
 
 # test that everything runs on both kev and angs
-test1 = SingleGrainPop(TEST_SDIST, MIE)
+test1 = SingleGrainPop(TEST_SDIST, 'Mie')
 test1.calculate_ext(LAMVALS, unit='angs', theta=THETA)
 
-test2 = SingleGrainPop(TEST_SDIST, RG)
+test2 = SingleGrainPop(TEST_SDIST, 'RG')
 test2.calculate_ext(EVALS, unit='kev', theta=THETA)
 
 def test_SingleGrainPop():
@@ -49,7 +47,7 @@ def test_GrainPop_keys():
     assert test['bar'].description == 'bar'
 
 def test_GrainPop_calculation():
-    test = GrainPop([SingleGrainPop(TEST_SDIST, MIE), SingleGrainPop(TEST_SDIST, RG)])
+    test = GrainPop([SingleGrainPop(TEST_SDIST, 'Mie'), SingleGrainPop(TEST_SDIST, 'RG')])
     test.calculate_ext(LAMVALS, unit='angs', theta=THETA)
     assert np.shape(test.tau_ext) == (NE,)
     assert np.shape(test.tau_sca) == (NE,)
