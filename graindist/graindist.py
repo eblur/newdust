@@ -51,7 +51,10 @@ class GrainDist(object):
         if custom:
             self.size  = dtype
             self.comp  = cmtype
-            self.shape = shape
+            if shape == 'Sphere':
+                self.shape = sh.Sphere()
+            else:
+                self.shape = shape
         else:
             assert dtype in ALLOWED_SIZES
             if dtype == 'Grain':

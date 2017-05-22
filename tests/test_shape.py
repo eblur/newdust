@@ -8,7 +8,7 @@ AVALS = np.linspace(0.01, 1.0, 100)  # um
 
 def test_sphere():
     test = shape.Sphere()
-    assert test.shape == 'sphere'
+    assert test.shape == 'Sphere'
     tvol = np.sum((4.0/3.0) * np.pi * (AVALS * c.micron2cm)**3)
     tgeo = np.sum(np.pi * (AVALS * c.micron2cm)**2)
     assert percent_diff(tvol, np.sum(test.vol(AVALS))) <= 0.01

@@ -287,11 +287,12 @@ def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6):
     md_gra_para = (1.0 - fsil) * md * (1.0/3.0)
     md_gra_perp = (1.0 - fsil) * md * (2.0/3.0)
 
-    pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
+    pl_sil  = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
+    pl_gra  = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p)
 
-    mrn_sil = graindist.GrainDist(pl, graindist.composition.CmSilicate(), md=md_sil)
-    mrn_gra_para = graindist.GrainDist(pl, graindist.composition.CmGraphite(orient='para'), md=md_gra_para)
-    mrn_gra_perp = graindist.GrainDist(pl, graindist.composition.CmGraphite(orient='perp'), md=md_gra_perp)
+    mrn_sil = graindist.GrainDist(pl_sil, graindist.composition.CmSilicate(), md=md_sil, custom=True)
+    mrn_gra_para = graindist.GrainDist(pl_gra, graindist.composition.CmGraphite(orient='para'), md=md_gra_para, custom=True)
+    mrn_gra_perp = graindist.GrainDist(pl_gra, graindist.composition.CmGraphite(orient='perp'), md=md_gra_perp, custom=True)
 
     gplist = [SingleGrainPop(mrn_sil, 'Mie'),
               SingleGrainPop(mrn_gra_para, 'Mie'),
@@ -312,7 +313,7 @@ def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT, **kwar
     | md   : dust mass column [g cm^-2]
     """
     pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p, **kwargs)
-    mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude(), md=md)
+    mrn_dru = graindist.GrainDist(pl, graindist.composition.CmDrude(), md=md, custom=True)
     gplist  = [SingleGrainPop(mrn_dru, 'RG')]
     keys    = ['RGD']
     return GrainPop(gplist, keys=keys, description='MRN_rgd')

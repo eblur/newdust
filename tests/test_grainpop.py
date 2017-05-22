@@ -11,12 +11,12 @@ MD = 1.e-5  # g cm^-2
 RHO = 3.0   # g c^-3
 
 ALLOWED_SCATM = ['RG','Mie']
-TEST_SDIST = make_GrainDist('Powerlaw','Silicate', md=MD, rho=RHO)
+TEST_SDIST = GrainDist('Powerlaw','Silicate', md=MD, rho=RHO)
 
-MRN_SIL = graindist.make_GrainDist('Powerlaw','Silicate')
-MRN_DRU = graindist.make_GrainDist('Powerlaw','Drude')
-EXP_SIL = graindist.make_GrainDist('ExpCutoff','Silicate')
-GRAIN   = graindist.make_GrainDist('Grain','Drude')
+MRN_SIL = graindist.GrainDist('Powerlaw','Silicate')
+MRN_DRU = graindist.GrainDist('Powerlaw','Drude')
+EXP_SIL = graindist.GrainDist('ExpCutoff','Silicate')
+GRAIN   = graindist.GrainDist('Grain','Drude')
 
 NE, NA, NTH = 50, np.size(TEST_SDIST.a), 30
 THETA    = np.logspace(-10.0, np.log10(np.pi), NTH)  # 0->pi scattering angles (rad)
@@ -103,8 +103,8 @@ def test_ext_calculations(gd, sm):
 # Make sure that doubling the dust mass doubles the extinction
 @pytest.mark.parametrize('estring', ALLOWED_SCATM)
 def test_mass_double(estring):
-    gd1 = graindist.make_GrainDist('Powerlaw','Silicate')
-    gd2 = graindist.make_GrainDist('Powerlaw', 'Silicate')
+    gd1 = graindist.GrainDist('Powerlaw','Silicate')
+    gd2 = graindist.GrainDist('Powerlaw', 'Silicate')
     gd2.md = 2.0 * gd1.md
 
     gp1 = SingleGrainPop(gd1, estring)
