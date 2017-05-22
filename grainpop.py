@@ -295,7 +295,8 @@ def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT, **kwar
     | md   : dust mass column [g cm^-2]
     """
     pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p, **kwargs)
-    mrn_dru = SingleGrainPop(pl, graindist.composition.CmDrude(), 'RG', md=md, custom=True)
+    dru     = graindist.composition.CmDrude()
+    mrn_dru = SingleGrainPop(pl, dru, 'RG', md=md, custom=True)
     gplist  = [mrn_dru]
     keys    = ['RGD']
     return GrainPop(gplist, keys=keys, description='MRN_rgd')
