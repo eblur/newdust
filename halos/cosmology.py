@@ -32,7 +32,7 @@ class Cosmology(object):
         Returns the co-moving number density of dust grains
         for a given **Cosmology** object
         """
-        return cosm.d * c.rho_crit * np.power(cosm.h0/c.h0, 2)  # g cm^-3
+        return self.d * c.rho_crit * np.power(self.h0/c.h0, 2)  # g cm^-3
 
     def dchi(self, z, zp=0.0, nz=NZ):
         """
@@ -43,7 +43,8 @@ class Cosmology(object):
         | nz   : int (100) : number of z-values to use in calculation
         """
         zvals     = np.linspace(zp, z, nz)
-        integrand = c.cperh0 * (x.h0/self.h0) / np.sqrt(self.m * (1.0+zvals)**3 + self.l)
+        ## I wrote x.h0 here at some point. If something goes wrong, it could be here
+        integrand = c.cperh0 * (c.h0/self.h0) / np.sqrt(self.m * (1.0+zvals)**3 + self.l)
         return c.intz(zvals, integrand) / (1e9 * c.pc2cm)  # Gpc, in comoving coordinates
 
     def da(self, theta, z, nz=NZ):
