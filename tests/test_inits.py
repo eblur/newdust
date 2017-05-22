@@ -8,7 +8,7 @@ ALLOWED_SHAPE = ['Sphere']
 custom_sdist = graindist.sizedist.ExpCutoff(acut=0.5, nfold=12)
 custom_comp  = graindist.composition.CmDrude(rho=2.2)
 
-def test_graindist_api():
+def test_graindist_init():
     for size in ALLOWED_SIZES:
         for comp in ALLOWED_COMPS:
             for shape in ALLOWED_SHAPE:
