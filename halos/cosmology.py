@@ -95,26 +95,3 @@ class Cosmology(object):
                 c.cperh0 * (c.h0/cosm.h0) / hfac
             result    = np.append(result, c.intz( zvals, integrand ))
         return result'''
-
-
-#-----------------------------------------------------
-
-
-
-def cosm_taux_screen( zg, E=1.0, dist=distlib.MRN_dist(md=cosmdens(Cosmology())), scatm=ss.ScatModel()):
-    """
-    | Calculates the optical depth from a screen of dust in the IGM
-    |
-    | **INPUTS**
-    | zg : redshift of screen
-    | E  : scalar or np.array [keV]
-    | dist  : distlib.Powerlaw or distlib.Grain
-    | scatm : ss.ScatModel
-    |
-    | **RETURNS**
-    | tauX : np.array [optical depth to X-ray scattering] for the screen
-    |      : = kappa(Eg) * M_d
-    """
-    Eg  = E * (1+zg)
-    kappa = ss.KappaScat(E=Eg, scatm=scatm, dist=dist).kappa
-    return dist.md * kappa

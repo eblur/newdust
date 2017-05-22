@@ -15,7 +15,7 @@ class CosmHalo(object):
     | **ATTRIBUTES**
     | zs      : float : redshift of X-ray source
     | zg      : float : redshift of an IGM screen
-    | cosm    : cosmo.Cosmology object
+    | cosm    : Cosmology object
     | igmtype : labels the type of IGM scattering calculation : 'Uniform' or 'Screen'
     """
     def __init__(self, zs, zg, cosm, igmtype):
@@ -55,7 +55,7 @@ def screenIGM(halo, gpop, zs, zg, cosm=Cosmology()):
     if halo.lam_unit == 'angs':
         lam_g = halo.lam / (1.0 + zg)
 
-    X      = cosmo.dchi(zs, zp=zg, cosm=cosm) / cosmo.dchi(zs, cosm=cosm)  # Single value
+    X      = cosm.dchi(zs, zp=zg, cosm=cosm) / cosm.dchi(zs, cosm=cosm)  # Single value
     thscat = halo.theta / X                     # Scattering angle required
 
     gpop.calculate_ext(lam_g, unit=halo.lam_unit, theta=thscat)
@@ -96,32 +96,40 @@ def uniformIGM(halo, gpop, zs, cosm=Cosmology(), nz=500):
     print("Adjusting grain population to md = %.2e [g cm^-3]" % cosm_md)
     gpop.md    = cosm_md  # Give the grain population the correct amount of dust, note different units than normal
 
-    Dtot   = cosmo.dchi(zs, cosm=cosm, nz=nz)
+    # Set up for cosmological integrals
     zpvals = np.linspace(0.0, zs, nz)
+    c_H0_cm = c.cperh0 * (c.h0 / cosm.h0)  # scalar, [cm]
+    hfac    = np.sqrt(cosm.m * np.power(1+zpvals, 3) + cosm.l)  # length nz
 
-    c_H0_cm = c.cperh0 * (c.h0 / cosm.h0)  # cm
-    hfac    = np.sqrt(cosm.m * np.power(1+zpvals, 3) + cosm.l)
-
+    # Calculate the total scattering optical depth
     lam = c._make_array(halo.lam)
     taux_result = self._taux_integral(lam)
     halo.taux = taux_result
 
-    '''# Start calculating normalized intensity
-    DP = np.array([])
+    # Calculate normalized intensity
+    Dtot   = cosm.dchi(zs, cosm=cosm, nz=nz)
+    DP     = np.array([])
     for zp in zpvals:
-        DP = np.append(DP, cosmo.dchi(zs, zp=zp, cosm=cosm))
+        DP = np.append(DP, cosm.dchi(zs, zp=zp, cosm=cosm))
     X      = DP/Dtot
 
-    intensity = np.array([])
+    # Integrate scattering halo for each obsrvation angle
+    NE, NTH  = np.size(halo.lam), np.size(halo.theta)
+    norm_int = np.zeros(shape=(NE, NTH))
     for al in halo.theta:
-        thscat = al / X  # np.size(thscat) = nz
+        thscat = al / X  # length nz
         gpop.calculate_ext(lam_g, unit=halo.lam_unit, theta=thscat)
-        dsig   = gpop.int_diff  # NE x NTH, [cm^2 arsec^-2]
+        dsig   = gpop.int_diff  # NE x NTH, [cm^-1 arsec^-2, based on number density units above]
 
-        dsig_xgrid = np.repeat(dsig.reshape(NE, NTH, 1), nz, axis=2)
+        # vectorize integral calculation, NE x NTH x nz
+        dsig_3d = np.repeat(dsig.reshape(NE, NTH, 1), nz, axis=2)
+        hfac_3d = np.repeat(np.repeat(hfac.reshape(1, 1, nz), NE, axis=0), NTH, axis=1)
+        zp_3d   = np.repeat(np.repeat(zpvals.reshape(1, 1, nz), NE, axis=0), NTH, axis=1)
+        X_3d    = np.repeat(np.repeat(X.reshape(1, 1, nz), NE, axis=0), NTH, axis=1)
 
-        itemp     = c_H0_cm/hfac * np.power((1+zpvals)/X, 2) * dsig_xgrid
-        intensity = np.append(intensity, trapz(itemp, zpvals, axis=2))'''
+        itemp     = c_H0_cm/hfac_3d * np.power((1+zp_3d)/X_3d, 2) * dsig_3d  # [arcsec^-2]
+        norm_int  = np.append(intensity, trapz(itemp, zpvals, axis=2))  # NE x NTH
+    self.norm_int = np.array(norm_int)
 
     def _taux_integral(lam):
         assert lam_unit in ALLOWED_UNITS
@@ -139,4 +147,4 @@ def uniformIGM(halo, gpop, zs, cosm=Cosmology(), nz=500):
         zp_2d     = np.repeat(zpvals.reshape(1, nz), NE, axis=0)
         integrand = (1+zp_2d)**2 * dtau * c_H0_cm / hfac_2d  # unitless
         result    = trapz(integrand, zpvals, axis=1)  # integrate over z
-        return result  # should be size (NE,)
+        return result  # np.shape(result) = (NE,)
