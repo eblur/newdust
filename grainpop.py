@@ -15,7 +15,7 @@ UNIT_LABELS   = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 ALLOWED_SCATM = ['RG','Mie']
 
 # Make this a subclass of GrainDist at some point
-class SingleGrainPop(object):
+class SingleGrainPop(graindist.GrainDist):
     """
     | A single dust grain population. Can add a string describing the Grain population using the *description* keyword
     |
@@ -36,9 +36,8 @@ class SingleGrainPop(object):
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     | info() prints information about the dust grain properties
     """
-    def __init__(self, graindist, stype, description='Custom'):
-        self.description  = description
-        self.gdist        = graindist
+    def __init__(self, stype, dtype, cmtype, shape='Sphere', md=MD_DEFAULT, **kwargs):
+        graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, **kwargs)
         assert stype in ALLOWED_SCATM
         if stype == 'RG':
             self.scatm = scatmodels.RGscat()
@@ -86,27 +85,6 @@ class SingleGrainPop(object):
             int_diff = trapz(self.scatm.diff * ndgrid, agrid, axis=1) * c.arcs2rad**2
 
         self.int_diff = int_diff  # NE x NTH, [arcsec^-2]
-
-    # Inheritance from gdist
-    @property
-    def a(self):
-        return self.gdist.a
-
-    @property
-    def ndens(self):
-        return self.gdist.ndens
-
-    @property
-    def mdens(self):
-        return self.gdist.mdens
-
-    @property
-    def cgeo(self):
-        return self.gdist.cgeo
-
-    @property
-    def vol(self):
-        return self.gdist.vol
 
     # Plotting things
     def plot_sdist(self, ax=None, **kwargs):
