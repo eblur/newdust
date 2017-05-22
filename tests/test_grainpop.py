@@ -11,7 +11,6 @@ MD = 1.e-5  # g cm^-2
 RHO = 3.0   # g c^-3
 
 ALLOWED_SCATM = ['RG','Mie']
-TEST_SDIST = GrainDist('Powerlaw','Silicate', md=MD, rho=RHO)
 
 MRN_SIL = graindist.GrainDist('Powerlaw','Silicate')
 MRN_DRU = graindist.GrainDist('Powerlaw','Drude')
@@ -26,10 +25,10 @@ LAMVALS  = np.linspace(1000., 5000., NE)  # angs
 EVALS    = np.logspace(-1, 1, NE)  # kev
 
 # test that everything runs on both kev and angs
-test1 = SingleGrainPop(TEST_SDIST, 'Mie')
+test1 = SingleGrainPop('Powerlaw', 'Silicate', 'Mie')
 test1.calculate_ext(LAMVALS, unit='angs', theta=THETA)
 
-test2 = SingleGrainPop(TEST_SDIST, 'RG')
+test2 = SingleGrainPop('Powerlaw', 'Silicate', 'RG')
 test2.calculate_ext(EVALS, unit='kev', theta=THETA)
 
 def test_SingleGrainPop():
@@ -55,7 +54,8 @@ def test_GrainPop_keys():
     assert test['bar'].description == 'bar'
 
 def test_GrainPop_calculation():
-    test = GrainPop([SingleGrainPop(TEST_SDIST, 'Mie'), SingleGrainPop(TEST_SDIST, 'RG')])
+    test = GrainPop([SingleGrainPop('Powerlaw', 'Silicate', 'Mie'),
+                     SingleGrainPop('Powerlaw', 'Silicate', 'RG')])
     test.calculate_ext(LAMVALS, unit='angs', theta=THETA)
     assert np.shape(test.tau_ext) == (NE,)
     assert np.shape(test.tau_sca) == (NE,)
@@ -86,13 +86,11 @@ def test_make_MRN_drude():
 #-------- Test the extinction calculations
 
 # Test that all the computations can run
-@pytest.mark.parametrize(('gd','sm'),
-                         [(MRN_SIL, 'RG'), (MRN_SIL, 'Mie'),
-                          (MRN_DRU, 'RG'), (MRN_DRU, 'Mie'),
-                          (EXP_SIL, 'RG'), (EXP_SIL, 'Mie'),
-                          (GRAIN, 'RG'), (GRAIN, 'Mie')])
-def test_ext_calculations(gd, sm):
-    test = SingleGrainPop(gd, sm)
+@pytest.mark.parametrize('sd', ['Powerlaw','ExpCutoff','Grain'])
+@pytest.mark.parametrize('cm', ['Silicate','Graphite','Drude'])
+@pytest.mark.parametrize('sc', ['RG','Mie'])
+def test_ext_calculations(sd, cm, sc):
+    test = SingleGrainPop(sd, cm, sc)
     test.calculate_ext(LAMVALS, unit='angs', theta=TH_asec)
     assert np.shape(test.tau_ext) == (NE,)
     assert np.shape(test.tau_sca) == (NE,)
@@ -103,13 +101,9 @@ def test_ext_calculations(gd, sm):
 # Make sure that doubling the dust mass doubles the extinction
 @pytest.mark.parametrize('estring', ALLOWED_SCATM)
 def test_mass_double(estring):
-    gd1 = graindist.GrainDist('Powerlaw','Silicate')
-    gd2 = graindist.GrainDist('Powerlaw', 'Silicate')
-    gd2.md = 2.0 * gd1.md
-
-    gp1 = SingleGrainPop(gd1, estring)
+    gp1 = SingleGrainPop('Powerlaw','Silicate', estring)
     gp1.calculate_ext(LAMVALS, unit='angs')
-    gp2 = SingleGrainPop(gd2, estring)
+    gp2 = SingleGrainPop('Powerlaw','Silicate', estring, md=2.0*gp1.md)
     gp2.calculate_ext(LAMVALS, unit='angs')
 
     assert all(percent_diff(gp2.tau_ext, 2.0 * gp1.tau_ext) <= 0.01)
