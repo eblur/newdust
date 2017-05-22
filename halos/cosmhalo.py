@@ -95,6 +95,17 @@ def uniformIGM(halo, gpop, zs, cosm=Cosmology(), nz=500):
     """
     assert zs >= 0.0
 
+    # internal function for dealing with redshift
+    def _apply_redshifts(l0, lam_unit, zvals):
+        assert lam_unit in ALLOWED_UNITS
+        if np.size(l0) > 1:
+            assert np.shape(l0) == np.shape(zvals)
+        if halo.lam_unit == 'kev':
+            lz = l0 * (1.0 + zvals)
+        if halo.lam_unit == 'angs':
+            lz = l0 / (1.0 + zvals)
+        return lz
+
     # Store information about this halo calculation
     halo.htype = CosmHalo(zs=zs, zg=None, cosm=cosm, igmtype='Uniform')
     cosm_md    = cosm.cosmdens  # g cm^-3
@@ -102,25 +113,17 @@ def uniformIGM(halo, gpop, zs, cosm=Cosmology(), nz=500):
     gpop.md    = cosm_md  # Give the grain population the correct amount of dust, note different units than normal
 
     # Set up for cosmological integrals
-    zpvals = np.linspace(0.0, zs, nz)
+    NE, NTH = np.size(halo.lam), np.size(halo.theta)
+    zpvals  = np.linspace(0.0, zs-zs/nz, nz)
     c_H0_cm = c.cperh0 * (c.h0 / cosm.h0)  # scalar, [cm]
     hfac    = np.sqrt(cosm.m * np.power(1+zpvals, 3) + cosm.l)  # length nz
 
-    # internal function for dealing with redshift
-    def _apply_redshifts(lam, lam_unit, zvals):
-        assert lam_unit in ALLOWED_UNITS
-        if halo.lam_unit == 'kev':
-            lz = lam * (1.0 + zvals)
-        if halo.lam_unit == 'angs':
-            lz = lam / (1.0 + zvals)
-        return lz
-
     # internal function for calculating total scattering optical depth
     def _taux_integral(lam, lam_unit, zvals):
-        NE = len(lam)
-        lam_2d = np.repeat(lam.reshape(NE, 1), nz, axis=1)     # NE x nz
-        zp_2d  = np.repeat(zpvals.reshape(1, nz), NE, axis=0)  # NE x nz
-        lz_2d  = _apply_redshifts(lam_2d, lam_unit, zp_2d)        # NE x nz
+        NE, NZ = len(lam), len(zvals)
+        lam_2d = np.repeat(lam.reshape(NE, 1), NZ, axis=1)     # NE x nz
+        zp_2d  = np.repeat(zpvals.reshape(1, NZ), NE, axis=0)  # NE x nz
+        lz_2d  = _apply_redshifts(lam_2d, lam_unit, zp_2d)     # NE x nz
         gpop.calculate_ext(lz_2d.flatten(), unit=lam_unit)     # new NE = NE times nz
         dtau = gpop.tau_sca.reshape(NE, nz)  # reshape to NE x nz, units are [cm^-1] due to input
 
@@ -135,29 +138,35 @@ def uniformIGM(halo, gpop, zs, cosm=Cosmology(), nz=500):
     halo.taux = taux_result
 
     # Calculate normalized intensity
-    ##  NEED TO FIX REDSHIFT DEPENDENCE FOR LAM_UNIT??
     Dtot   = cosm.dchi(zs, nz=nz)
     DP     = np.array([])
     for zp in zpvals:
         DP = np.append(DP, cosm.dchi(zs, zp=zp))
     X      = DP/Dtot
 
+    def _halo_integral(l0, lam_unit, zvals, thscat):
+        assert np.size(l0) == 1
+        assert np.size(thscat) == np.size(zvals)
+
+        lz = _apply_redshifts(l0, lam_unit, zvals)
+        gpop.calculate_ext(lz, unit=lam_unit, theta=thscat)
+        dsig = gpop.int_diff  # nz x nz, [cm^-1 arcsec^-2, based on number density units above]
+
+        dsig_diag = dsig.diagonal()  # gets diagonal of the matrix, length nz
+        integrand = c_H0_cm/hfac * np.power((1+zvals)/X, 2) * dsig_diag  # [arcsec^-2]
+        return trapz(integrand, zvals)
+
     # Integrate scattering halo for each obsrvation angle
-    NE, NTH  = np.size(halo.lam), np.size(halo.theta)
-    norm_int = np.zeros(shape=(NE,NTH))
-    ic       = 0
+    # This is the long, slow way of calculating with for-loops
+    # Could switch to interpolation methods instead
+    # But interpolation could also be a problem for accuracy of Mie scattering halos
+    halo.norm_int = np.zeros(shape=(NE,NTH))
+    ic = 0
     for al in halo.theta:
         thscat = al / X  # length nz
-        gpop.calculate_ext(lam_g, unit=halo.lam_unit, theta=thscat)
-        dsig   = gpop.int_diff  # NE x NTH, [cm^-1 arsec^-2, based on number density units above]
-
-        # vectorize integral calculation, NE x NTH x nz
-        dsig_3d = np.repeat(dsig.reshape(NE, NTH, 1), nz, axis=2)
-        hfac_3d = np.repeat(np.repeat(hfac.reshape(1, 1, nz), NE, axis=0), NTH, axis=1)
-        zp_3d   = np.repeat(np.repeat(zpvals.reshape(1, 1, nz), NE, axis=0), NTH, axis=1)
-        X_3d    = np.repeat(np.repeat(X.reshape(1, 1, nz), NE, axis=0), NTH, axis=1)
-
-        itemp     = c_H0_cm/hfac_3d * np.power((1+zp_3d)/X_3d, 2) * dsig_3d  # [arcsec^-2]
-        norm_int  = trapz(itemp, zpvals, axis=2)  # NE x NTH
-        #halo.norm_int[:,ic] =
+        result = []
+        for l0 in lam:
+            result.append(_halo_integral(l0, halo.lam_unit, zpvals, thscat))
+        assert len(result) == NE
+        halo.norm_int[:,ic] = np.array(result)
         ic += 1

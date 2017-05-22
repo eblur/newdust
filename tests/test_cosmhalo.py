@@ -6,7 +6,7 @@ from newdust.halos import *
 from newdust import grainpop
 from . import percent_diff
 
-NE, NTH = 10, 200
+NE, NTH = 10, 20
 EVALS   = np.logspace(-1, 1, NE)   # keV
 THVALS  = np.logspace(-1, 4, NTH)  # arcsec
 
@@ -28,13 +28,12 @@ UNI_HALO = Halo(EVALS, THVALS, unit='kev')
 SCR_HALO = Halo(EVALS, THVALS, unit='kev')
 
 # Test that calculations run
-"""def test_cosmhalo_uniform():
+def test_cosmhalo_uniform():
     cosmhalo.uniformIGM(UNI_HALO, GPOP, ZS)
     assert isinstance(UNI_HALO.htype, cosmhalo.CosmHalo)
     assert UNI_HALO.htype.zs == ZS
     assert UNI_HALO.htype.zg is None
     assert UNI_HALO.htype.igmtype == 'Uniform'
-"""
 
 @pytest.mark.parametrize('zg', [0.0, 0.5*ZS])
 def test_cosmhalo_screen(zg):
