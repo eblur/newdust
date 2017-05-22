@@ -14,7 +14,7 @@ GPOP    = grainpop.make_MRN_drude()['RGD']
 
 E0, A0, TH0 = 1.0, 0.3, 10.0  # keV, um, arcsec
 FABS   = 1.0 * np.power(EVALS, -2.0) * np.exp(-0.1 * np.power(EVALS, -2.5))
-ZS, ZG = 4.0, 2.0
+ZS     = 4.0
 
 def test_Halo_dimensions():
     test = Halo(EVALS, THVALS, unit='kev')
@@ -35,10 +35,13 @@ SCR_HALO = Halo(EVALS, THVALS, unit='kev')
     assert UNI_HALO.htype.zg is None
     assert UNI_HALO.htype.igmtype == 'Uniform'
 """
-@pytest.mark.parametrize('x', [1.0, 0.5])
-def test_cosmhalo_screen(x):
-    cosmhalo.screenIGM(SCR_HALO, GPOP, zs=ZS, zg=ZG)
+
+@pytest.mark.parametrize('zg', [0.0, 0.5*ZS])
+def test_cosmhalo_screen(zg):
+    cosmhalo.screenIGM(SCR_HALO, GPOP, zs=ZS, zg=zg)
     assert isinstance(SCR_HALO.htype, cosmhalo.CosmHalo)
     assert SCR_HALO.htype.zs == ZS
-    assert SCR_HALO.htype.zg == ZG
+    assert SCR_HALO.htype.zg == zg
     assert SCR_HALO.htype.igmtype == 'Screen'
+    if zg == 0.0:
+        assert all(percent_diff(SCR_HALO.norm_int.flatten(), GPOP.int_diff.flatten()) <= 0.01)
