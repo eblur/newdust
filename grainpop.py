@@ -171,9 +171,12 @@ class GrainPop(object):
         self.lam_unit = unit
 
     def __getitem__(self, key):
-        assert key in self.keys
-        k = self.keys.index(key)
-        return self.gpoplist[k]
+        if isinstance(key, int):
+            return self.gpoplist[key]
+        else:
+            assert key in self.keys
+            k = self.keys.index(key)
+            return self.gpoplist[k]
 
     @property
     def md(self):
