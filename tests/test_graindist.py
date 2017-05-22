@@ -17,25 +17,25 @@ ALLOWED_COMPS = ['Drude','Silicate','Graphite']
 # Test that the helper function runs on all types
 @pytest.mark.parametrize('sstring', ALLOWED_SIZES)
 def test_sstring(sstring):
-    test = make_GrainDist(sstring, CDEFAULT)
+    test = GrainDist(sstring, CDEFAULT)
     assert isinstance(test, GrainDist)
 
 @pytest.mark.parametrize('cstring', ALLOWED_COMPS)
 def test_cstring(cstring):
-    test = make_GrainDist(SDEFAULT, cstring)
+    test = GrainDist(SDEFAULT, cstring)
     assert isinstance(test, GrainDist)
 
 # Test that the helper function does not run on weird strings
 def test_catch_exception():
     ss, cc = 'foo', 'bar'
     with pytest.raises(AssertionError):
-        make_GrainDist(ss, CDEFAULT)
-        make_GrainDist(SDEFAULT, cc)
+        GrainDist(ss, CDEFAULT)
+        GrainDist(SDEFAULT, cc)
 
 # Test the basic properties and functions of GrainDist
 @pytest.mark.parametrize('sstring', ALLOWED_SIZES)
 def test_GrainDist(sstring):
-    test = make_GrainDist(sstring, CDEFAULT, md=MD)
+    test = GrainDist(sstring, CDEFAULT, md=MD)
     assert isinstance(test.a, np.ndarray)
     assert len(test.a) == len(test.ndens)
     assert len(test.a) == len(test.mdens)
@@ -50,8 +50,8 @@ MD2 = 2.0 * MD
 def test_dmass():
     for ss in ALLOWED_SIZES:
         for cc in ALLOWED_COMPS:
-            test1 = make_GrainDist(ss, cc, md=MD)
-            test2 = make_GrainDist(ss, cc, md=MD2)
+            test1 = GrainDist(ss, cc, md=MD)
+            test2 = GrainDist(ss, cc, md=MD2)
             if isinstance(test1.size, sizedist.Grain):
                 mtot1, mtot2 = test1.mdens, test2.mdens
             else:
@@ -64,8 +64,8 @@ RHO2 = 2.0 * RHO
 def test_ndens():
     for ss in ALLOWED_SIZES:
         for cc in ALLOWED_COMPS:
-            test1 = make_GrainDist(ss, cc, md=MD, rho=RHO)
-            test2 = make_GrainDist(ss, cc, md=MD, rho=RHO2)
+            test1 = GrainDist(ss, cc, md=MD, rho=RHO)
+            test2 = GrainDist(ss, cc, md=MD, rho=RHO2)
             if isinstance(test1.size, sizedist.Grain):
                 nd1, nd2 = test1.ndens, test2.ndens
             else:

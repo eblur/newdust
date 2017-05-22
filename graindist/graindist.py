@@ -86,7 +86,7 @@ class GrainDist(object):
 
     @property
     def mdens(self):
-        mg = self.sh.vol(self.a) * self.comp.rho  # mass of each dust grain [g]
+        mg = self.shape.vol(self.a) * self.comp.rho  # mass of each dust grain [g]
         return self.ndens * mg
 
     @property
@@ -95,11 +95,11 @@ class GrainDist(object):
 
     @property
     def cgeo(self):
-        return self.sh.cgeo(self.a)
+        return self.shape.cgeo(self.a)
 
     @property
     def vol(self):
-        return self.sh.vol(self.a)
+        return self.shape.vol(self.a)
 
     def plot(self, ax=None, **kwargs):
         if isinstance(self.size, sizedist.Grain):
