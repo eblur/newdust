@@ -30,6 +30,7 @@ SCR_HALO = Halo(EVALS, THVALS, unit='kev')
 def test_galhalo_uniform():
     galhalo.uniformISM(UNI_HALO, GPOP)
     assert isinstance(UNI_HALO.htype, galhalo.UniformGalHalo)
+    assert np.shape(UNI_HALO.taux) == (NE,)
 
 @pytest.mark.parametrize('x', [1.0, 0.5])
 def test_galhalo_screen(x):

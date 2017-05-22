@@ -103,10 +103,8 @@ def uniformIGM(halo, gpop, zs, cosm=Cosmology(), nz=500):
     hfac    = np.sqrt(cosm.m * np.power(1+zpvals, 3) + cosm.l)
 
     lam = c._make_array(halo.lam)
-    taux_result = []
-    for ll in lam:
-        taux_result.append(_taux_integral(ll))
-    halo.taux = np.array(taux_result)
+    taux_result = self._taux_integral(lam)
+    halo.taux = taux_result
 
     '''# Start calculating normalized intensity
     DP = np.array([])
@@ -132,8 +130,13 @@ def uniformIGM(halo, gpop, zs, cosm=Cosmology(), nz=500):
         if halo.lam_unit == 'angs':
             lz = lam / (1.0 + zpvals)
 
-        gpop.calculate_ext(lz, unit=lam_unit)
-        dsig = gpop.tau_sca  # length = NE, units are [cm^-1] due to input
+        NE = len(lam)
+        super_lam = np.repeat(lz.reshape(NE, 1), nz, axis=1)  # NE x nz
+        gpop.calculate_ext(super_lam.flatten(), unit=lam_unit)  # new NE = NE times nz
+        dtau = gpop.tau_sca.reshape(NE, nz)  # reshape to NE x nz, units are [cm^-1] due to input
 
-        integrand = (1+zpvals)**2 * dsig * c_H0_cm / hfac  # unitless
-        return trapz(integrand, zpvals)
+        hfac_2d   = np.repeat(hfac.reshape(1, nz), NE, axis=0)  # NE x nz
+        zp_2d     = np.repeat(zpvals.reshape(1, nz), NE, axis=0)
+        integrand = (1+zp_2d)**2 * dtau * c_H0_cm / hfac_2d  # unitless
+        result    = trapz(integrand, zpvals, axis=1)  # integrate over z
+        return result  # should be size (NE,)
