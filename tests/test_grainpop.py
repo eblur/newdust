@@ -3,8 +3,7 @@ import numpy as np
 from scipy.integrate import trapz
 
 from newdust.grainpop import *
-from newdust.graindist import *
-from newdust.scatmodels import *
+from newdust import graindist
 from . import percent_diff
 
 MD = 1.e-5  # g cm^-2
@@ -17,7 +16,7 @@ MRN_DRU = graindist.GrainDist('Powerlaw','Drude')
 EXP_SIL = graindist.GrainDist('ExpCutoff','Silicate')
 GRAIN   = graindist.GrainDist('Grain','Drude')
 
-NE, NA, NTH = 50, np.size(TEST_SDIST.a), 30
+NE, NA, NTH = 50, np.size(graindist.sizedist.Powerlaw().a), 30
 THETA    = np.logspace(-10.0, np.log10(np.pi), NTH)  # 0->pi scattering angles (rad)
 ASEC2RAD = (2.0 * np.pi) / (360.0 * 60. * 60.)     # rad / arcsec
 TH_asec  = THETA / ASEC2RAD  # rad * (arcsec/rad)
@@ -68,9 +67,9 @@ def test_make_MRN(fsil):
     assert isinstance(test3, GrainPop)
     assert percent_diff(test3.md, MD) <= 0.1
     if fsil == 0.0:
-        assert test3['sil'].gdist.md == 0.0
+        assert test3['sil'].md == 0.0
     if fsil == 1.0:
-        assert test3['sil'].gdist.md == MD
+        assert test3['sil'].md == MD
     # Test that doubling the mass doubles the extinction
     test4 = make_MRN(fsil=fsil, md=2.0*MD)
     assert percent_diff(test4.tau_ext, 2.0*test3.tau_ext) <= 0.01
@@ -95,7 +94,7 @@ def test_ext_calculations(sd, cm, sc):
     assert np.shape(test.tau_ext) == (NE,)
     assert np.shape(test.tau_sca) == (NE,)
     assert np.shape(test.tau_abs) == (NE,)
-    assert np.shape(test.diff) == (NE, len(gd.a), NTH)
+    assert np.shape(test.diff) == (NE, len(test.a), NTH)
     assert all(percent_diff(test.tau_ext, test.tau_abs + test.tau_sca) <= 0.01)
 
 # Make sure that doubling the dust mass doubles the extinction
