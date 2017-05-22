@@ -36,7 +36,7 @@ class SingleGrainPop(graindist.GrainDist):
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     | info() prints information about the dust grain properties
     """
-    def __init__(self, stype, dtype, cmtype, shape='Sphere', md=MD_DEFAULT, **kwargs):
+    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, **kwargs):
         graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, **kwargs)
         assert stype in ALLOWED_SCATM
         if stype == 'RG':
