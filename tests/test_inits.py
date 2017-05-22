@@ -17,3 +17,9 @@ def test_graindist_api():
                 assert test.size.dtype  == size
                 assert test.comp.cmtype == comp
                 assert test.shape.shape == shape
+
+def test_custom_graindist():
+    test = graindist.GrainDist(custom_sdist, custom_comp, custom=True)
+    assert isinstance(test, graindist.GrainDist)
+    assert test.size.dtype == custom_sdist.dtype
+    assert test.comp.cmtype == custom_comp.cmtype
