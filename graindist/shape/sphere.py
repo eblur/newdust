@@ -15,7 +15,7 @@ class Sphere(object):
     | Takes grain radius (a) in units of microns only
     """
     def __init__(self):
-        self.shape = 'sphere'
+        self.shape = 'Sphere'
 
     def vol(self, a):
         return (4.0/3.0) * np.pi * np.power(a * c.micron2cm, 3)  # cm^3
