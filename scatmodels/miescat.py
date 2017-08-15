@@ -3,6 +3,8 @@ from .. import constants as c
 
 __all__ = ['Mie']
 
+MAX_RAM = 8.0
+
 # Major update: March 27, 2016
 # This code is slow, so to avoid running getQs over and over again, create
 # "calculate" function that runs getQs and stores it, then returns the appropriate values later??  Not sure ...
@@ -31,8 +33,10 @@ class Mie(object):
     | qabs  : array  : absorption efficiency (unitless, per geometric area)
     |
     | *functions*
-    | calculate( lam, a, cm, unit='kev', theta=0.0 )
+    | calculate( lam, a, cm, unit='kev', theta=0.0, memlim=8.0 )
     |    calculates the relevant values (qsca, qext, qback, gsca, diff)
+    |    memlim (float, in GB) sets the amount of RAM allowed for calculation,
+    |    limits size of complex number array used in Mie scattering calculation
     """
 
     def __init__(self):
@@ -53,7 +57,8 @@ class Mie(object):
         else:
             return self.qext - self.qsca
 
-    def calculate(self, lam, a, cm, unit='kev', theta=0.0):  # Takes single a and E argument
+    def calculate(self, lam, a, cm, unit='kev', theta=0.0, memlim=MAX_RAM):
+
         self.pars = dict(zip(['lam','a','cm','theta','lam_unit'],[lam, a, cm, theta, unit]))
 
         NE, NA, NTH = np.size(lam), np.size(a), np.size(theta)
@@ -75,7 +80,7 @@ class Mie(object):
         refrel = np.repeat(refrel_1d.reshape(NE, 1), NA, axis=1)
         x      = 2.0 * np.pi * a_cm / lam_cm
 
-        qsca, qext, qback, gsca, Cdiff = _mie_helper(x, refrel, theta=th_1d)
+        qsca, qext, qback, gsca, Cdiff = _mie_helper(x, refrel, theta=th_1d, memlim=memlim)
 
         # Assumes spherical grains (implicit in Mie)
         geo    = np.pi * a_cm**2  # NE x NA
@@ -89,7 +94,7 @@ class Mie(object):
 
 #---------------- Helper function that does the actual calculation
 
-def _mie_helper(x, refrel, theta):
+def _mie_helper(x, refrel, theta, memlim=MAX_RAM):
     # x and refrel are NE x NA
     # need to make outputs that are NE x NA x NTH
     assert np.shape(x) == np.shape(refrel)
@@ -128,7 +133,6 @@ def _mie_helper(x, refrel, theta):
     test   = np.append(xstop, ymod)
     nmx    = np.max(test) + 15
     nmx    = np.int64(nmx)  # max number of iterations
-    print("nmx = ", nmx)
 
     nstop  = xstop
 #   nmxx   = 150000
@@ -137,6 +141,15 @@ def _mie_helper(x, refrel, theta):
 #        print('error: nmx > nmxx=', nmxx, ' for |m|x=', ymod)
     # *** Logarithmic derivative D(J) calculated by downward recurrence
     # beginning with initial value (0.,0.) at J=NMX
+
+    ## Check memory usage
+    ## If it is above the memory limit, stop the calculation
+    dsize  = np.int64(NE * NA * nmx)
+    dspace = _test_complex_mem_usage(dsize)  # GB
+    if dspace > memlim:
+        print("WARNING!! Space needed (%f GB) exceeds memory limit (%.2f GB)" % (dspace, memlim))
+        print("WARNING!! Try increasing the memlim keyword to match available RAM, or decrease sampling")
+        return (0.0, 0.0, 0.0, 0.0, 0.0)
 
     d = np.zeros(shape=(NE,NA,nmx+1), dtype='complex')  # NE x NA x nmx
     dold = np.zeros(nmx+1, dtype='complex')
