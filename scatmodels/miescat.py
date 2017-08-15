@@ -128,6 +128,7 @@ def _mie_helper(x, refrel, theta):
     test   = np.append(xstop, ymod)
     nmx    = np.max(test) + 15
     nmx    = np.int64(nmx)  # max number of iterations
+    print("nmx = ", nmx)
 
     nstop  = xstop
 #   nmxx   = 150000
@@ -309,3 +310,13 @@ def _mie_helper(x, refrel, theta):
 
     result = (qsca, qext, qback, gsca, Cdiff)
     return result
+
+    def _test_complex_mem_usage(num):
+        ## Test memory usage for an array of complex numbers of length numbers
+        ## Returns size of complex number array in units of GB
+        # 64 bit numbers are 8 bytes each
+        # Assume 64 bit, times two (real and imaginary part), so each complex number is 16 bytes
+        bytes_per_num = 16.   # bytes per complex number
+        GB_to_bytes   = 1.e9  # bytes per GB
+        total_mem_GB  = num * bytes_per_num / GB_to_bytes
+        return total_mem_GB
