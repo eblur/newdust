@@ -52,8 +52,8 @@ class SingleGrainPop(graindist.GrainDist):
         self.diff     = None  # NE x NA x NTH [cm^2 / arcsec^2]
         self.int_diff = None  # NE x NTH [arcsec^2], differential xsect integrated over grain size
 
-    def calculate_ext(self, lam, unit='kev', theta=0.0):
-        self.scatm.calculate(lam, self.a, self.comp, unit=unit, theta=theta)
+    def calculate_ext(self, lam, unit='kev', theta=0.0, **kwargs):
+        self.scatm.calculate(lam, self.a, self.comp, unit=unit, theta=theta, **kwargs)
         self.lam      = lam
         self.lam_unit = unit
         NE, NA, NTH = np.shape(self.scatm.diff)
