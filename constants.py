@@ -151,7 +151,7 @@ def read_table(filename, ncols, ignore='#'):
 
     try: f = open(filename, 'r')
     except:
-        print 'ERROR: file not found'
+        print('ERROR: file not found')
         return
 
     end_of_file = False
