@@ -1,6 +1,6 @@
 
-import sizedist
-import composition
-import shape
+from . import sizedist
+from . import composition
+from . import shape
 
-from graindist import *
+from .graindist import *
