@@ -1,7 +1,7 @@
 import numpy as np
-import sizedist
-import composition
-import shape as sh
+from . import sizedist
+from . import composition
+from . import shape as sh
 
 MD_DEFAULT = 1.e-4  # g cm^-2
 RHO        = 3.0    # g cm^-3

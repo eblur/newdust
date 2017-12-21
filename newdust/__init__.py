@@ -1,4 +1,4 @@
-import constants
+from . import constants
 from . import graindist
 from . import scatmodels
-from grainpop import *
+from .grainpop import *

@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.integrate import trapz
 
-import graindist
-import scatmodels
-import constants as c
+from . import graindist
+from . import scatmodels
+from . import constants as c
 
 __all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
 
