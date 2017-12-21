@@ -15,7 +15,7 @@ def make_pkg_string(dir_path):
         result = result + '.' + i
     return result
 
-PACKAGES = []
+PACKAGES = ['newdust']
 n, keep_looking = 1, True
 while keep_looking:
     pkg_paths = glob.glob('newdust/' + '*/' * n)
@@ -31,7 +31,7 @@ PACKAGES.remove('newdust.graindist.tables')
 ##-------------------------------------------------
 ## Package setup
 
-setup(name='eblur-dust',
+setup(name='newdust',
       version='0.1',
       description='Library of dust scattering codes',
       author='Lia Corrales',
