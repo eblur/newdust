@@ -26,6 +26,8 @@ while keep_looking:
         for pn in pkg_names: PACKAGES.append(pn)
         n += 1
 
+PACKAGES.remove('newdust.graindist.tables')
+        
 ##-------------------------------------------------
 ## Package setup
 
