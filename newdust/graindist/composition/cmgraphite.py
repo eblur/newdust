@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.interpolate import interp1d
+from astropy.io import ascii
+from astropy import units as u
 
 from newdust import constants as c
 from newdust.graindist.composition import _find_cmfile
@@ -37,31 +39,27 @@ class CmGraphite(object):
         self.orient = orient
         self.citation = "Using optical constants for graphite,\nDraine, B. T. 2003, ApJ, 598, 1026\nhttp://adsabs.harvard.edu/abs/2003ApJ...598.1026D"
 
-        D03file = _find_cmfile('CM_D03.pysav')  # look up file
-        D03vals = c.restore(D03file)  # read in index values
-
         if size == 'big':
-            if orient == 'perp':
-                lamvals = D03vals['Cpe_010_lam']
-                revals  = D03vals['Cpe_010_re']
-                imvals  = D03vals['Cpe_010_im']
-
-            if orient == 'para':
-                lamvals = D03vals['Cpa_010_lam']
-                revals  = D03vals['Cpa_010_re']
-                imvals  = D03vals['Cpa_010_im']
-
+            D03file_para = _find_cmfile('callindex.out_CpaD03_0.10')
+            D03file_perp = _find_cmfile('callindex.out_CpeD03_0.10')
         if size == 'small':
+            D03file_para = _find_cmfile('callindex.out_CpaD03_0.01')
+            D03file_perp = _find_cmfile('callindex.out_CpeD03_0.01')
 
-            if orient == 'perp':
-                lamvals = D03vals['Cpe_001_lam']
-                revals  = D03vals['Cpe_001_re']
-                imvals  = D03vals['Cpe_001_im']
+        D03dat_para = ascii.read(D03file_para, header_start=4, data_start=5)
+        D03dat_perp = ascii.read(D03file_perp, header_start=4, data_start=5)
 
-            if orient == 'para':
-                lamvals = D03vals['Cpa_001_lam']
-                revals  = D03vals['Cpa_001_re']
-                imvals  = D03vals['Cpa_001_im']
+        if orient == 'perp':
+            wavel = D03dat_perp['wave(um)'] * u.micron
+            lamvals = wavel.to(u.cm).value
+            revals  = 1.0 + D03dat_perp['Re(n)-1']
+            imvals  = D03dat_perp['Im(n)']
+
+        if orient == 'para':
+            wavel = D03dat_para['wave(um)'] * u.micron
+            lamvals = wavel.to(u.cm).value
+            revals  = 1.0 + D03dat_para['Re(n)-1']
+            imvals  = D03dat_para['Im(n)']
 
         rp  = interp1d(lamvals * c.micron2cm, revals)  # wavelength (cm), rp
         ip  = interp1d(lamvals * c.micron2cm, imvals)  # wavelength (cm), ip
