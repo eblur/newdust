@@ -1,3 +1,3 @@
-from halo import *
+from .halo import Halo
 
-import galhalo
+from . import galhalo

@@ -158,9 +158,9 @@ def _mie_helper(x, refrel, theta, memlim=MAX_RAM):
 
     for n in range(1,nmx):  # for n=1, nmx-1 do begin
         en = nmx - n + 1
-        assert isinstance(en, int)
-        assert isinstance(nmx-n, int)
-        assert isinstance(nmx-n+1, int)
+        #assert isinstance(en, int)
+        #assert isinstance(nmx-n, int)
+        #assert isinstance(nmx-n+1, int)
         d[...,nmx-n]  = (en/y) - (1.0 / (d[...,nmx-n+1]+en/y))
 
     # *** Riccati-Bessel functions with real argument X

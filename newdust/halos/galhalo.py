@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import trapz
 
-from halo import *
+from .halo import *
 from ..grainpop import *
 from .. import constants as c
 
