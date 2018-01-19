@@ -37,5 +37,6 @@ setup(name='newdust',
       author='Lia Corrales',
       author_email='lia@astro.wisc.edu',
       url='https://github.com/eblur/newdust',
-      packages=PACKAGES
+      packages=PACKAGES,
+      package_data={'newdust': ['graindist/tables/*']}
 )
