@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.interpolate import interp1d
+from astropy.io import ascii
+from astropy import units as u
 
 from newdust import constants as c
 from newdust.graindist.composition import _find_cmfile
@@ -29,15 +31,12 @@ class CmSilicate(object):
         self.rho    = rho
         self.citation = "Using optical constants for astrosilicate,\nDraine, B. T. 2003, ApJ, 598, 1026\nhttp://adsabs.harvard.edu/abs/2003ApJ...598.1026D"
 
-        D03file = _find_cmfile('CM_D03.pysav')
-        D03vals = c.restore(D03file)      # look up file
+        D03file = _find_cmfile('callindex.out_sil.D03')
+        D03dat  = ascii.read(D03file, header_start=4, data_start=5)
 
-        lamvals = D03vals['Sil_lam']  # um
-        revals  = D03vals['Sil_re']
-        imvals  = D03vals['Sil_im']
-
-        rp  = interp1d(lamvals * c.micron2cm, revals)  # wavelength (cm), rp
-        ip  = interp1d(lamvals * c.micron2cm, imvals)  # wavelength (cm), ip
+        wavel = D03dat['wave(um)'] * u.micron
+        rp  = interp1d(wavel.to(u.cm).value, 1.0 + D03dat['Re(n)-1'])  # wavelength (cm), rp
+        ip  = interp1d(wavel.to(u.cm).value, D03dat['Im(n)'])          # wavelength (cm), ip
         self.interps = (rp, ip)
 
     def _interp_helper(self, lam_cm, interp, rp=False):
