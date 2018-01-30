@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.integrate import trapz
+from astropy.io import fits
 
 from . import graindist
 from . import scatmodels
@@ -124,6 +125,31 @@ class SingleGrainPop(graindist.GrainDist):
         print("Extinction calculated with: %s" % self.scatm.stype)
         print("Grain composition: %s" % self.comp.cmtype)
         print("rho = %.2f g cm^-3, M_d = %.2e g cm^-2" % (self.rho, self.md))
+
+    # Write an extinction table
+    def write_extinction_table(self, outfile):
+        ff = open(outfile, 'w')
+        ff.write("This is extinction table output")
+        ff.close()
+        return
+
+    # writes an extinction table header
+    def __write_extinction_table_header(self):
+        return
+
+    # writes table parameters
+    def __write_extinction_table_pars(self):
+        # e.g. pars['lam'], pars['a']
+        # should this be part of WCS?
+        return
+
+    # writes table data
+    def __write_extinction_table_data(self):
+        # e.g. 2D array of sigma(a, E)
+        cgeo    = c._make_array(self.cgeo)    # cm**2
+        geo_2d  = np.repeat(cgeo.reshape(1, NA), NE, axis=0)  # NE x NA
+        sigma_ext = self.scatm.qext * geo_2d  # cm**2
+        return
 
 class GrainPop(object):
     """
