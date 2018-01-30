@@ -2,3 +2,6 @@
 *~
 .DS_Store
 .*
+*.fits
+*.pdf
+*.png
