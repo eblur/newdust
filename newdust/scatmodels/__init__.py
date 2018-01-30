@@ -19,5 +19,9 @@ calculate( lam : scalar or np.array [wavelength or energy grid, keV default]
 qsca : np.array, scattering efficiency [unitless]
 qabs : np.array, absorption efficiency [unitless]
 qext : np.array, extinction efficiency [unitless]
-self.diff : np.array, differentifal scattering cross section [cm**2/ster]
+diff : np.array, differentifal scattering cross section [cm**2/ster]
+pars : dict, stores the parameters used to run `calculate`
+
+write_table( outfile : string [filename for writing a FITS table of efficiency values]
+            )
 """

@@ -1,11 +1,12 @@
 import numpy as np
 from .. import constants as c
+from .scatmodel import _ScatModel
 
 __all__ = ['RGscat']
 
 CHARSIG       = 1.04 * 60.0  # characteristic scattering angle [arcsec E(keV)^-1 a(um)^-1]
 
-class RGscat(object):
+class RGscat(_ScatModel):
     """
     | RAYLEIGH-GANS scattering model.
     | *see* Mauche & Gorenstein (1986), ApJ 302, 371
