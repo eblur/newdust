@@ -4,33 +4,20 @@ from .. import constants as c
 
 """
 --------------------------------------------------------------
-    API
+    API for Abstract Class 'ScatModel'
 --------------------------------------------------------------
- A dust scattering model should contain functions that take
- energy value, complex index of refraction object (see cmlib),
- and grain sizes
+ A dust scattering model should contain the following attributes
 
- Qsca ( E  : scalar or np.array [keV]
-        cm : cmtype object from cmi.py
-        a  : scalar [grain size, micron] ) :
- returns scalar or np.array [scattering efficiency, unitless]
+calculate( lam : scalar or np.array [wavelength or energy grid, keV default]
+           a   : scalar [grain size, micron]
+           cm  : newdust.graindist.composition cm object (abstract class)
+           unit = : string ['kev', 'angs']
+           theta = : scalar or np.array [angles to calculate differential scattering, arcsec, default 0.0]
+           **kwargs
+           )
 
- Diff ( cm : cmtype object from cmi.py
-        theta : scalar or np.array [angle, arcsec]
-        a  : scalar [grain size, micron]
-        E  : scalar or np.array [energy, keV]
-        ** if len(E) > 1 and len(theta) > 1, then len(E) must equal len(theta)
-           returns dsigma/dOmega of values (E0,theta0), (E1,theta1) etc...
-
- Some (but not all) scattering models may also contain related extinction terms
-
- Qext ( E  : scalar or np.array [keV]
-        cm : cmtype object cmi.py
-        a  : scalar [grain size, micron] ) :
- returns scalar or np.array [extinction efficiency, unitless]
-
- Qabs ( E  : scalar or np.array [keV]
-        cm : cmtype object cmi.py
-        a  : scalar [grain size, micron] ) :
- returns scalar or np.array [absorption efficiency, unitless]
+qsca : np.array, scattering efficiency [unitless]
+qabs : np.array, absorption efficiency [unitless]
+qext : np.array, extinction efficiency [unitless]
+self.diff : np.array, differentifal scattering cross section [cm**2/ster]
 """
