@@ -2,7 +2,7 @@
 ###### Requirements without Version Specifiers ######
 numpy
 matplotlib
-cPickle
+astropy
 #
 ###### Requirements with Version Specifiers ######
-python <= 2.7
+python <= 3.6
