@@ -45,9 +45,9 @@ class Mie(object):
         self.pars  = None  # parameters used in running the calculation: lam, a, cm, theta, unit
         self.qsca  = None
         self.qext  = None
-        self.qback = None
-        self.gsca  = None
         self.diff  = None
+        self.gsca  = None
+        self.qback = None
 
     @property
     def qabs(self):
