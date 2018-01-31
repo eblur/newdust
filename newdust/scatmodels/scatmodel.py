@@ -25,7 +25,7 @@ class ScatModel(object):
         # qext, qsca, and qext will be separate image cards in the FITS file
         img_list  = [fits.ImageHDU(q) for q in [self.qext, self.qabs, self.qsca]]
         # Put everything together to write the table
-        fnl_list  = [header, par_table] + img_list
+        fnl_list  = [header] + par_table + img_list
         hdu_list  = fits.HDUList(hdus=fnl_list)
         hdu_list.writeto(outfile, overwrite=overwrite)
         return
@@ -42,6 +42,10 @@ class ScatModel(object):
         """writes table lam and a parameters from self.pars"""
         # e.g. pars['lam'], pars['a']
         # should this be part of WCS?
-        c1 = fits.Column(name='lam', array=c._make_array(self.pars['lam']), format='E', unit=self.pars['unit'])
-        c2 = fits.Column(name='a', array=c._make_array(self.pars['a']), format='E', unit='micron')
-        return fits.BinTableHDU.from_columns([c1, c2])
+        c1 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='lam', array=c._make_array(self.pars['lam']),
+             format='E', unit=self.pars['unit'])])
+        c2 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='a', array=c._make_array(self.pars['a']),
+             format='E', unit='micron')])
+        return [c1, c2]
