@@ -105,4 +105,5 @@ from newdust.scatmodels.scatmodel import ScatModel
 #                         [scatmodels.RGscat(),
 #                          scatmodels.Mie()])
 def test_writing(sm):
+    sm.calculate(0.0, 0.0, 0.0)
     sm.write_efficiency_table('test_scatmodels.fits')
