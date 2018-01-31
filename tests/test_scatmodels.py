@@ -99,9 +99,10 @@ def test_dimensions(sm):
     assert percent_diff(dtot1, ssca1) <= 0.05
     assert percent_diff(dtot2, ssca2) <= 0.05
 
+from newdust.scatmodels.scatmodel import ScatModel
 # Test the writing and reading functions
-@pytest.mark.parametrize('sm',
-                         [scatmodels.RGscat(),
-                          scatmodels.Mie()])
+@pytest.mark.parametrize('sm', [ScatModel()])
+#                         [scatmodels.RGscat(),
+#                          scatmodels.Mie()])
 def test_writing(sm):
     sm.write_efficiency_table('test_scatmodels.fits')
