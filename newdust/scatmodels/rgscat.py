@@ -43,7 +43,7 @@ class RGscat(ScatModel):
         return self.qext - self.qsca
 
     def calculate(self, lam, a, cm, unit='kev', theta=0.0):
-        self.pars = dict(zip(['lam','a','cm','theta','lam_unit'],[lam, a, cm, theta, unit]))
+        self.pars = dict(zip(['lam','a','cm','theta','unit'],[lam, a, cm, theta, unit]))
 
         NE, NA, NTH = np.size(lam), np.size(a), np.size(theta)
 

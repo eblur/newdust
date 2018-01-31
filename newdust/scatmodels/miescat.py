@@ -60,7 +60,7 @@ class Mie(ScatModel):
 
     def calculate(self, lam, a, cm, unit='kev', theta=0.0, memlim=MAX_RAM):
 
-        self.pars = dict(zip(['lam','a','cm','theta','lam_unit'],[lam, a, cm, theta, unit]))
+        self.pars = dict(zip(['lam','a','cm','theta','unit'],[lam, a, cm, theta, unit]))
 
         NE, NA, NTH = np.size(lam), np.size(a), np.size(theta)
 
