@@ -20,7 +20,7 @@ class ScatModel(object):
         pardata = self.__write_table_pars(['lam','a'])
         # self.qsca, self.qext, and self.qabs will be separate cards in the FITS file
         #hdu_list = fits.HDUList([fits.PrimaryHDU(q) for q in [self.qext, self.qabs, self.qsca]])
-        hdu_list = fits.HDUList([fits.PrimaryHDU(self.qext)])
+        hdu_list = fits.HDUList(hdus=[fits.PrimaryHDU(self.qext), fits.ImageHDU(self.qsca)])
         hdu_list.writeto(outfile, overwrite=overwrite)
         return
 
