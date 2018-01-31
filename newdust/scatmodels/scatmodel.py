@@ -2,7 +2,7 @@ from astropy.io import fits
 
 ## Superclass _ScatModel
 ## See __init__ for API
-class _ScatModel(object):
+class ScatModel(object):
     def __init__(self):
         self.qsca = None
         self.qext = None
