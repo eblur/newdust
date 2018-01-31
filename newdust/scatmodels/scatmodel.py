@@ -18,18 +18,25 @@ class ScatModel(object):
         return
 
     def write_efficiency_table(self, outfile, overwrite=True):
+        # some basic info
         header    = self._write_table_header()
+        # wavelength (or energy) and grain radius associated with calculation
         par_table = self._write_table_pars()
-        # self.qsca, self.qext, and self.qabs will be separate cards in the FITS file
-        #hdu_list = fits.HDUList([fits.PrimaryHDU(q) for q in [self.qext, self.qabs, self.qsca]])
-        hdu_list = fits.HDUList(hdus=[fits.PrimaryHDU(self.qext), fits.ImageHDU(self.qsca)])
+        # qext, qsca, and qext will be separate image cards in the FITS file
+        img_list  = [fits.ImageHDU(q) for q in [self.qext, self.qabs, self.qsca]]
+        # Put everything together to write the table
+        fnl_list  = [header, par_table] + img_list
+        hdu_list  = fits.HDUList(hdus=fnl_list)
         hdu_list.writeto(outfile, overwrite=overwrite)
         return
 
     ##----- Helper material
     def _write_table_header(self):
         """ Writes FITS file header based on self.pars """
-        return
+        result = fits.Header()
+        result['COMMENT']  = "Extinction efficiency table"
+        result['COMMENT']  = "Qext, Qsca, Qabs in wavelength (or energy) vs grain radius"
+        return fits.PrimaryHDU(header=result)
 
     def _write_table_pars(self):
         """writes table lam and a parameters from self.pars"""
