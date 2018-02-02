@@ -51,4 +51,4 @@ class ScatModel(object):
         c3 = fits.BinTableHDU.from_columns(
              [fits.Column(name='theta', array=c._make_array(self.pars['theta']),
              format='E', unit='arcsec')])
-        return [c1, c2]
+        return [c1, c2, c3]
