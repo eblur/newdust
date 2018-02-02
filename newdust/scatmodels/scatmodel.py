@@ -23,7 +23,7 @@ class ScatModel(object):
         # wavelength (or energy) and grain radius associated with calculation
         par_table = self._write_table_pars()
         # qext, qsca, and qext will be separate image cards in the FITS file
-        img_list  = [fits.ImageHDU(q) for q in [self.qext, self.qabs, self.qsca]]
+        img_list  = [fits.ImageHDU(q) for q in [self.qext, self.qabs, self.qsca, self.diff]]
         # Put everything together to write the table
         fnl_list  = [header] + par_table + img_list
         hdu_list  = fits.HDUList(hdus=fnl_list)
@@ -48,4 +48,7 @@ class ScatModel(object):
         c2 = fits.BinTableHDU.from_columns(
              [fits.Column(name='a', array=c._make_array(self.pars['a']),
              format='E', unit='micron')])
+        c3 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='theta', array=c._make_array(self.pars['theta']),
+             format='E', unit='arcsec')])
         return [c1, c2]
