@@ -17,13 +17,18 @@ class ScatModel(object):
         self.pars = {'lam':lam, 'a':a, 'cm':cm, 'unit':unit, 'theta':theta}
         return
 
-    def write_efficiency_table(self, outfile, overwrite=True):
+    def write_table(self, outfile, overwrite=True):
         # some basic info
         header    = self._write_table_header()
         # wavelength (or energy) and grain radius associated with calculation
         par_table = self._write_table_pars()
         # qext, qsca, and qext will be separate image cards in the FITS file
-        img_list  = [fits.ImageHDU(q) for q in [self.qext, self.qabs, self.qsca, self.diff]]
+        img_list = []
+        for (q, h) in zip([self.qext, self.qabs, self.qsca, self.diff],
+                          ['Qext', 'Qabs', 'Qsca', 'Diff (cm^2/ster)']):
+            htemp = fits.Header()
+            htemp['TYPE'] = h
+            img_list.append(fits.ImageHDU(self.qext, header=htemp))
         # Put everything together to write the table
         fnl_list  = [header] + par_table + img_list
         hdu_list  = fits.HDUList(hdus=fnl_list)

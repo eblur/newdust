@@ -60,7 +60,7 @@ def test_rgscat():
     assert test.diff == 0.0
 
     # Test the write function
-    test.write_efficiency_table('qrg.fits')
+    test.write_table('qrg.fits')
 
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),
@@ -83,7 +83,7 @@ def test_mie(cm):
     assert percent_diff(dtot, sigsca) <= 0.01
 
     # Test the write function
-    test.write_efficiency_table('qmie.fits')
+    test.write_table('qmie.fits')
 
 @pytest.mark.parametrize('sm',
                          [scatmodels.RGscat(),
@@ -112,4 +112,4 @@ from newdust.scatmodels.scatmodel import ScatModel
 #                          scatmodels.Mie()])
 def test_writing(sm):
     sm.calculate(0.0, 0.0, 0.0)
-    sm.write_efficiency_table('test_scatmodels.fits')
+    sm.write_table('test_scatmodels.fits')
