@@ -25,7 +25,7 @@ class ScatModel(object):
         # qext, qsca, and qext will be separate image cards in the FITS file
         img_list = []
         for (q, h) in zip([self.qext, self.qabs, self.qsca, self.diff],
-                          ['Qext', 'Qabs', 'Qsca', 'Diff (cm^2/ster)']):
+                          ['Qext', 'Qabs', 'Qsca', 'Diff-xsect (cm^2/ster)']):
             htemp = fits.Header()
             htemp['TYPE'] = h
             img_list.append(fits.ImageHDU(self.qext, header=htemp))
@@ -39,8 +39,9 @@ class ScatModel(object):
     def _write_table_header(self):
         """ Writes FITS file header based on self.pars """
         result = fits.Header()
-        result['COMMENT']  = "Extinction efficiency table"
-        result['COMMENT']  = "Qext, Qsca, Qabs in wavelength (or energy) vs grain radius"
+        result['COMMENT']  = "Extinction efficiency and differential cross-sections"
+        result['COMMENT']  = "HDUS 4-6 are Qext, Qsca, Qabs in wavelength (or energy) vs grain radius"
+        result['COMMENT']  = "HDU 7 is differential cross-section (cm^2/ster)"
         return fits.PrimaryHDU(header=result)
 
     def _write_table_pars(self):
