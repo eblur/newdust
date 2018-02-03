@@ -16,10 +16,18 @@ __all__ = ['GrainDist']
 class GrainDist(object):
     """
     | **ATTRIBUTES**
-    | size  : Abstract class from astrodust.sizedist
-    | comp  : Abstract class from astrodust.composition
-    | shape : Abstract class from astrodust.shape
+    | size  : Abstract class from newdust.sizedist
+    | comp  : Abstract class from newdust.composition
+    | shape : Abstract class from newdust.shape
     | md    : float
+    | a     : grain radii from size.a
+    | ndens : number density from size.ndens using the other attributes as input
+    | mdens : mass density as a function of grain size
+    | cgeo  : physical cross-sectional area based on grain shape
+    | vol   : physical grain volume based on grain shape
+    |
+    | *methods*
+    | plot(ax, kwargs) : Plots the number density of dust grains via size.plot()
     |
     | **__init__**
     | dtype   : 'Grain', 'Powerlaw' or 'ExpCutoff' (defines the grain size distribution)
@@ -35,15 +43,6 @@ class GrainDist(object):
     |   if True, will set attributes of size, comp, and shape with raw input values
     | **kwargs : extra input to the size dist functions
     |
-    | *properties*
-    | a     : grain radii from size.a
-    | ndens : number density from size.ndens using the other attributes as input
-    | mdens : mass density as a function of grain size
-    | cgeo  : physical cross-sectional area based on grain shape
-    | vol   : physical grain volume based on grain shape
-    |
-    | *functions*
-    | plot(ax, kwargs) : Plots the number density of dust grains via size.plot()
     """
     def __init__(self, dtype, cmtype, shape='Sphere', md=MD_DEFAULT,
                  amax=AMAX, rho=None, custom=False, **kwargs):

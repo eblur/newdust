@@ -1,11 +1,12 @@
 import numpy as np
 from .. import constants as c
+from .scatmodel import ScatModel
 
 __all__ = ['RGscat']
 
 CHARSIG       = 1.04 * 60.0  # characteristic scattering angle [arcsec E(keV)^-1 a(um)^-1]
 
-class RGscat(object):
+class RGscat(ScatModel):
     """
     | RAYLEIGH-GANS scattering model.
     | *see* Mauche & Gorenstein (1986), ApJ 302, 371
@@ -42,7 +43,7 @@ class RGscat(object):
         return self.qext - self.qsca
 
     def calculate(self, lam, a, cm, unit='kev', theta=0.0):
-        self.pars = dict(zip(['lam','a','cm','theta','lam_unit'],[lam, a, cm, theta, unit]))
+        self.pars = dict(zip(['lam','a','cm','theta','unit'],[lam, a, cm, theta, unit]))
 
         NE, NA, NTH = np.size(lam), np.size(a), np.size(theta)
 

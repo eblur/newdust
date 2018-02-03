@@ -1,5 +1,6 @@
 import numpy as np
 from .. import constants as c
+from .scatmodel import ScatModel
 
 __all__ = ['Mie']
 
@@ -14,7 +15,7 @@ MAX_RAM = 8.0
 #    to calculate scattering and absorption by a homogenous isotropic
 #    sphere.''
 #
-class Mie(object):
+class Mie(ScatModel):
     """
     | Mie scattering algorithms of Bohren & Hoffman
     | See their book: *Absorption and Scattering of Light by Small Particles*
@@ -45,9 +46,9 @@ class Mie(object):
         self.pars  = None  # parameters used in running the calculation: lam, a, cm, theta, unit
         self.qsca  = None
         self.qext  = None
-        self.qback = None
-        self.gsca  = None
         self.diff  = None
+        self.gsca  = None
+        self.qback = None
 
     @property
     def qabs(self):
@@ -59,7 +60,7 @@ class Mie(object):
 
     def calculate(self, lam, a, cm, unit='kev', theta=0.0, memlim=MAX_RAM):
 
-        self.pars = dict(zip(['lam','a','cm','theta','lam_unit'],[lam, a, cm, theta, unit]))
+        self.pars = dict(zip(['lam','a','cm','theta','unit'],[lam, a, cm, theta, unit]))
 
         NE, NA, NTH = np.size(lam), np.size(a), np.size(theta)
 
@@ -86,11 +87,11 @@ class Mie(object):
         geo    = np.pi * a_cm**2  # NE x NA
         geo_3d = np.repeat(geo.reshape(NE, NA, 1), NTH, axis=2)
 
-        self.qsca  = qsca
+        self.qsca  = qsca  # NE x NA
         self.qext  = qext
         self.qback = qback
         self.gsca  = gsca
-        self.diff  = Cdiff * geo_3d  # cm^2 / ster
+        self.diff  = Cdiff * geo_3d  # cm^2 / ster,  NE x NA x NTH
 
 #---------------- Helper function that does the actual calculation
 

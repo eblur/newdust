@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.integrate import trapz
+from astropy.io import fits
 
 from . import graindist
 from . import scatmodels
@@ -17,17 +18,10 @@ ALLOWED_SCATM = ['RG','Mie']
 # Make this a subclass of GrainDist at some point
 class SingleGrainPop(graindist.GrainDist):
     """
-    | A single dust grain population. Can add a string describing the Grain population using the *description* keyword
-    |
     | **ATTRIBUTES**
-    | description : a string describing the grain population
-    | gdist : GrainDist object
-    | stype : string : Scattering model to use
-    |
-    | *The following attributes are inherited form the GrainDist object*
+    | lam, lam_unit, tau_ext, tau_sca, tau_abs, diff, int_diff
+    | *Inherited from the GrainDist object*
     | a, ndens, mdens, cgeo, vol
-    | *The following attributes are inherited from the Extinction object*
-    | lam, lam_unit, tau_ext, tau_sca, tau_abs
     |
     | *functions*
     | calculate_ext(lam, unit='kev', **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit
@@ -35,6 +29,8 @@ class SingleGrainPop(graindist.GrainDist):
     | plot_ext(ax, keyword, **kwargs) plots the extinction properties (see *astrodust.extinction*)
     |   - ``keyword`` options are "ext", "sca", "abs", "all"
     | info() prints information about the dust grain properties
+    | write_extinction_table(outfile, **kwargs) writes extinction table
+    |    (qext, qabs, qsca, and diff-xsect) for the calculated scattering properties
     """
     def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, **kwargs):
         graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, **kwargs)
@@ -119,11 +115,15 @@ class SingleGrainPop(graindist.GrainDist):
 
     # Printing information
     def info(self):
-        print("Grain Population: %s" % self.description)
         print("Size distribution: %s" % self.size.dtype)
         print("Extinction calculated with: %s" % self.scatm.stype)
         print("Grain composition: %s" % self.comp.cmtype)
         print("rho = %.2f g cm^-3, M_d = %.2e g cm^-2" % (self.rho, self.md))
+
+    # Write an extinction table
+    def write_extinction_table(self, outfile, **kwargs):
+        self.scatm.write_table(outfile, **kwargs)
+        return
 
 class GrainPop(object):
     """
