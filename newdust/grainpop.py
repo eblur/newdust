@@ -34,12 +34,11 @@ class SingleGrainPop(graindist.GrainDist):
     """
     def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, custom=False, **kwargs):
         graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, custom=custom, **kwargs)
-        if custom:
-            if isinstance(stype, str): pass
-            else: self.scatm = stype
+        if isinstance(stype, str):
+            self._assign_scatm_from_string(stype)
         else:
-            assert stype in SCATMODELS.keys()
-            self.scatm = SCATMODELS[stype]
+            assert custom  # Check that the user intended to set up a custom model
+            self.scatm = stype
 
         self.lam      = None  # NE
         self.lam_unit = None  # string
@@ -48,6 +47,10 @@ class SingleGrainPop(graindist.GrainDist):
         self.tau_ext  = None  # NE
         self.diff     = None  # NE x NA x NTH [cm^2 / arcsec^2]
         self.int_diff = None  # NE x NTH [arcsec^2], differential xsect integrated over grain size
+
+    def _assign_scatm_from_string(self, stype):
+        assert stype in SCATMODELS.keys()
+        self.scatm = SCATMODELS[stype]
 
     def calculate_ext(self, lam, unit='kev', theta=0.0, **kwargs):
         self.scatm.calculate(lam, self.a, self.comp, unit=unit, theta=theta, **kwargs)

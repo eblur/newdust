@@ -117,5 +117,5 @@ def test_custom_SingleGrainPop():
     sdist = graindist.sizedist.Powerlaw()
     compo = graindist.composition.CmSilicate(rho=3.0)
     mscat = scatmodels.Mie()
-    test  = SingleGrainPop(sdist, compo, 'Mie', custom=True)
     test  = SingleGrainPop(sdist, compo, mscat, custom=True)
+    test  = SingleGrainPop(sdist, compo, 'RG', custom=True)
