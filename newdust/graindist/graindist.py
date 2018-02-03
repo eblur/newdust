@@ -16,9 +16,9 @@ __all__ = ['GrainDist']
 class GrainDist(object):
     """
     | **ATTRIBUTES**
-    | size  : Abstract class from newdust.sizedist
-    | comp  : Abstract class from newdust.composition
-    | shape : Abstract class from newdust.shape
+    | size  : Abstract class from newdust.graindist.sizedist
+    | comp  : Abstract class from newdust.graindist.composition
+    | shape : Abstract class from newdust.graindist.shape
     | md    : float
     | a     : grain radii from size.a
     | ndens : number density from size.ndens using the other attributes as input
@@ -103,12 +103,9 @@ class GrainDist(object):
     def vol(self):
         return self.shape.vol(self.a)
 
-    def plot(self, ax=None, **kwargs):
-        if isinstance(self.size, sizedist.Grain):
-            print("Number density of dust grains = %.2e cm^-2" % self.ndens)
-        else:
-            ax.plot(self.a, self.ndens * np.power(self.a, 4), **kwargs)
-            ax.set_xlabel("Radius (um)")
-            ax.set_ylabel("$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)")
-            ax.set_xscale('log')
-            ax.set_yscale('log')
+    def plot(self, ax, **kwargs):
+        ax.plot(self.a, self.ndens * np.power(self.a, 4), **kwargs)
+        ax.set_xlabel("Radius (um)")
+        ax.set_ylabel("$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)")
+        ax.set_xscale('log')
+        ax.set_yscale('log')

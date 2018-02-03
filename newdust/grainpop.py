@@ -83,7 +83,7 @@ class SingleGrainPop(graindist.GrainDist):
         self.int_diff = int_diff  # NE x NTH, [arcsec^-2]
 
     # Plotting things
-    def plot_sdist(self, ax=None, **kwargs):
+    def plot_sdist(self, ax, **kwargs):
         self.plot(ax, **kwargs)
 
     def plot_ext(self, ax, keyword, **kwargs):
