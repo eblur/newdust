@@ -4,6 +4,7 @@ from scipy.integrate import trapz
 
 from newdust.grainpop import *
 from newdust import graindist
+from newdust import scatmodels
 from . import percent_diff
 
 MD = 1.e-5  # g cm^-2
@@ -110,3 +111,11 @@ def test_mass_double(estring):
     assert all(percent_diff(gp2.tau_ext, 2.0 * gp1.tau_ext) <= 0.01)
     assert all(percent_diff(gp2.tau_abs, 2.0 * gp1.tau_abs) <= 0.01)
     assert all(percent_diff(gp2.tau_sca, 2.0 * gp1.tau_sca) <= 0.01)
+
+##---------- Test that we can customize the grain populations easily
+def test_custom_SingleGrainPop():
+    sdist = graindist.sizedist.Powerlaw()
+    compo = graindist.composition.CmSilicate(rho=3.0)
+    mscat = scatmodels.Mie()
+    test  = SingleGrainPop(sdist, compo, 'Mie', custom=True)
+    test  = SingleGrainPop(sdist, compo, mscat, custom=True)

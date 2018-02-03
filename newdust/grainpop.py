@@ -13,7 +13,7 @@ AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
 RHO_AVG       = 3.0  # g cm^-3
 UNIT_LABELS   = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
-ALLOWED_SCATM = ['RG','Mie']
+SCATMODELS = {'RG':scatmodels.RGscat(),'Mie':scatmodels.Mie()}
 
 # Make this a subclass of GrainDist at some point
 class SingleGrainPop(graindist.GrainDist):
@@ -32,13 +32,14 @@ class SingleGrainPop(graindist.GrainDist):
     | write_extinction_table(outfile, **kwargs) writes extinction table
     |    (qext, qabs, qsca, and diff-xsect) for the calculated scattering properties
     """
-    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, **kwargs):
-        graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, **kwargs)
-        assert stype in ALLOWED_SCATM
-        if stype == 'RG':
-            self.scatm = scatmodels.RGscat()
-        if stype == 'Mie':
-            self.scatm = scatmodels.Mie()
+    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, custom=False, **kwargs):
+        graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, custom=custom, **kwargs)
+        if custom:
+            if isinstance(stype, str): pass
+            else: self.scatm = stype
+        else:
+            assert stype in SCATMODELS.keys()
+            self.scatm = SCATMODELS[stype]
 
         self.lam      = None  # NE
         self.lam_unit = None  # string
