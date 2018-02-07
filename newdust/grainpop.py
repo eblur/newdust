@@ -13,7 +13,7 @@ AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
 RHO_AVG       = 3.0  # g cm^-3
 UNIT_LABELS   = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
-ALLOWED_SCATM = ['RG','Mie']
+SCATMODELS = {'RG':scatmodels.RGscat(),'Mie':scatmodels.Mie()}
 
 # Make this a subclass of GrainDist at some point
 class SingleGrainPop(graindist.GrainDist):
@@ -32,13 +32,13 @@ class SingleGrainPop(graindist.GrainDist):
     | write_extinction_table(outfile, **kwargs) writes extinction table
     |    (qext, qabs, qsca, and diff-xsect) for the calculated scattering properties
     """
-    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, **kwargs):
-        graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, **kwargs)
-        assert stype in ALLOWED_SCATM
-        if stype == 'RG':
-            self.scatm = scatmodels.RGscat()
-        if stype == 'Mie':
-            self.scatm = scatmodels.Mie()
+    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, custom=False, **kwargs):
+        graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, custom=custom, **kwargs)
+        if isinstance(stype, str):
+            self._assign_scatm_from_string(stype)
+        else:
+            assert custom  # Check that the user intended to set up a custom model
+            self.scatm = stype
 
         self.lam      = None  # NE
         self.lam_unit = None  # string
@@ -47,6 +47,10 @@ class SingleGrainPop(graindist.GrainDist):
         self.tau_ext  = None  # NE
         self.diff     = None  # NE x NA x NTH [cm^2 / arcsec^2]
         self.int_diff = None  # NE x NTH [arcsec^2], differential xsect integrated over grain size
+
+    def _assign_scatm_from_string(self, stype):
+        assert stype in SCATMODELS.keys()
+        self.scatm = SCATMODELS[stype]
 
     def calculate_ext(self, lam, unit='kev', theta=0.0, **kwargs):
         self.scatm.calculate(lam, self.a, self.comp, unit=unit, theta=theta, **kwargs)
