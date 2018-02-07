@@ -10,6 +10,7 @@ class ScatModel(object):
         self.qabs = None
         self.diff = None
         self.pars = None
+        #self.read_from_table(from_table)
 
     def calculate(self, lam, a, cm, unit='kev', theta=0.0, **kwargs):
         print("You are attempting to run calculation from ScatModel superclass.")

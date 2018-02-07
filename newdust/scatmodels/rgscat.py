@@ -17,6 +17,7 @@ class RGscat(ScatModel):
     | citation : string : citation string
     | pars  : dict   : parameters used to run the calculation
     | qsca  : array  : scattering efficiency (unitless, per geometric area)
+    | qabs  : array  : absorption efficiency (unitless, per geometric area)
     | qext  : array  : extinction efficiency (unitless, per geometric area)
     | diff  : array  : differential scattering cross-section (cm^2 ster^-1)
     |
@@ -30,17 +31,10 @@ class RGscat(ScatModel):
     |    calculates the relevant values (qsca, qext, diff)
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        ScatModel.__init__(self, **kwargs)
         self.stype = 'RGscat'
         self.citation = 'Calculating RG-Drude approximation\nMauche & Gorenstein (1986), ApJ 302, 371\nSmith & Dwek (1998), ApJ, 503, 831'
-        self.pars  = None  # parameters used in running the calculation: lam, a, cm, theta, unit
-        self.qsca  = None
-        self.qext  = None
-        self.diff  = None
-
-    @property
-    def qabs(self):
-        return self.qext - self.qsca
 
     def calculate(self, lam, a, cm, unit='kev', theta=0.0):
         self.pars = dict(zip(['lam','a','cm','theta','unit'],[lam, a, cm, theta, unit]))
@@ -69,6 +63,7 @@ class RGscat(ScatModel):
         qsca = _qsca(x, mm1)
         self.qsca = qsca
         self.qext = qsca
+        self.qabs = self.qext - self.qext
 
         # Make the NE x NA x NTH stuff
         dsig        = _dsig(a_cm, x, mm1)
