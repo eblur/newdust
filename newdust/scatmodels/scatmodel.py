@@ -4,13 +4,14 @@ from .. import constants as c
 ## Superclass _ScatModel
 ## See __init__ for API
 class ScatModel(object):
-    def __init__(self):
+    def __init__(self, from_file=None):
         self.qsca = None
         self.qext = None
         self.qabs = None
         self.diff = None
         self.pars = None
-        #self.read_from_table(from_table)
+        if from_file is not None:
+            self.read_from_table(from_file)
 
     def calculate(self, lam, a, cm, unit='kev', theta=0.0, **kwargs):
         print("You are attempting to run calculation from ScatModel superclass.")
@@ -40,7 +41,7 @@ class ScatModel(object):
         ff = fits.open(infile)
         # Load parameteric information
         lam   = ff[1].data['lam']
-        unit  = ff[1].data['lam'].unit
+        unit  = ff[1].data.columns['lam'].unit
         a     = ff[2].data['a']
         theta = ff[3].data['theta']
         self.pars = {'lam':lam, 'a':a, 'unit':unit, 'theta':theta}

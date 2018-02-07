@@ -61,6 +61,8 @@ def test_rgscat():
 
     # Test the write function
     test.write_table('qrg.fits')
+    # Test the read function
+    new_test = scatmodels.ScatModel(from_file='qrg.fits')
 
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),
@@ -84,6 +86,9 @@ def test_mie(cm):
 
     # Test the write function
     test.write_table('qmie.fits')
+    # Test the read function
+    new_test = scatmodels.ScatModel(from_file='qmie.fits')
+
 
 @pytest.mark.parametrize('sm',
                          [scatmodels.RGscat(),
@@ -113,3 +118,4 @@ from newdust.scatmodels.scatmodel import ScatModel
 def test_writing(sm):
     sm.calculate(0.0, 0.0, 0.0)
     sm.write_table('test_scatmodels.fits')
+    test = ScatModel(from_file='test_scatmodels.fits')
