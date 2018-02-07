@@ -35,6 +35,22 @@ class ScatModel(object):
         hdu_list.writeto(outfile, overwrite=overwrite)
         return
 
+    def read_from_table(self, infile):
+        ff = fits.open(infile)
+        # Load parameteric information
+        lam   = ff[1].data['lam']
+        unit  = ff[1].data['lam'].unit
+        a     = ff[2].data['a']
+        theta = ff[3].data['theta']
+        self.pars = {'lam':lam, 'a':a, 'unit':unit, 'theta':theta}
+
+        # Load extinction information
+        qtypes = {'Qext':self.qext, 'Qabs':self.qabs, 'Qsca':self.qsca, 'Diff-xsect (cm^2/ster)':self.diff}
+        for i in range(4,8):  # runs on hdus 4,5,6,7
+            htype = ff[i].header['TYPE']
+            qtypes[htype] = ff[i].data
+        return
+
     ##----- Helper material
     def _write_table_header(self):
         """ Writes FITS file header based on self.pars """
