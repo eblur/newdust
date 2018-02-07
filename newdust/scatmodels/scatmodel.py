@@ -13,14 +13,19 @@ class ScatModel(object):
         if from_file is not None:
             self.read_from_table(from_file)
 
-    def calculate(self, lam, a, cm, unit='kev', theta=0.0, **kwargs):
-        print("You are attempting to run calculation from ScatModel superclass.")
-        print("No attributes will be updated.")
-        self.pars = {'lam':lam, 'a':a, 'cm':cm, 'unit':unit, 'theta':theta}
+    # Base superclass does nothing
+    def calculate(self, *args, **kwargs):
         return
 
     def write_table(self, outfile, overwrite=True):
-        # some basic info
+        # Don't write a table that has not been calculated
+        try:
+            assert self.pars is not None
+        except:
+            print("There are no values to store.")
+            return
+        
+        # All must be well! Store information in a FITS file
         header    = self._write_table_header()
         # wavelength (or energy) and grain radius associated with calculation
         par_table = self._write_table_pars()
