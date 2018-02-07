@@ -30,7 +30,7 @@ class ScatModel(object):
                           ['Qext', 'Qabs', 'Qsca', 'Diff-xsect (cm^2/ster)']):
             htemp = fits.Header()
             htemp['TYPE'] = h
-            img_list.append(fits.ImageHDU(self.qext, header=htemp))
+            img_list.append(fits.ImageHDU(q, header=htemp))
         # Put everything together to write the table
         fnl_list  = [header] + par_table + img_list
         hdu_list  = fits.HDUList(hdus=fnl_list)
@@ -47,10 +47,14 @@ class ScatModel(object):
         self.pars = {'lam':lam, 'a':a, 'unit':unit, 'theta':theta}
 
         # Load extinction information
-        qtypes = {'Qext':self.qext, 'Qabs':self.qabs, 'Qsca':self.qsca, 'Diff-xsect (cm^2/ster)':self.diff}
+        qvals = dict()
         for i in range(4,8):  # runs on hdus 4,5,6,7
             htype = ff[i].header['TYPE']
-            qtypes[htype] = ff[i].data
+            qvals[htype] = ff[i].data
+        self.qext = qvals['Qext']
+        self.qabs = qvals['Qabs']
+        self.qsca = qvals['Qsca']
+        self.diff = qvals['Diff-xsect (cm^2/ster)']
         return
 
     ##----- Helper material

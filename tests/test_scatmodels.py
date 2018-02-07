@@ -63,7 +63,10 @@ def test_rgscat():
     test.write_table('qrg.fits')
     # Test the read function
     new_test = scatmodels.ScatModel(from_file='qrg.fits')
-
+    assert percent_diff(test.qext, new_test.qext) <= 1.e-5
+    assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
+    assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
+    
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),
                           composition.CmSilicate(),
@@ -86,9 +89,10 @@ def test_mie(cm):
 
     # Test the write function
     test.write_table('qmie.fits')
-    # Test the read function
     new_test = scatmodels.ScatModel(from_file='qmie.fits')
-
+    assert percent_diff(test.qext, new_test.qext) <= 1.e-5
+    assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
+    assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
 
 @pytest.mark.parametrize('sm',
                          [scatmodels.RGscat(),
