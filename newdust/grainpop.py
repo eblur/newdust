@@ -46,7 +46,8 @@ class SingleGrainPop(graindist.GrainDist):
         # Handling scattering model FITS input, if requested
         if scatm_from_file is not None:
             self.scatm = scatmodels.ScatModel(from_file=scatm_from_file)
-            self.scatm.stype = scatm_from_file
+            assert isinstance(stype, str)
+            self.scatm.stype = stype
             self.lam = self.scatm.pars['lam']
             self.lam_unit = self.scatm.pars['unit']
             self.calculate_ext()
