@@ -78,7 +78,7 @@ class Mie(ScatModel):
 
         self.qsca  = qsca  # NE x NA
         self.qext  = qext
-        self.qabs  = self.qext - self.qext
+        self.qabs  = self.qext - self.qsca
         self.qback = qback
         self.gsca  = gsca
         self.diff  = Cdiff * geo_3d  # cm^2 / ster,  NE x NA x NTH

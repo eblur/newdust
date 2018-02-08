@@ -63,7 +63,7 @@ class RGscat(ScatModel):
         qsca = _qsca(x, mm1)
         self.qsca = qsca
         self.qext = qsca
-        self.qabs = self.qext - self.qext
+        self.qabs = self.qext - self.qsca
 
         # Make the NE x NA x NTH stuff
         dsig        = _dsig(a_cm, x, mm1)
