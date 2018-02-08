@@ -104,8 +104,8 @@ def test_ext_calculations(sd, cm, sc):
     assert all(percent_diff(test.tau_ext, new_test.tau_ext) <= 1.e-5)
     assert all(percent_diff(test.tau_abs, new_test.tau_abs) <= 1.e-5)
     assert all(percent_diff(test.tau_sca, new_test.tau_sca) <= 1.e-5)
-    assert all(percent_diff(test.diff, new_test.diff) <= 1.e-5)
-    assert all(percent_diff(test.int_diff, new_test.int_diff) <= 1.e-5)
+    assert all(percent_diff(test.diff.flatten(), new_test.diff.flatten()) <= 1.e-5)
+    assert all(percent_diff(test.int_diff.flatten(), new_test.int_diff.flatten()) <= 1.e-5)
 
 # Make sure that doubling the dust mass doubles the extinction
 @pytest.mark.parametrize('estring', ALLOWED_SCATM)

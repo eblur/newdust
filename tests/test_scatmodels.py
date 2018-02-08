@@ -59,6 +59,9 @@ def test_rgscat():
     test.calculate(E_KEV, A_UM, CMD, unit='kev', theta=1.e10)
     assert test.diff == 0.0
 
+    # Test that the extinction values are correct
+    assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
+    
     # Test the write function
     test.write_table('qrg.fits')
     # Test the read function
@@ -86,6 +89,9 @@ def test_mie(cm):
     dtot = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # cm^2
     sigsca = test.qsca * np.pi * (A_UM * c.micron2cm)**2  # cm^2
     assert percent_diff(dtot, sigsca) <= 0.01
+
+    # Test that the extinction values are correct
+    assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
 
     # Test the write function
     test.write_table('qmie.fits')
