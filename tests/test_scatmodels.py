@@ -59,9 +59,17 @@ def test_rgscat():
     test.calculate(E_KEV, A_UM, CMD, unit='kev', theta=1.e10)
     assert test.diff == 0.0
 
+    # Test that the extinction values are correct
+    assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
+    
     # Test the write function
     test.write_table('qrg.fits')
-
+    # Test the read function
+    new_test = scatmodels.ScatModel(from_file='qrg.fits')
+    assert percent_diff(test.qext, new_test.qext) <= 1.e-5
+    assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
+    assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
+    
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),
                           composition.CmSilicate(),
@@ -82,8 +90,16 @@ def test_mie(cm):
     sigsca = test.qsca * np.pi * (A_UM * c.micron2cm)**2  # cm^2
     assert percent_diff(dtot, sigsca) <= 0.01
 
+    # Test that the extinction values are correct
+    assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
+
     # Test the write function
     test.write_table('qmie.fits')
+    # Test the read function
+    new_test = scatmodels.ScatModel(from_file='qmie.fits')
+    assert percent_diff(test.qext, new_test.qext) <= 1.e-5
+    assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
+    assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
 
 @pytest.mark.parametrize('sm',
                          [scatmodels.RGscat(),
@@ -105,11 +121,3 @@ def test_dimensions(sm):
     assert percent_diff(dtot1, ssca1) <= 0.05
     assert percent_diff(dtot2, ssca2) <= 0.05
 
-from newdust.scatmodels.scatmodel import ScatModel
-# Test the writing and reading functions
-@pytest.mark.parametrize('sm', [ScatModel()])
-#                         [scatmodels.RGscat(),
-#                          scatmodels.Mie()])
-def test_writing(sm):
-    sm.calculate(0.0, 0.0, 0.0)
-    sm.write_table('test_scatmodels.fits')

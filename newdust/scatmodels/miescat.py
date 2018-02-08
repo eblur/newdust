@@ -40,23 +40,12 @@ class Mie(ScatModel):
     |    limits size of complex number array used in Mie scattering calculation
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        ScatModel.__init__(self, **kwargs)
         self.stype = 'Mie'
         self.citation = 'Mie scattering algorithm from Bohren & HOffman\n*Absorption and Scattering of Light by Small Particles*'
-        self.pars  = None  # parameters used in running the calculation: lam, a, cm, theta, unit
-        self.qsca  = None
-        self.qext  = None
-        self.diff  = None
         self.gsca  = None
         self.qback = None
-
-    @property
-    def qabs(self):
-        if self.qext is None:
-            print("Error: Need to calculate cross sections")
-            return 0.0
-        else:
-            return self.qext - self.qsca
 
     def calculate(self, lam, a, cm, unit='kev', theta=0.0, memlim=MAX_RAM):
 
@@ -89,6 +78,7 @@ class Mie(ScatModel):
 
         self.qsca  = qsca  # NE x NA
         self.qext  = qext
+        self.qabs  = self.qext - self.qsca
         self.qback = qback
         self.gsca  = gsca
         self.diff  = Cdiff * geo_3d  # cm^2 / ster,  NE x NA x NTH

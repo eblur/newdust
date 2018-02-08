@@ -32,13 +32,8 @@ class SingleGrainPop(graindist.GrainDist):
     | write_extinction_table(outfile, **kwargs) writes extinction table
     |    (qext, qabs, qsca, and diff-xsect) for the calculated scattering properties
     """
-    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, custom=False, **kwargs):
+    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, custom=False, scatm_from_file=None, **kwargs):
         graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, custom=custom, **kwargs)
-        if isinstance(stype, str):
-            self._assign_scatm_from_string(stype)
-        else:
-            assert custom  # Check that the user intended to set up a custom model
-            self.scatm = stype
 
         self.lam      = None  # NE
         self.lam_unit = None  # string
@@ -48,14 +43,34 @@ class SingleGrainPop(graindist.GrainDist):
         self.diff     = None  # NE x NA x NTH [cm^2 / arcsec^2]
         self.int_diff = None  # NE x NTH [arcsec^2], differential xsect integrated over grain size
 
+        # Handling scattering model FITS input, if requested
+        if scatm_from_file is not None:
+            self.scatm = scatmodels.ScatModel(from_file=scatm_from_file)
+            assert isinstance(stype, str)
+            self.scatm.stype = stype
+            self.lam = self.scatm.pars['lam']
+            self.lam_unit = self.scatm.pars['unit']
+            self._calculate_tau()
+        # Otherwise choose from existing (or custom) scattering calculators
+        elif isinstance(stype, str):
+            self._assign_scatm_from_string(stype)
+        else:
+            assert custom  # Check that the user intended to set up a custom model
+            self.scatm = stype
+
     def _assign_scatm_from_string(self, stype):
         assert stype in SCATMODELS.keys()
         self.scatm = SCATMODELS[stype]
 
+    # Run scattering model calculation, then compute optical depths
     def calculate_ext(self, lam, unit='kev', theta=0.0, **kwargs):
         self.scatm.calculate(lam, self.a, self.comp, unit=unit, theta=theta, **kwargs)
         self.lam      = lam
         self.lam_unit = unit
+        self._calculate_tau()
+
+    # Compute optical depths only
+    def _calculate_tau(self):
         NE, NA, NTH = np.shape(self.scatm.diff)
         # In single size grain case
         if len(self.a) == 1:

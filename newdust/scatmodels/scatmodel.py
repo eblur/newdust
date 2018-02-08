@@ -4,21 +4,30 @@ from .. import constants as c
 ## Superclass _ScatModel
 ## See __init__ for API
 class ScatModel(object):
-    def __init__(self):
+    def __init__(self, from_file=None):
         self.qsca = None
         self.qext = None
         self.qabs = None
         self.diff = None
         self.pars = None
+        self.stype = 'Empty'
+        if from_file is not None:
+            self.read_from_table(from_file)
+            self.stype = from_file
 
-    def calculate(self, lam, a, cm, unit='kev', theta=0.0, **kwargs):
-        print("You are attempting to run calculation from ScatModel superclass.")
-        print("No attributes will be updated.")
-        self.pars = {'lam':lam, 'a':a, 'cm':cm, 'unit':unit, 'theta':theta}
+    # Base calculate method does nothing
+    def calculate(self, lam, a, cm, **kwargs):
         return
 
     def write_table(self, outfile, overwrite=True):
-        # some basic info
+        # Don't write a table that has not been calculated
+        try:
+            assert self.pars is not None
+        except:
+            print("There are no values to store.")
+            return
+        
+        # All must be well! Store information in a FITS file
         header    = self._write_table_header()
         # wavelength (or energy) and grain radius associated with calculation
         par_table = self._write_table_pars()
@@ -28,11 +37,31 @@ class ScatModel(object):
                           ['Qext', 'Qabs', 'Qsca', 'Diff-xsect (cm^2/ster)']):
             htemp = fits.Header()
             htemp['TYPE'] = h
-            img_list.append(fits.ImageHDU(self.qext, header=htemp))
+            img_list.append(fits.ImageHDU(q, header=htemp))
         # Put everything together to write the table
         fnl_list  = [header] + par_table + img_list
         hdu_list  = fits.HDUList(hdus=fnl_list)
         hdu_list.writeto(outfile, overwrite=overwrite)
+        return
+
+    def read_from_table(self, infile):
+        ff = fits.open(infile)
+        # Load parameteric information
+        lam   = ff[1].data['lam']
+        unit  = ff[1].data.columns['lam'].unit
+        a     = ff[2].data['a']
+        theta = ff[3].data['theta']
+        self.pars = {'lam':lam, 'a':a, 'unit':unit, 'theta':theta}
+
+        # Load extinction information
+        qvals = dict()
+        for i in range(4,8):  # runs on hdus 4,5,6,7
+            htype = ff[i].header['TYPE']
+            qvals[htype] = ff[i].data
+        self.qext = qvals['Qext']
+        self.qabs = qvals['Qabs']
+        self.qsca = qvals['Qsca']
+        self.diff = qvals['Diff-xsect (cm^2/ster)']
         return
 
     ##----- Helper material
