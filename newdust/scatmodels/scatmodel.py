@@ -15,8 +15,8 @@ class ScatModel(object):
             self.read_from_table(from_file)
             self.stype = from_file
 
-    # Base superclass does nothing
-    def calculate(self, *args, **kwargs):
+    # Base calculate method does nothing
+    def calculate(self, lam, a, cm, **kwargs):
         return
 
     def write_table(self, outfile, overwrite=True):
