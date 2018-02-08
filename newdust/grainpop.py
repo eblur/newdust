@@ -50,7 +50,7 @@ class SingleGrainPop(graindist.GrainDist):
             self.scatm.stype = stype
             self.lam = self.scatm.pars['lam']
             self.lam_unit = self.scatm.pars['unit']
-            self.calculate_ext()
+            self._calculate_tau()
         # Otherwise choose from existing (or custom) scattering calculators
         elif isinstance(stype, str):
             self._assign_scatm_from_string(stype)
@@ -62,11 +62,15 @@ class SingleGrainPop(graindist.GrainDist):
         assert stype in SCATMODELS.keys()
         self.scatm = SCATMODELS[stype]
 
-    # Default is to calculate extinction parameters at 1 keV
-    def calculate_ext(self, lam=1.0, unit='kev', theta=0.0, **kwargs):
+    # Run scattering model calculation, then compute optical depths
+    def calculate_ext(self, lam, unit='kev', theta=0.0, **kwargs):
         self.scatm.calculate(lam, self.a, self.comp, unit=unit, theta=theta, **kwargs)
         self.lam      = lam
         self.lam_unit = unit
+        self._calculate_tau()
+
+    # Compute optical depths only
+    def _calculate_tau(self):
         NE, NA, NTH = np.shape(self.scatm.diff)
         # In single size grain case
         if len(self.a) == 1:
