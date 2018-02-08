@@ -10,8 +10,10 @@ class ScatModel(object):
         self.qabs = None
         self.diff = None
         self.pars = None
+        self.stype = 'Empty'
         if from_file is not None:
             self.read_from_table(from_file)
+            self.stype = from_file
 
     # Base superclass does nothing
     def calculate(self, *args, **kwargs):
