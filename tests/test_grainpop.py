@@ -98,7 +98,14 @@ def test_ext_calculations(sd, cm, sc):
     assert np.shape(test.diff) == (NE, len(test.a), NTH)
     assert all(percent_diff(test.tau_ext, test.tau_abs + test.tau_sca) <= 0.01)
     test.info()
+    # Test write and read functions
     test.write_extinction_table('test_grainpop.fits')
+    new_test = SingleGrainPop(sd, cm, sc, scatm_from_file='test_grainpop.fits')
+    assert all(percent_diff(test.tau_ext, new_test.tau_ext) <= 1.e-5)
+    assert all(percent_diff(test.tau_abs, new_test.tau_abs) <= 1.e-5)
+    assert all(percent_diff(test.tau_sca, new_test.tau_sca) <= 1.e-5)
+    assert all(percent_diff(test.diff, new_test.diff) <= 1.e-5)
+    assert all(percent_diff(test.int_diff, new_test.int_diff) <= 1.e-5)
 
 # Make sure that doubling the dust mass doubles the extinction
 @pytest.mark.parametrize('estring', ALLOWED_SCATM)
