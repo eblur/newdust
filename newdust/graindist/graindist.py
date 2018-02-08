@@ -39,7 +39,6 @@ class GrainDist(object):
     |   *Powerlaw:* defines the maximum grain size
     |   *ExpCutoff:* defines the *acut* value
     | rho     : if defined, will alter the rho keyword in composition
-    | custom  : boolean : (default:False)
     |   if True, will set attributes of size, comp, and shape with raw input values
     | **kwargs : extra input to the size dist functions
     |

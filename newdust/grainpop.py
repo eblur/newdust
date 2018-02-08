@@ -32,8 +32,8 @@ class SingleGrainPop(graindist.GrainDist):
     | write_extinction_table(outfile, **kwargs) writes extinction table
     |    (qext, qabs, qsca, and diff-xsect) for the calculated scattering properties
     """
-    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, custom=False, scatm_from_file=None, **kwargs):
-        graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, custom=custom, **kwargs)
+    def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, scatm_from_file=None, **kwargs):
+        graindist.GrainDist.__init__(self, dtype, cmtype, shape=shape, md=md, **kwargs)
 
         self.lam      = None  # NE
         self.lam_unit = None  # string
@@ -55,7 +55,6 @@ class SingleGrainPop(graindist.GrainDist):
         elif isinstance(stype, str):
             self._assign_scatm_from_string(stype)
         else:
-            assert custom  # Check that the user intended to set up a custom model
             self.scatm = stype
 
     def _assign_scatm_from_string(self, stype):
@@ -296,9 +295,9 @@ def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6, **kwargs):
     gra_ll = graindist.composition.CmGraphite(orient='para')
     gra_T  = graindist.composition.CmGraphite(orient='perp')
 
-    mrn_sil = SingleGrainPop(pl_sil, sil, 'Mie', md=md_sil, custom=True)
-    mrn_gra_para = SingleGrainPop(pl_gra, gra_ll, 'Mie', md=md_gra_para, custom=True)
-    mrn_gra_perp = SingleGrainPop(pl_gra, gra_T, 'Mie', md=md_gra_perp, custom=True)
+    mrn_sil = SingleGrainPop(pl_sil, sil, 'Mie', md=md_sil)
+    mrn_gra_para = SingleGrainPop(pl_gra, gra_ll, 'Mie', md=md_gra_para)
+    mrn_gra_perp = SingleGrainPop(pl_gra, gra_T, 'Mie', md=md_gra_perp)
 
     gplist = [mrn_sil, mrn_gra_para, mrn_gra_perp]
     keys   = ['sil','gra_para','gra_perp']
@@ -318,7 +317,7 @@ def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT, **kwar
     """
     pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p, **kwargs)
     dru     = graindist.composition.CmDrude()
-    mrn_dru = SingleGrainPop(pl, dru, 'RG', md=md, custom=True)
+    mrn_dru = SingleGrainPop(pl, dru, 'RG', md=md)
     gplist  = [mrn_dru]
     keys    = ['RGD']
     return GrainPop(gplist, keys=keys, description='MRN_rgd')
