@@ -8,7 +8,7 @@ RHO        = 3.0    # g cm^-3
 AMAX = 0.3  # um
 
 ALLOWED_SIZES  = ['Grain','Powerlaw','ExpCutoff']
-ALLOWED_COMPS  = ['Drude', 'Silicate', 'Sphere']
+ALLOWED_COMPS  = ['Drude', 'Silicate', 'Graphite']
 SHAPES = {'Sphere':sh.Sphere()}
 
 __all__ = ['GrainDist']
