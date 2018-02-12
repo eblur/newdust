@@ -1,7 +1,7 @@
 from astropy.io import fits
 from .. import constants as c
 
-## Superclass _ScatModel
+## Superclass ScatModel
 ## See __init__ for API
 class ScatModel(object):
     def __init__(self, from_file=None):
@@ -26,7 +26,7 @@ class ScatModel(object):
         except:
             print("There are no values to store.")
             return
-        
+
         # All must be well! Store information in a FITS file
         header    = self._write_table_header()
         # wavelength (or energy) and grain radius associated with calculation

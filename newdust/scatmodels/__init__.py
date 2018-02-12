@@ -1,6 +1,7 @@
 from .rgscat import RGscat
 from .miescat import Mie
 from .scatmodel import ScatModel
+from .tablescatmodel import TableScatModel
 from .. import constants as c
 
 """
