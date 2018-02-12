@@ -61,15 +61,7 @@ def test_rgscat():
 
     # Test that the extinction values are correct
     assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
-    
-    # Test the write function
-    test.write_table('qrg.fits')
-    # Test the read function
-    new_test = scatmodels.ScatModel(from_file='qrg.fits')
-    assert percent_diff(test.qext, new_test.qext) <= 1.e-5
-    assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
-    assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
-    
+
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),
                           composition.CmSilicate(),
@@ -93,14 +85,6 @@ def test_mie(cm):
     # Test that the extinction values are correct
     assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
 
-    # Test the write function
-    test.write_table('qmie.fits')
-    # Test the read function
-    new_test = scatmodels.ScatModel(from_file='qmie.fits')
-    assert percent_diff(test.qext, new_test.qext) <= 1.e-5
-    assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
-    assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
-
 @pytest.mark.parametrize('sm',
                          [scatmodels.RGscat(),
                           scatmodels.Mie()])
@@ -121,3 +105,22 @@ def test_dimensions(sm):
     assert percent_diff(dtot1, ssca1) <= 0.05
     assert percent_diff(dtot2, ssca2) <= 0.05
 
+# Test the tablescatmodel
+@pytest.mark.parametrize('sm',
+    [scatmodels.RGscat(), scatmodels.Mie()])
+@pytest.mark.parametrize('cm',
+    [composition.CmSilicate(), composition.CmGraphite()])
+def test_read_write_tables(sm, cm):
+    NE, NA, NTH = 10, 20, 30
+    ener  = np.linspace(0.1, 10, NE)
+    arad  = np.linspace(0.01, 0.1, NA)
+    theta = np.logspace(0, 3, NTH)
+    # Write a table
+    sm.calculate(ener, arad, cm, unit='kev', theta=theta)
+    sm.write_table('test_write.fits')
+    # Test the read function
+    test1 = scatmodels.ScatModel(from_file='qrg.fits')
+    assert percent_diff(sm.qext, test1.qext) <= 1.e-5
+    assert percent_diff(sm.qabs, test1.qabs) <= 1.e-5
+    assert percent_diff(sm.qsca, test1.qsca) <= 1.e-5
+    assert percent_diff(sm.diff.flatten(), test1.diff.flatten()) <= 1.e-5
