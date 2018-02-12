@@ -50,6 +50,13 @@ class SingleGrainPop(graindist.GrainDist):
             self.scatm.stype = stype
             self.lam = self.scatm.pars['lam']
             self.lam_unit = self.scatm.pars['unit']
+            # Change the grain radii to mirror that used in scatmodel calc
+            atemp  = np.copy(self.scatm.pars['a'])
+            if (len(self.a) == 1) & len(atemp > 1):
+                print("Table model not made for single grain size distribution")
+                # Warning that the user is loading table model for more than one grain size
+                # while using a single grain size distribution
+            self.a = atemp
             self._calculate_tau()
         # Otherwise choose from existing (or custom) scattering calculators
         elif isinstance(stype, str):
