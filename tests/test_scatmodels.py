@@ -119,8 +119,8 @@ def test_read_write_tables(sm, cm):
     sm.calculate(ener, arad, cm, unit='kev', theta=theta)
     sm.write_table('test_write.fits')
     # Test the read function
-    test1 = scatmodels.ScatModel(from_file='qrg.fits')
-    assert percent_diff(sm.qext, test1.qext) <= 1.e-5
-    assert percent_diff(sm.qabs, test1.qabs) <= 1.e-5
-    assert percent_diff(sm.qsca, test1.qsca) <= 1.e-5
-    assert percent_diff(sm.diff.flatten(), test1.diff.flatten()) <= 1.e-5
+    test1 = scatmodels.ScatModel(from_file='test_write.fits')
+    assert np.sum(sm.qext - test1.qext) < 1.e-7
+    assert np.sum(sm.qabs - test1.qabs) < 1.e-7
+    assert np.sum(sm.qsca - test1.qsca) < 1.e-7
+    assert np.sum(sm.diff - test1.diff) < 1.e-7
