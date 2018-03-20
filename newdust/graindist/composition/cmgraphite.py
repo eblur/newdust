@@ -51,18 +51,16 @@ class CmGraphite(object):
 
         if orient == 'perp':
             wavel = D03dat_perp['wave(um)'] * u.micron
-            lamvals = wavel.to(u.cm).value
             revals  = 1.0 + D03dat_perp['Re(n)-1']
             imvals  = D03dat_perp['Im(n)']
 
         if orient == 'para':
             wavel = D03dat_para['wave(um)'] * u.micron
-            lamvals = wavel.to(u.cm).value
             revals  = 1.0 + D03dat_para['Re(n)-1']
             imvals  = D03dat_para['Im(n)']
 
-        rp  = interp1d(lamvals * c.micron2cm, revals)  # wavelength (cm), rp
-        ip  = interp1d(lamvals * c.micron2cm, imvals)  # wavelength (cm), ip
+        rp  = interp1d(wavel.to(u.cm).value, revals)  # wavelength (cm), rp
+        ip  = interp1d(wavel.to(u.cm).value, imvals)  # wavelength (cm), ip
         self.interps = (rp, ip)
 
     def _interp_helper(self, lam_cm, interp, rp=False):
