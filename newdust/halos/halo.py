@@ -130,3 +130,39 @@ class Halo(object):
         fh_tot   = np.sum(self.fhalo)
         enclosed = trapz(I_grid * 2.0 * np.pi * th_grid, th_grid)
         return enclosed / fh_tot
+
+    def write(self, filename, overwrite=True):
+        """
+        Inputs
+        ------
+        filename : string
+            Name for the output FITS file
+
+        Write the scattering halo 'norm_int' attribute to a FITS file.
+        The file will also store the relevant LAM, THETA, and TAUX values.
+        """
+        hdr = fits.Header()
+        hdr['COMMENT'] = "Normalized halo intensity as a function of angle"
+        hdr['COMMENT'] = "HDU 1 is ENERGY, HDU 2 is THETA, HDU 3 is TAUX"
+        primary_hdu = fits.PrimaryHDU(self.norm_int, header=result)
+
+        hdus_to_write = primary_hdu + self._write_halo_pars()
+        hdu_list = fits.HDUList(hdus=hdus_to_write)
+        hdu_list.writeto(outfile, overwrite=overwrite)
+        return
+
+    ##----- Helper material
+    def _write_halo_pars(self):
+        """Write the FITS file"""
+        # e.g. pars['lam'], pars['a']
+        # should this be part of WCS?
+        c1 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='lam', array=c._make_array(self.lam),
+             format='E', unit=self.lam_unit])
+        c2 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='theta', array=c._make_array(self.theta),
+             format='E', unit='arcsec')])
+        c3 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='taux', array=c._make_array(self.taux),
+             format='E', unit='')])
+        return [c1, c2, c3]
