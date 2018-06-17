@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.integrate import trapz
+from astropy.io import fits
+from .. import constants as c
 
 __all__ = ['Halo']
 
@@ -32,7 +34,7 @@ class Halo(object):
     | ecf(th, n)
     | __getitem__(lmin, lmax)
     """
-    def __init__(self, lam, theta, unit='kev'):
+    def __init__(self, lam=1.0, theta=1.0, unit='kev', from_file=None, **kwargs):
         self.lam       = lam    # length NE
         self.lam_unit  = unit   # 'kev' or 'angs'
         self.theta     = theta  # length NTH, arcsec
@@ -42,6 +44,8 @@ class Halo(object):
         self.fabs      = None   # NE, bin integrated flux [e.g. phot/cm^2/s, NOT phot/cm^2/s/keV]
         self.funit     = None
         self.intensity = None   # NTH, flux x arcsec^-2
+        if from_file is not None:
+            self._read_from_file(from_file, **kwargs)
 
     def calculate_intensity(self, flux, ftype='abs', funit='none'):
         assert self.norm_int is not None
@@ -130,3 +134,52 @@ class Halo(object):
         fh_tot   = np.sum(self.fhalo)
         enclosed = trapz(I_grid * 2.0 * np.pi * th_grid, th_grid)
         return enclosed / fh_tot
+
+    def write(self, filename, overwrite=True):
+        """
+        Inputs
+        ------
+        filename : string
+            Name for the output FITS file
+
+        Write the scattering halo 'norm_int' attribute to a FITS file.
+        The file will also store the relevant LAM, THETA, and TAUX values.
+        """
+        hdr = fits.Header()
+        hdr['COMMENT'] = "Normalized halo intensity as a function of angle"
+        hdr['COMMENT'] = "HDU 1 is LAM, HDU 2 is THETA, HDU 3 is TAUX"
+        primary_hdu = fits.PrimaryHDU(self.norm_int, header=hdr)
+
+        hdus_to_write = [primary_hdu] + self._write_halo_pars()
+        hdu_list = fits.HDUList(hdus=hdus_to_write)
+        hdu_list.writeto(filename, overwrite=overwrite)
+        return
+
+    ##----- Helper material
+    def _write_halo_pars(self):
+        """Write the FITS file"""
+        # e.g. pars['lam'], pars['a']
+        # should this be part of WCS?
+        c1 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='lam', array=c._make_array(self.lam),
+             format='E', unit=self.lam_unit)])
+        c2 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='theta', array=c._make_array(self.theta),
+             format='E', unit='arcsec')])
+        c3 = fits.BinTableHDU.from_columns(
+             [fits.Column(name='taux', array=c._make_array(self.taux),
+             format='E', unit='')])
+        return [c1, c2, c3]
+
+    def _read_from_file(self, filename, htype='CustomFile'):
+        """Read a Halo object from a FITS file"""
+        ff = fits.open(filename)
+        # Load the normalized intensity
+        self.norm_int = ff[0].data
+        # Load the other parameters
+        self.lam = ff[1].data['lam']
+        self.lam_unit = ff[1].columns['lam'].unit
+        self.theta = ff[2].data['theta']
+        self.taux = ff[3].data['taux']
+        # Set halo type
+        self.htype = htype
