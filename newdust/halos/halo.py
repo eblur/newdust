@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.integrate import trapz
+from astropy.io import fits
+from .. import constants as c
 
 __all__ = ['Halo']
 
@@ -144,11 +146,11 @@ class Halo(object):
         hdr = fits.Header()
         hdr['COMMENT'] = "Normalized halo intensity as a function of angle"
         hdr['COMMENT'] = "HDU 1 is ENERGY, HDU 2 is THETA, HDU 3 is TAUX"
-        primary_hdu = fits.PrimaryHDU(self.norm_int, header=result)
+        primary_hdu = fits.PrimaryHDU(self.norm_int, header=hdr)
 
-        hdus_to_write = primary_hdu + self._write_halo_pars()
+        hdus_to_write = [primary_hdu] + self._write_halo_pars()
         hdu_list = fits.HDUList(hdus=hdus_to_write)
-        hdu_list.writeto(outfile, overwrite=overwrite)
+        hdu_list.writeto(filename, overwrite=overwrite)
         return
 
     ##----- Helper material
@@ -158,7 +160,7 @@ class Halo(object):
         # should this be part of WCS?
         c1 = fits.BinTableHDU.from_columns(
              [fits.Column(name='lam', array=c._make_array(self.lam),
-             format='E', unit=self.lam_unit])
+             format='E', unit=self.lam_unit)])
         c2 = fits.BinTableHDU.from_columns(
              [fits.Column(name='theta', array=c._make_array(self.theta),
              format='E', unit='arcsec')])
