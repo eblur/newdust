@@ -112,3 +112,14 @@ def test_halo_index(test):
     assert tt.taux == test.taux[i]
     assert np.shape(tt.norm_int) == (1, NTH)
     assert np.shape(tt.intensity) == (NTH,)
+
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+def test_halo_io(test):
+    test.write('test_halo_io.fits')
+    new_halo = Halo(from_file='test_halo_io.fits', htype=test.htype)
+    assert np.all(percent_diff(new_halo.lam,test.lam) < 0.01)
+    assert np.all(percent_diff(new_halo.theta,test.theta) < 0.01)
+    assert np.all(percent_diff(new_halo.taux,test.taux) < 0.01)
+    assert np.all(percent_diff(new_halo.norm_int.flatten(),test.norm_int.flatten()) < 0.01)
+    assert new_halo.lam_unit == test.lam_unit
+    assert np.all(new_halo.htype.md == test.htype.md)
