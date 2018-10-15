@@ -260,7 +260,7 @@ class Halo(object):
             iend = np.arange(len(h.lam)+1)[imax]
             
         # Add up randomized image for each energy index value
-        r_asec = r * pix_scale
+        r_asec = radius * pix_scale
         result = np.zeros_like(radius)
         for i in np.arange(imin, iend):
             # interp object for halo grid (arcsec, counts/arcsec^2)
