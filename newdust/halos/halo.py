@@ -246,7 +246,7 @@ class Halo(object):
         arf   = InterpolatedUnivariateSpline(arf_x, arf_y, k=1)
 
         # Source counts to use for each energy bin
-        if self.lam_unit in ANGS:
+        if self.lam_unit == 'angs':
             ltemp      = self.lam * u.angstrom
             ltemp_kev  = ltemp.to(u.keV, equivalencies=u.spectral()).value
             arf_temp   = arf(ltemp_kev)[::-1]
