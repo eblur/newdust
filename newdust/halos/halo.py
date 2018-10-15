@@ -257,7 +257,7 @@ class Halo(object):
         # Decide which energy indexes to use
         iend = imax
         if imax < 0:
-            iend = np.arange(len(h.lam)+1)[imax]
+            iend = np.arange(len(self.lam)+1)[imax]
             
         # Add up randomized image for each energy index value
         r_asec = radius * pix_scale
