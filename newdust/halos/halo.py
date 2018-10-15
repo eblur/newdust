@@ -254,25 +254,24 @@ class Halo(object):
         else:
             src_counts = src_flux * arf(self.lam) * exposure
 
-        # Method for creating an image for a single energy value
-        def _im_index(r, i):
-            h_interp = InterpolatedUnivariateSpline(
-                self.theta, self.norm_int[i,:] * src_counts[i], k=1)
-            # arcsec, counts/arcsec^2
-            r_new      = r * pix_scale
-            pix_counts = h_interp(r_new) * pix_scale**2
-            pix_random = np.random.poisson(pix_counts)
-            return pix_random
-
         # Decide which energy indexes to use
         iend = imax
         if imax < 0:
             iend = np.arange(len(h.lam)+1)[imax]
             
-        # Do it for all the energy values desired and add them up
-        result = np.zeros_like
+        # Add up randomized image for each energy index value
+        r_asec = r * pix_scale
+        result = np.zeros_like(radius)
         for i in np.arange(imin, iend):
-            result += _im_index(radius, i)
+            # interp object for halo grid (arcsec, counts/arcsec^2)
+            h_interp = InterpolatedUnivariateSpline(
+                self.theta, self.norm_int[i,:] * src_counts[i], k=1)
+            # corresponding counts at each radial value in the grid
+            pix_counts = h_interp(r_asec) * pix_scale**2
+            # use poisson statistics to get a random value
+            pix_random = np.random.poisson(pix_counts)
+            # add it to the final result
+            result += pix_random
 
         if save_file is not None:
             hdu  = fits.PrimaryHDU(result)
