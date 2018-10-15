@@ -243,7 +243,7 @@ class Halo(object):
         arf_data = fits.open(arf)['SPECRESP'].data
         arf_x = 0.5*(arf_data['ENERG_LO'] + arf_data['ENERG_HI'])
         arf_y = arf_data['SPECRESP']
-        arf   = InterpolatedUnivariateSpline(x, y, k=1)
+        arf   = InterpolatedUnivariateSpline(arf_x, arf_y, k=1)
 
         # Source counts to use for each energy bin
         if self.lam_unit in ANGS:
@@ -256,7 +256,8 @@ class Halo(object):
 
         # Method for creating an image for a single energy value
         def _im_index(r, i):
-            h_interp = InterpolatedUnivariateSpline(self.theta, self.norm_int[i,:] * src_counts[i])
+            h_interp = InterpolatedUnivariateSpline(
+                self.theta, self.norm_int[i,:] * src_counts[i], k=1)
             # arcsec, counts/arcsec^2
             r_new      = r * pix_scale
             pix_counts = h_interp(r_new) * pix_scale**2
