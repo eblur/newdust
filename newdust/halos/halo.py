@@ -1,7 +1,8 @@
 import numpy as np
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
 from scipy.integrate import trapz
 from astropy.io import fits
+import astropy.units as u
 from .. import constants as c
 
 __all__ = ['Halo']
@@ -183,3 +184,98 @@ class Halo(object):
         self.taux = ff[3].data['taux']
         # Set halo type
         self.htype = htype
+
+    ##------ Make a fake image with a telescope arf
+    def fake_image(self, arf, src_flux, exposure, 
+                   pix_scale=0.5, num_pix=[2400,2400],
+                   imin=0, imax=-1, save_file=None, **kwargs):
+        """Make a fake image file using a telescope ARF as input.
+
+        Parameters
+        ----------
+        arf : string
+            Filename of telescope ARF
+
+        src_flux : numpy.ndarray [phot/cm^2/s]
+            Describes the absorbed (without X-ray scattering) flux
+            model for the central X-ray point source. Must correspond
+            to the values in Halo.lam
+
+        exposure : float [seconds]
+            Exposure time to use
+
+        pix_scale : float [arcsec]
+            Size of simulated pixels
+
+        num_pix : ints (nx,ny) 
+            Size of pixel grid to use
+
+        imin : int
+            Energy index to start with (Default: 0)
+
+        imax : int
+            Energy index to end with, exclusive, except when using
+            negative indexing (Default: -1)
+
+        save_file : string (Default:None)
+            Filename to use if you want to save the output to a .fits
+
+        Returns
+        -------
+        2D numpy.ndarray of shape (nx, ny), representing the image of
+        a dust scattering halo. The halo intensity at different
+        energies are converted into counts using the ARF. Then a
+        Poisson distribution is used to simulate the number of counts
+        in each pixel.
+        
+        If the user supplies a file name string using the save_file
+        keyword, a FITS file will be saved.
+
+        """
+        assert len(src_flux) == len(self.lam)
+
+        xlen, ylen = num_pix
+        xcen, ycen = xlen//2, ylen//2
+        ccdx, ccdy = np.meshgrid(np.arange(xlen), np.arange(ylen))
+        radius = np.sqrt((ccdx - xcen)**2 + (ccdy - ycen)**2)
+
+        # Typical ARF files have columns 'ENERG_LO', 'ENERG_HI', 'SPECRESP'
+        arf_data = fits.open(arf)['SPECRESP'].data
+        arf_x = 0.5*(arf_data['ENERG_LO'] + arf_data['ENERG_HI'])
+        arf_y = arf_data['SPECRESP']
+        arf   = InterpolatedUnivariateSpline(x, y, k=1)
+
+        # Source counts to use for each energy bin
+        if self.lam_unit in ANGS:
+            ltemp      = self.lam * u.angstrom
+            ltemp_kev  = ltemp.to(u.keV, equivalencies=u.spectral()).value
+            arf_temp   = arf(ltemp_kev)[::-1]
+            src_counts = src_flux * arf_temp * exposure
+        else:
+            src_counts = src_flux * arf(self.lam) * exposure
+
+        # Method for creating an image for a single energy value
+        def _im_index(r, i):
+            h_interp = InterpolatedUnivariateSpline(self.theta, self.norm_int[i,:] * src_counts[i])
+            # arcsec, counts/arcsec^2
+            r_new      = r * pix_scale
+            pix_counts = h_interp(r_new) * pix_scale**2
+            pix_random = np.random.poisson(pix_counts)
+            return pix_random
+
+        # Decide which energy indexes to use
+        iend = imax
+        if imax < 0:
+            iend = np.arange(len(h.lam)+1)[imax]
+            
+        # Do it for all the energy values desired and add them up
+        result = np.zeros_like
+        for i in np.arange(imin, iend):
+            result += _im_index(radius, i)
+
+        if save_file is not None:
+            hdu  = fits.PrimaryHDU(result)
+            hdul = fits.HDUList([hdu])
+            hdul.writeto(save_file, overwrite=True)
+
+        return result
