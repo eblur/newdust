@@ -53,10 +53,38 @@ def _zda_dnda(a, A, pars):
 # B = B star composition
 # FG = F & G star composition
 
-# ZDA Table 6
+##---- ZDA Table 6
 ZDA_MODEL_TYPES = ['BARE-GR-S', 'BARE-GR-FG', 'BARE-GR-B', \
                    'BARE-AC-S', 'BARE-AC-FG', 'BARE-AC-B', \
                    'COMP-GR-S', 'COMP-GR-FG', 'COMP-GR-B', \
                    'COMP-AC-S', 'COMP-AC-FG', 'COMP-AC-B', \
                    'COMP-NC-S', 'COMP-NC-FG', 'COMP-NC-B']
-ZDA_A
+# normalization for analytic models
+ZDA_A = dict(zip(ZDA_MODEL_TYPES,
+                [1.44, 1.43, 1.32, 1.49, 1.51, 1.37, \
+                 1.46, 1.44, 1.35, 1.48, 1.49, 1.34, \
+                 1.48, 1.49, 1.35])) # 1.e-26 g H^-1
+# fraction of each grain type in the model
+ZDA_F = dict(zip(ZDA_MODEL_TYPES,
+                [dict(zip(ZDA_TYPES, [4.57, 29.47, 65.96, 0.0, 0.0, 0.0])),
+                 dict(zip(ZDA_TYPES, [4.88, 29.44, 65.68, 0.0, 0.0, 0.0])),
+                 dict(zip(ZDA_TYPES, [5.02, 33.38, 61.60, 0.0, 0.0, 0.0])),
+                 dict(zip(ZDA_TYPES, [6.89, 0.0, 64.46, 28.65, 0.0, 0.0])),
+                 dict(zip(ZDA_TYPES, [6.94, 0.0, 64.91, 28.15, 0.0, 0.0])),
+                 dict(zip(ZDA_TYPES, [7.60, 0.0, 59.93, 32.47, 0.0, 0.0])),
+                 dict(zip(ZDA_TYPES, [4.59, 14.96, 64.78, 0.0, 14.30, 1.37])),
+                 dict(zip(ZDA_TYPES, [4.94, 18.43, 64.20, 0.0, 11.34, 1.09])),
+                 dict(zip(ZDA_TYPES, [4.98, 19.64, 58.86, 0.0, 15.08, 1.44])),
+                 dict(zip(ZDA_TYPES, [6.81, 0.0, 64.34, 10.13, 17.09, 1.63])),
+                 dict(zip(ZDA_TYPES, [6.90, 0.0, 64.60, 10.85, 16.11, 1.54])),
+                 dict(zip(ZDA_TYPES, [7.63, 0.0, 59.31, 4.16, 26.37, 2.53])),
+                 dict(zip(ZDA_TYPES, [6.76, 0.0, 64.69, 0.0, 26.07, 2.49])),
+                 dict(zip(ZDA_TYPES, [6.81, 0.0, 64.80, 0.0, 25.91, 2.48])),
+                 dict(zip(ZDA_TYPES, [7.62, 0.0, 59.64, 0.0, 29.88, 2.86]))]))
+# dust-to-gas mass ratio, for reference
+ZDA_D2G = dict(zip(ZDA_MODEL_TYPES,
+                  [0.00619, 0.00618, 0.00568, \
+                   0.00639, 0.00648, 0.00589, \
+                   0.00626, 0.00620, 0.00580, \
+                   0.00637, 0.00642, 0.00578, \
+                   0.00635, 0.00642, 0.00579]))
