@@ -16,19 +16,27 @@ ZDA_UNIT_CELLS = dict(zip(ZDA_TYPES,
 # where g(a) integrates to 1 and A is the normalization in units of H^{-1}.
 # a is in units of um
 
-def zda_logg(a, pars):
-    m, a, b, c = pars # coefficients in eq 20
-    assert len(m) == 5 # value of m[0] doesn't matter
-    assert len(a) == 5 # value of a[0] doesn't matter
+def _zda_logg(a, pars):
+    m_in, a_in, b, c = pars # coefficients in eq 20
+    assert len(m_in) == 4 # value of m[0] doesn't matter
+    assert len(a_in) == 4 # value of a[0] doesn't matter
     assert len(b) == 5
     assert len(c) == 1
+    # unnecessary, but makes the following read easier
+    m = np.append(1.0, m_in)
+    a = np.append(1.0, a_in)
     terms = [c0, b[0] * np.log10(a)]
     terms.append(-b[1] * np.power(np.abs(np.log10(a/a[1])), m[1]))
     terms.append(-b[2] * np.power(np.abs(np.log10(a/a[2])), m[2]))
     terms.append(-b[3] * np.power(np.abs(a - a[3]), m[3])),
     terms.append(-b[4] * np.power(np.abs(a - a[4]), m[4]))
     result = np.array(terms)
-    return np.sum(result)
+    return np.sum(result) # um^-1
+
+def _zda_dnda(a, A, pars):
+    logg = _zda_logg(a, pars)
+    result = A * np.power(10.0, logg)
+    return result
 
 ##---- ZDA model types
 # First string:
@@ -45,7 +53,10 @@ def zda_logg(a, pars):
 # B = B star composition
 # FG = F & G star composition
 
-# ZDA Table 3
-ZDA_MODEL_TYPES = ['COMP-GR-S', 'COMP-AC-S', 'COMP-NC-S', \
-                   'COMP-GR-FG', 'COMP-AC-FG', 'COMP-NC-FG', \
-                   'COMP-GR-B', 'COMP-AC-B', 'COMP-NC-B']
+# ZDA Table 6
+ZDA_MODEL_TYPES = ['BARE-GR-S', 'BARE-GR-FG', 'BARE-GR-B', \
+                   'BARE-AC-S', 'BARE-AC-FG', 'BARE-AC-B', \
+                   'COMP-GR-S', 'COMP-GR-FG', 'COMP-GR-B', \
+                   'COMP-AC-S', 'COMP-AC-FG', 'COMP-AC-B', \
+                   'COMP-NC-S', 'COMP-NC-FG', 'COMP-NC-B']
+ZDA_A
