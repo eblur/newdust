@@ -2,6 +2,9 @@
 ## Zubko, Dwek, & Arendt (2004) [ZDA hereafter]
 ## http://adsabs.harvard.edu/abs/2004ApJS..152..211Z
 
+## TO DO :
+## [ ] Write a test for _zda_logg integrating to 1.0
+
 # ZDA Table 2
 ZDA_TYPES = ['PAHs', 'Graphite', 'Silicate', \
          'AmorphousCarbon', 'OrganicRefractory', 'WaterIce']
