@@ -2,8 +2,11 @@
 ## Zubko, Dwek, & Arendt (2004) [ZDA hereafter]
 ## http://adsabs.harvard.edu/abs/2004ApJS..152..211Z
 
+import numpy as np
+
 ## TO DO :
 ## [ ] Write a test for _zda_logg integrating to 1.0
+## [ ] Catch Warnings on r/a = 1.0 special case in _zda_logg
 
 # ZDA Table 2
 ZDA_TYPES = ['PAHs', 'Graphite', 'Silicate', \
@@ -19,23 +22,27 @@ ZDA_UNIT_CELLS = dict(zip(ZDA_TYPES,
 # where g(a) integrates to 1 and A is the normalization in units of H^{-1}.
 # a is in units of um
 
-def _zda_logg(a, pars):
-    amin, amax, c, b, a_in, m_in = pars # coefficients in eq 20, and grain limits
-    assert len(m_in) == 5 # value of m[0] doesn't matter
-    assert len(a_in) == 5 # value of a[0] doesn't matter
+def _zda_logg(r, pars):
+    # r = grain radius
+    rmin, rmax, c, b, a, m = pars # coefficients in eq 20, and grain limits
+    assert len(m) == 5 # value of m[0] doesn't matter
+    assert len(a) == 5 # value of a[0] doesn't matter
     assert len(b) == 5
-    assert len(c) == 1
-    # unnecessary, but makes the following read easier
-    m = np.append(1.0, m_in)
-    a = np.append(1.0, a_in)
-    terms = [c0 + b[0] * np.log10(a)] # length = a
-    terms.append(-b[1] * np.power(np.abs(np.log10(a/a[1])), m[1]))
-    terms.append(-b[2] * np.power(np.abs(np.log10(a/a[2])), m[2]))
-    terms.append(-b[3] * np.power(np.abs(a - a[3]), m[3])),
-    terms.append(-b[4] * np.power(np.abs(a - a[4]), m[4]))
-    result = np.sum(np.array(terms), axis=1)
-    result[a < amin] = 0.0
-    result[a > amax] = 0.0
+
+    terms = [c + b[0] * np.log10(r)] # length = len(a)
+    terms.append(-b[1] * np.power(np.abs(np.log10(r/a[1])), m[1]))
+    terms.append(-b[2] * np.power(np.abs(np.log10(r/a[2])), m[2]))
+    terms.append(-b[3] * np.power(np.abs(r - a[3]), m[3])),
+    terms.append(-b[4] * np.power(np.abs(r - a[4]), m[4]))
+    terms = np.array(terms)
+    # note special cases: if m < 0 and r/a = 1.0,
+    # there will be a divide by zero error
+    terms[np.isinf(terms)] = 0.0
+    #print(terms)
+
+    result = np.sum(terms, axis=0)
+    result[r < rmin] = 0.0
+    result[r > rmax] = 0.0
     return result # um^-1
 
 def _zda_dnda(a, A, pars):
@@ -94,21 +101,22 @@ ZDA_D2G = dict(zip(ZDA_MODEL_TYPES,
 # Model parameters follow precedent set in _zda_logg function
 # pars = A, amin, amax, c, b (length 5), a (length 5), m (length 5)
 # I always set a[0]=1 and m[0]=1 because it works out in the expansion.
+# Any b[n]=0 terms will have a[n]=1 (to avoid divide by 0) and m[n]=0
 ZDA_MODEL = dict()
 
 # Table 7
 ZDA_MODEL['BARE-GR-S'] = dict()
 ZDA_MODEL['BARE-GR-S']['PAH'] = [2.227433e-7, 3.5e-4, 5.e-3, -8.02895, \
     [-3.45764, 1.18396e3, 0.0, 1.e24, 0.0], \
-    [1.0, 1.0, 0.0, -5.29496e-3, 0.0], \
-    [1.0, -8.20551, 0.0, 12.0146]]
+    [1.0, 1.0, 1.0, -5.29496e-3, 1.0], \
+    [1.0, -8.20551, 0.0, 12.0146, 0.0]]
 ZDA_MODEL['BARE-GR-S']['Graphite'] = [1.905816e-7, 3.5e-4, 0.33, -9.86, \
     [-5.02082, 5.81215e-3, 0.0, 1.12502e3, 1.12602e3], \
-    [1.0, 0.415861, 0.0, 0.160344, 0.160501], \
+    [1.0, 0.415861, 1.0, 0.160344, 0.160501], \
     [1.0, 4.63229, 0.0, 3.69897, 3.69967]]
 ZDA_MODEL['BARE-GR-S']['Silicate'] = [1.471288e-7, 3.5e-4, 0.37, -8.47091,\
     [-3.68708, 2.37316e-5, 0.0, 2.96128e3, 0.0], \
-    [1.0, 7.64943e-3, 0.0, 0.480229, 0.0], \
+    [1.0, 7.64943e-3, 1.0, 0.480229, 1.0], \
     [1.0, 22.5489, 0.0, 12.1717, 0.0]]
 
 def logg(avals, modelname, gtype):

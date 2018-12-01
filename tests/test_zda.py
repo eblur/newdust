@@ -11,7 +11,8 @@ AVALS = np.logspace(-4, 0.0, 100)
 
 @pytest.mark.parametrize('model', MTYPES)
 def test_logg(model):
-    for k in model.keys():
+    for k in zda.ZDA_MODEL[model].keys():
+        print("Testing {}, {}".format(model, k))
         result = zda.logg(AVALS, model, k)
         assert len(result) == len(AVALS)
         test_integral = trapz(result, AVALS)
