@@ -114,5 +114,4 @@ ZDA_MODEL['BARE-GR-S']['Silicate'] = [1.471288e-7, 3.5e-4, 0.37, -8.47091,\
 def logg(avals, modelname, gtype):
     assert modelname in ZDA_MODEL_TYPES
     assert gtype in ZDA_MODEL[modelname].keys()
-    A, amin, amax, c, b, a, m = ZDA_MODEL[modelname][gtype]
-    return _zda_logg(avals, [m, a, b, c])
+    return _zda_logg(avals, ZDA_MODEL[modelname][gtype][1:])
