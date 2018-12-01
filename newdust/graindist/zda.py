@@ -28,15 +28,15 @@ def _zda_logg(a, pars):
     # unnecessary, but makes the following read easier
     m = np.append(1.0, m_in)
     a = np.append(1.0, a_in)
-    terms = [c0, b[0] * np.log10(a)]
+    terms = [c0 + b[0] * np.log10(a)] # length = a
     terms.append(-b[1] * np.power(np.abs(np.log10(a/a[1])), m[1]))
     terms.append(-b[2] * np.power(np.abs(np.log10(a/a[2])), m[2]))
     terms.append(-b[3] * np.power(np.abs(a - a[3]), m[3])),
     terms.append(-b[4] * np.power(np.abs(a - a[4]), m[4]))
-    result = np.array(terms)
+    result = np.sum(np.array(terms), axis=1)
     result[a < amin] = 0.0
     result[a > amax] = 0.0
-    return np.sum(result) # um^-1
+    return result # um^-1
 
 def _zda_dnda(a, A, pars):
     logg = _zda_logg(a, pars)
