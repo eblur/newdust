@@ -20,7 +20,7 @@ ZDA_UNIT_CELLS = dict(zip(ZDA_TYPES,
 # a is in units of um
 
 def _zda_logg(a, pars):
-    m_in, a_in, b, c = pars # coefficients in eq 20
+    amin, amax, c, b, a_in, m_in = pars # coefficients in eq 20, and grain limits
     assert len(m_in) == 5 # value of m[0] doesn't matter
     assert len(a_in) == 5 # value of a[0] doesn't matter
     assert len(b) == 5
@@ -34,6 +34,8 @@ def _zda_logg(a, pars):
     terms.append(-b[3] * np.power(np.abs(a - a[3]), m[3])),
     terms.append(-b[4] * np.power(np.abs(a - a[4]), m[4]))
     result = np.array(terms)
+    result[a < amin] = 0.0
+    result[a > amax] = 0.0
     return np.sum(result) # um^-1
 
 def _zda_dnda(a, A, pars):
