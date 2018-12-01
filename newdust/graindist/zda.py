@@ -21,8 +21,8 @@ ZDA_UNIT_CELLS = dict(zip(ZDA_TYPES,
 
 def _zda_logg(a, pars):
     m_in, a_in, b, c = pars # coefficients in eq 20
-    assert len(m_in) == 4 # value of m[0] doesn't matter
-    assert len(a_in) == 4 # value of a[0] doesn't matter
+    assert len(m_in) == 5 # value of m[0] doesn't matter
+    assert len(a_in) == 5 # value of a[0] doesn't matter
     assert len(b) == 5
     assert len(c) == 1
     # unnecessary, but makes the following read easier
@@ -108,3 +108,9 @@ ZDA_MODEL['BARE-GR-S']['Silicate'] = [1.471288e-7, 3.5e-4, 0.37, -8.47091,\
     [-3.68708, 2.37316e-5, 0.0, 2.96128e3, 0.0], \
     [1.0, 7.64943e-3, 0.0, 0.480229, 0.0], \
     [1.0, 22.5489, 0.0, 12.1717, 0.0]]
+
+def logg(avals, modelname, gtype):
+    assert modelname in ZDA_MODEL_TYPES
+    assert gtype in ZDA_MODEL[modelname].keys()
+    A, amin, amax, c, b, a, m = ZDA_MODEL[modelname][gtype]
+    return _zda_logg(avals, [m, a, b, c])
