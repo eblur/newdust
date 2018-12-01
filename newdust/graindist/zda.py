@@ -62,11 +62,7 @@ ZDA_MODEL_TYPES = ['BARE-GR-S', 'BARE-GR-FG', 'BARE-GR-B', \
                    'COMP-GR-S', 'COMP-GR-FG', 'COMP-GR-B', \
                    'COMP-AC-S', 'COMP-AC-FG', 'COMP-AC-B', \
                    'COMP-NC-S', 'COMP-NC-FG', 'COMP-NC-B']
-# normalization for analytic models
-ZDA_A = dict(zip(ZDA_MODEL_TYPES,
-                [1.44, 1.43, 1.32, 1.49, 1.51, 1.37, \
-                 1.46, 1.44, 1.35, 1.48, 1.49, 1.34, \
-                 1.48, 1.49, 1.35])) # 1.e-26 g H^-1
+
 # fraction of each grain type in the model
 ZDA_F = dict(zip(ZDA_MODEL_TYPES,
                 [dict(zip(ZDA_TYPES, [4.57, 29.47, 65.96, 0.0, 0.0, 0.0])),
@@ -91,3 +87,24 @@ ZDA_D2G = dict(zip(ZDA_MODEL_TYPES,
                    0.00626, 0.00620, 0.00580, \
                    0.00637, 0.00642, 0.00578, \
                    0.00635, 0.00642, 0.00579]))
+
+# ZDA Tables 7 - 21
+# Model parameters follow precedent set in _zda_logg function
+# pars = A, amin, amax, c, b (length 5), a (length 5), m (length 5)
+# I always set a[0]=1 and m[0]=1 because it works out in the expansion.
+ZDA_MODEL = dict()
+
+# Table 7
+ZDA_MODEL['BARE-GR-S'] = dict()
+ZDA_MODEL['BARE-GR-S']['PAH'] = [2.227433e-7, 3.5e-4, 5.e-3, -8.02895, \
+    [-3.45764, 1.18396e3, 0.0, 1.e24, 0.0], \
+    [1.0, 1.0, 0.0, -5.29496e-3, 0.0], \
+    [1.0, -8.20551, 0.0, 12.0146]]
+ZDA_MODEL['BARE-GR-S']['Graphite'] = [1.905816e-7, 3.5e-4, 0.33, -9.86, \
+    [-5.02082, 5.81215e-3, 0.0, 1.12502e3, 1.12602e3], \
+    [1.0, 0.415861, 0.0, 0.160344, 0.160501], \
+    [1.0, 4.63229, 0.0, 3.69897, 3.69967]]
+ZDA_MODEL['BARE-GR-S']['Silicate'] = [1.471288e-7, 3.5e-4, 0.37, -8.47091,\
+    [-3.68708, 2.37316e-5, 0.0, 2.96128e3, 0.0], \
+    [1.0, 7.64943e-3, 0.0, 0.480229, 0.0], \
+    [1.0, 22.5489, 0.0, 12.1717, 0.0]]
