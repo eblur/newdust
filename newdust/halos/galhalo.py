@@ -1,11 +1,12 @@
 import numpy as np
 from scipy.integrate import trapz
 
-from .halo import *
+from .halo import Halo
 from ..grainpop import *
 from .. import constants as c
 
-__all__ = ['UniformGalHalo','ScreenGalHalo','path_diff','uniformISM','screenISM']
+__all__ = ['UniformGalHalo','ScreenGalHalo','path_diff',
+           'uniformISM','screenISM','time_delay']
 
 ANGLES = np.logspace(0.0, 3.5, np.int(3.5/0.05))
 
@@ -21,7 +22,7 @@ class UniformGalHalo(object):
         self.description = 'Uniform'
         self.md = md
 
-class ScreenGalHalo(object):
+class ScreenGalHalo(Halo):
     """
     | *An htype class for storing halo properties (see halo.py)*
     |
@@ -32,10 +33,87 @@ class ScreenGalHalo(object):
     | x = 0 is the position of the source
     | x = 1 is the position of the observer
     """
-    def __init__(self, md, x):
+    def __init__(self, *args, **kwargs):
+        Halo.__init__(*args)
         self.description = 'Screen'
-        self.md  = md
-        self.x   = x
+        self.md   = None
+        self.x    = None
+
+    def calculate(self, gpop, x=0.5):
+        assert isinstance(gpop, SingleGrainPop)
+        assert (x > 0.0) & (x <= 1.0)
+        self.md   = gpop.mdens
+        self.x    = x
+
+        NE, NA, NTH = np.size(self.lam), np.size(gpop.a), np.size(self.theta)
+        #self.htype = ScreenGalHalo(md=gpop.mdens, x=x)
+
+        thscat = self.theta / x
+        gpop.calculate_ext(self.lam, unit=self.lam_unit, theta=thscat)
+        dsig   = gpop.diff  # NE x NA x NTH, [cm^2 arsec^-2]
+
+        ndmesh = np.repeat(
+            np.repeat(gpop.ndens.reshape(1, NA, 1), NE, axis=0),
+            NTH, axis=2)
+
+        itemp  = np.power(x, -2.0) * dsig * ndmesh  # NE x NA x NTH, [um^-1 arcsec^-2]
+        intensity = trapz(itemp, gpop.a, axis=1)  # NE x NTH, [arcsec^-2]
+
+        self.norm_int = intensity
+        self.taux     = gpop.tau_sca
+
+    #------- Deal with variable scattering halo images ----#
+    def variable_profile(self, time, lc, dist=8.0, tnow=None):
+        """
+        Given a light curve, calculate the energy-dependent intensity of
+        the scattering halo at some time afterwards.
+
+        Parameters
+        ----------
+        time : numpy.ndarray (days)
+            Time values for light curve
+
+        lc : numpy.ndarray (unitless)
+            Light curve in units of source flux
+            (i.e. will be multiplied by self.fabs)
+
+        dist : float (kpc)
+            Distance to the object in kpc
+
+        tnow : float (days)
+            Time for calculating the halo image
+            (Default: Last time value in light curve)
+
+        Returns
+        -------
+        numpy.ndarray (NE x NTH) [fabs units / arcsec**2]
+            Scattering halo intensity as a function of
+            energy and observation angle.
+        """
+        assert self.fabs is not None, "Must run calculate_intensity before" \
+                                "calculating a variable profile"
+
+        tzero = time[0]
+        # echo observation time
+        if tnow is None:
+            tnow = time[-1]
+
+        assert tnow > tzero, "Invalid value for tnow"
+
+        # cross section data in arcsec, convert to radian
+        theta_rad = self.theta/3600./180.*np.pi
+
+        ne, ntheta = len(self.lam), len(self.theta)
+        inten  = np.zeros(shape=(ne, ntheta))
+        lctm   = (time-tzero)
+
+        for i in range(len(self.lam)):
+            deltat = time_delay(self.theta, self.htype.x, dist) * u.second.to(u.day)
+            t      = tnow - deltat
+            for j in range(ntheta):
+                inten[i,j] += np.interp(t[j], lctm, lc * self.norm_int[i,j] * self.fabs[i])
+
+        return inten
 
 #--------------- Galactic Halos --------------------
 
@@ -125,6 +203,7 @@ def uniformISM(halo, gpop, nx=500):
     #dscat      = interp  ## Need to figure out multi-dimensional interpolation
 
 
+# 2018.12.15 -- keep this for backwards compatibility
 def screenISM(halo, gpop, x=0.5):
     """
     | Calculate the X-ray scattering intensity for dust in an
