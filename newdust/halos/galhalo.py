@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.integrate import trapz
+from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
+
 import astropy.units as u
+from astropy.io import fits
 
 from .halo import Halo
 from ..grainpop import *
@@ -162,7 +165,7 @@ class ScreenGalHalo(Halo):
                             tnow=None, pix_scale=0.5, num_pix=[2400,2400],
                             lmin=None, lmax=None, save_file=None, **kwargs):
         """
-        
+
         """
         assert np.all(time >= 0.0)
         if tnow < 0:
@@ -189,10 +192,6 @@ class ScreenGalHalo(Halo):
         ccdx, ccdy = np.meshgrid(np.arange(xlen), np.arange(ylen))
         radius = np.sqrt((ccdx - xcen)**2 + (ccdy - ycen)**2)
 
-        iend = imax
-        if imax < 0:
-            iend = np.arange(len(halo.lam)+1)[imax]
-
         # Typical ARF files have columns 'ENERG_LO', 'ENERG_HI', 'SPECRESP'
         arf_data = fits.open(arf)['SPECRESP'].data
         arf_x = 0.5*(arf_data['ENERG_LO'] + arf_data['ENERG_HI'])
@@ -200,18 +199,25 @@ class ScreenGalHalo(Halo):
         arf   = InterpolatedUnivariateSpline(arf_x, arf_y, k=1)
 
         # Conversion erg -> ct for each energy bin
-        int_conv = arf(ener.to(u.keV).value) # cm^2 ct/phot
+        if self.lam_unit in ['Angs', 'Angstrom', 'angs', 'angstrom']:
+            ener = self.lam * u.angstrom
+        elif self.lam_unit in ['kev', 'keV']:
+            ener = self.lam * u.keV
+        else:
+            ener = self.lam * u.Unit(self.lam_unit)
+        int_conv = arf(ener.to(u.keV, equivalencies=u.spectral()))
+        # cm^2 ct/phot
 
         r_asec = radius * pix_scale
         result = np.zeros_like(radius)
         for i in np.arange(imin, iend):
             h_interp = InterpolatedUnivariateSpline(
-                    theta, intensity[i,:] * int_conv[i], k=1) # ct/s/arcsec^2
+                    self.theta, var_profile[i,:] * int_conv[i], k=1) # ct/s/arcsec^2
             # corresponding counts at each radial value in the grid
             pix_flux = h_interp(r_asec) * pix_scale**2 * exposure # phot
             result += pix_flux
 
-    return result
+        return result
 
 #--------------- Galactic Halos --------------------
 
