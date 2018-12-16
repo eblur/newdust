@@ -230,7 +230,6 @@ class Halo(object):
 
         If the user supplies a file name string using the save_file
         keyword, a FITS file will be saved.
-
         """
         assert len(src_flux) == len(self.lam)
 

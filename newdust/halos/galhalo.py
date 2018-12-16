@@ -161,11 +161,63 @@ class ScreenGalHalo(Halo):
 
         return inten
 
-    def fake_variable_image(self, time, lc, arf, exposure=10.e3,
-                            tnow=None, pix_scale=0.5, num_pix=[2400,2400],
-                            lmin=None, lmax=None, save_file=None, **kwargs):
+    def fake_variable_image(self, time, lc, arf,
+                            exposure=10.e3, tnow=None, dist=8.0,
+                            pix_scale=0.5, num_pix=[2400,2400],
+                            lmin=None, lmax=None, save_file=None):
         """
+        Make a fake image of a variable scattering halo
+        using a telescope ARF as input.
 
+        Parameters
+        ----------
+        time : numpy.ndarray [days]
+            Time values for light curve
+
+        lc : numpy.ndarray (unitless)
+            Light curve in units of source flux
+            (i.e. will be multiplied by self.fabs)
+
+        arf : string
+            Filename of telescope ARF
+
+        exposure : float [seconds]
+            Exosure time for simulated image
+
+        tnow : float [days]
+            Time for calculating the halo image
+            (Default: Last time value in light curve)
+
+        dist : float [kpc]
+            Distance to the object in kpc
+
+        pix_scale : float [arcsec]
+            Size of simulated pixels
+
+        num_pix : ints (nx,ny)
+            Size of pixel grid to use
+
+        lmin : float
+            Minimum halo.lam value
+            (Default:None uses entire range)
+
+        lmax : float
+            Maximum halo.lam value
+            (Default:None uses entire range)
+
+        save_file : string (Default:None)
+            Filename to use if you want to save the output to a FITS file
+
+        Returns
+        -------
+        2D numpy.ndarray of shape (nx, ny), representing the image of
+        a dust scattering halo. The halo intensity at different
+        energies are converted into counts using the ARF. Then a
+        Poisson distribution is used to simulate the number of counts
+        in each pixel.
+
+        If the user supplies a file name string using the save_file
+        keyword, a FITS file will be saved.
         """
         assert np.all(time >= 0.0)
         if tnow < 0:
