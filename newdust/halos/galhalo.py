@@ -158,6 +158,61 @@ class ScreenGalHalo(Halo):
 
         return inten
 
+    def fake_variable_image(self, time, lc, arf, exposure=10.e3,
+                            tnow=None, pix_scale=0.5, num_pix=[2400,2400],
+                            lmin=None, lmax=None, save_file=None, **kwargs):
+        """
+        
+        """
+        assert np.all(time >= 0.0)
+        if tnow < 0:
+            time_now = time[-1]
+        else:
+            time_now = tnow
+
+        var_profile = self.variable_profile(time, lc, tnow=time_now, **kwargs)
+        # intensity cube (NE x NTH), phot/cm^2/s/arcsec^2
+
+        # Decide which energy indexes to use
+        if lmin is None:
+            imin = 0
+        else:
+            imin = min(np.arange(len(self.lam))[self.lam >= lmin])
+        if lmax is None:
+            iend = -1
+        else:
+            iend = max(np.arange(len(self.lam))[self.lam <= lmax])
+
+        # set up image grid
+        xlen, ylen = num_pix
+        xcen, ycen = xlen//2, ylen//2
+        ccdx, ccdy = np.meshgrid(np.arange(xlen), np.arange(ylen))
+        radius = np.sqrt((ccdx - xcen)**2 + (ccdy - ycen)**2)
+
+        iend = imax
+        if imax < 0:
+            iend = np.arange(len(halo.lam)+1)[imax]
+
+        # Typical ARF files have columns 'ENERG_LO', 'ENERG_HI', 'SPECRESP'
+        arf_data = fits.open(arf)['SPECRESP'].data
+        arf_x = 0.5*(arf_data['ENERG_LO'] + arf_data['ENERG_HI'])
+        arf_y = arf_data['SPECRESP']
+        arf   = InterpolatedUnivariateSpline(arf_x, arf_y, k=1)
+
+        # Conversion erg -> ct for each energy bin
+        int_conv = arf(ener.to(u.keV).value) # cm^2 ct/phot
+
+        r_asec = radius * pix_scale
+        result = np.zeros_like(radius)
+        for i in np.arange(imin, iend):
+            h_interp = InterpolatedUnivariateSpline(
+                    theta, intensity[i,:] * int_conv[i], k=1) # ct/s/arcsec^2
+            # corresponding counts at each radial value in the grid
+            pix_flux = h_interp(r_asec) * pix_scale**2 * exposure # phot
+            result += pix_flux
+
+    return result
+
 #--------------- Galactic Halos --------------------
 
 def _is_small_angle(radians):
