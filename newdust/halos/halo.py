@@ -259,11 +259,11 @@ class Halo(object):
         if lmin is None:
             imin = 0
         else:
-            imin = min(np.arange(len(halo.lam))[halo.lam >= lmin])
+            imin = min(np.arange(len(self.lam))[self.lam >= lmin])
         if lmax is None:
             iend = -1
         else:
-            iend = max(np.arange(len(halo.lam))[halo.lam <= lmax]))
+            iend = max(np.arange(len(self.lam))[self.lam <= lmax])
 
         #iend = imax
         #if imax < 0:
