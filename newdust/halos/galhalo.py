@@ -37,7 +37,6 @@ class UniformGalHalo(Halo):
         self.md    = gpop.mdens
 
         NE, NA     = np.size(self.lam), np.size(gpop.a)
-        self.htype = UniformGalHalo(md=gpop.mdens)
         self.norm_int = np.zeros(shape=(NE, np.size(self.theta)))
 
         xgrid      = np.linspace(1.0/nx, 1.0, nx)
@@ -92,7 +91,6 @@ class ScreenGalHalo(Halo):
         self.x    = x
 
         NE, NA, NTH = np.size(self.lam), np.size(gpop.a), np.size(self.theta)
-        #self.htype = ScreenGalHalo(md=gpop.mdens, x=x)
 
         thscat = self.theta / x
         gpop.calculate_ext(self.lam, unit=self.lam_unit, theta=thscat)

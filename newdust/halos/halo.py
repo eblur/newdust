@@ -34,18 +34,18 @@ class Halo(object):
     | ecf(th, n)
     | __getitem__(lmin, lmax)
     """
-    def __init__(self, lam=1.0, theta=1.0, unit='kev', from_file=None, **kwargs):
+    def __init__(self, lam=1.0, theta=1.0, unit='kev', from_file=None):
+        self.description = None
         self.lam       = lam    # length NE
         self.lam_unit  = unit   # 'kev' or 'angs'
         self.theta     = theta  # length NTH, arcsec
-        #self.htype     = None   # modified by halo calculation functions
         self.norm_int  = None   # NE x NTH, arcsec^-2
         self.taux      = None   # NE, unitless
         self.fabs      = None   # NE, bin integrated flux [e.g. phot/cm^2/s, NOT phot/cm^2/s/keV]
         self.funit     = None
         self.intensity = None   # NTH, flux x arcsec^-2
         if from_file is not None:
-            self._read_from_file(from_file, **kwargs)
+            self._read_from_file(from_file)
 
     def calculate_intensity(self, flux, ftype='abs', funit='none'):
         assert self.norm_int is not None
@@ -99,7 +99,7 @@ class Halo(object):
     def _get_lam_slice(self, ii):
         result = Halo(self.lam[ii], self.theta, unit=self.lam_unit)
         if self.norm_int is not None:
-            result.htype    = self.htype
+            result.description = self.description
             result.norm_int = self.norm_int[ii,...]
             result.taux     = self.taux[ii]
         if self.fabs is not None:
@@ -110,7 +110,7 @@ class Halo(object):
         assert isinstance(i, int)
         result = Halo(self.lam[i], self.theta, unit=self.lam_unit)
         if self.norm_int is not None:
-            result.htype    = self.htype
+            result.description = self.description
             result.norm_int = np.array([self.norm_int[i,...]])
             result.taux     = self.taux[i]
         if self.fabs is not None:
@@ -171,7 +171,7 @@ class Halo(object):
              format='E', unit='')])
         return [c1, c2, c3]
 
-    def _read_from_file(self, filename, htype='CustomFile'):
+    def _read_from_file(self, filename):
         """Read a Halo object from a FITS file"""
         ff = fits.open(filename)
         # Load the normalized intensity
@@ -182,7 +182,7 @@ class Halo(object):
         self.theta = ff[2].data['theta']
         self.taux = ff[3].data['taux']
         # Set halo type
-        self.htype = htype
+        self.description = filename
 
     ##------ Make a fake image with a telescope arf
     def fake_image(self, arf, src_flux, exposure,
