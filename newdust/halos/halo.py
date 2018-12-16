@@ -289,3 +289,57 @@ class Halo(object):
             hdul.writeto(save_file, overwrite=True)
 
         return result
+
+    #------- Deal with variable scattering halo images ----#
+    def variable_profile(self, time, lc, dist=8.0, tnow=None):
+        """
+        Given a light curve, calculate the energy-dependent intensity of
+        the scattering halo at some time afterwards.
+
+        Parameters
+        ----------
+        time : numpy.ndarray
+            Time values for light curve
+
+        lc : numpy.ndarray (unitless)
+            Light curve in units of source flux
+            (i.e. will be multiplied by self.fabs)
+
+        dist : float (kpc)
+            Distance to the object in kpc
+
+        tnow : float
+            Time for calculating the halo image
+            (Default: Last time value in light curve)
+
+        Returns
+        -------
+        numpy.ndarray (NE x NTH) [fabs units / arcsec**2]
+            Scattering halo intensity as a function of
+            energy and observation angle.
+        """
+        assert self.htype.description == 'Screen', "Can only run variable" \
+                                "profiles on Screen calculations"
+        assert self.fabs is not None, "Must run calculate_intensity before" \
+                                "calculating a variable profile"
+        assert tnow > tzero, "Invalid value for tnow"
+
+        tzero = time[0]
+        # echo observation time
+        if tnow is None:
+            tnow = time[-1]
+
+        # cross section data in arcsec, convert to radian
+        theta_rad = halo.theta/3600./180.*np.pi
+
+        ne, ntheta = len(halo.lam), len(halo.theta)
+        inten  = np.zeros(shape=(ne, ntheta))
+        lctm   = (time-tzero)
+
+        for i in range(len(halo.lam)):
+            deltat = time_delay(halo.theta, halo.htype.x, dist) * u.second.to(u.day)
+            t      = tnow - deltat
+            for j in range(ntheta):
+                inten[i,j] += np.interp(t[j], lctm, lc * halo.norm_int[i,j] * halo.fabs[i])
+
+        return inten
