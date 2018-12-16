@@ -11,29 +11,59 @@ __all__ = ['UniformGalHalo','ScreenGalHalo','path_diff',
 
 ANGLES = np.logspace(0.0, 3.5, np.int(3.5/0.05))
 
-class UniformGalHalo(object):
-    """
-    | *An htype class for storing halo properties (see halo.py)*
-    |
-    | **ATTRIBUTES**
-    | description = 'Uniform'
-    | md : Dust mass column  [g cm^-2]
-    """
-    def __init__(self, md):
+class UniformGalHalo(Halo):
+    def __init__(self, *args, **kwargs):
+        Halo.__init__(self, *args, **kwargs)
         self.description = 'Uniform'
-        self.md = md
+        self.md = None
+
+    def calculate(self, gpop, nx=500):
+        """
+        Calculate the X-ray scattering intensity for dust distributed
+        uniformly along the line of sight
+
+        Parameters
+        ----------
+        gpop : newdust.grainpop.SingleGrainPop
+
+        nx : int
+            Number of x-values to use for calculation (Default: 500)
+
+        Returns
+        -------
+        None. Updates the md, norm_int, and taux attributes.
+        """
+        assert isinstance(gpop, SingleGrainPop)
+        self.md    = gpop.mdens
+
+        NE, NA     = np.size(self.lam), np.size(gpop.a)
+        self.htype = UniformGalHalo(md=gpop.mdens)
+        self.norm_int = np.zeros(shape=(NE, np.size(self.theta)))
+
+        xgrid      = np.linspace(1.0/nx, 1.0, nx)
+        xmesh      = np.repeat(
+            np.repeat(xgrid.reshape(1, 1, nx), NE, axis=0),
+            NA, axis=1)
+        ndmesh     = np.repeat(
+            np.repeat(gpop.ndens.reshape(1, NA, 1), NE, axis=0),
+            nx, axis=2)
+        assert np.shape(xmesh) == (NE, NA, nx)
+        assert np.shape(ndmesh) == (NE, NA, nx)
+        i_th = 0
+        for al in self.theta:
+            thscat = al / xgrid  # nx, goes from small to large angle
+            gpop.calculate_ext(self.lam, unit=self.lam_unit, theta=thscat)
+            dsig   = gpop.diff  # NE x NA x nx, [cm^2 arcsec^-2]
+            itemp  = dsig * ndmesh / xmesh**2  # NE x NA x nx, [um^-1 arcsec^-2]
+
+            intx      = trapz(itemp, xgrid, axis=2)  # NE x NA, [um^-1 arcsec^-2]
+            intensity = trapz(intx, gpop.a, axis=1)  # NE, [arcsec^-2]
+            self.norm_int[:,i_th] = intensity
+            i_th += 1
+
+        self.taux  = gpop.tau_sca
 
 class ScreenGalHalo(Halo):
-    """
-    | *An htype class for storing halo properties (see halo.py)*
-    |
-    | **ATTRIBUTES**
-    | description = 'Screen'
-    | md  : Dust mass column [g cm^-2]
-    | x   : float[0-1] : position of dust screen
-    | x = 0 is the position of the source
-    | x = 1 is the position of the observer
-    """
     def __init__(self, *args, **kwargs):
         Halo.__init__(self, *args, **kwargs)
         self.description = 'Screen'
@@ -42,7 +72,8 @@ class ScreenGalHalo(Halo):
 
     def calculate(self, gpop, x=0.5):
         """
-        Calculate scattering halo from a screen of dust
+        Calculate the X-ray scattering intensity for dust in an
+        infinitesimally thin wall somewhere on the line of sight.
 
         Parameters
         ----------
@@ -53,7 +84,7 @@ class ScreenGalHalo(Halo):
 
         Returns
         -------
-        None. Calculates and stores the md, x, norm_int, and taux attributes.
+        None. Updates the md, x, norm_int, and taux attributes.
         """
         assert isinstance(gpop, SingleGrainPop)
         assert (x > 0.0) & (x <= 1.0)
@@ -170,6 +201,7 @@ def time_delay(alpha, x, dkpc):
     d_cm    = dkpc * 1.e3 * c.pc2cm   # cm
     return delta_x * d_cm / c.clight  # seconds
 
+# 2018.12.15 -- keep this for backwards compatibility
 def uniformISM(halo, gpop, nx=500):
     """
     | Calculate the X-ray scattering intensity for dust distributed
