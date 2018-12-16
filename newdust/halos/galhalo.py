@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.integrate import trapz
+import astropy.units as u
 
 from .halo import Halo
 from ..grainpop import *
@@ -34,12 +35,26 @@ class ScreenGalHalo(Halo):
     | x = 1 is the position of the observer
     """
     def __init__(self, *args, **kwargs):
-        Halo.__init__(*args)
+        Halo.__init__(self, *args, **kwargs)
         self.description = 'Screen'
         self.md   = None
         self.x    = None
 
     def calculate(self, gpop, x=0.5):
+        """
+        Calculate scattering halo from a screen of dust
+
+        Parameters
+        ----------
+        gpop : newdust.grainpop.SingleGrainPop
+
+        x : float (0.0, 1.0]
+            1.0 - (distance to screen / distance to X-ray source)
+
+        Returns
+        -------
+        None. Calculates and stores the md, x, norm_int, and taux attributes.
+        """
         assert isinstance(gpop, SingleGrainPop)
         assert (x > 0.0) & (x <= 1.0)
         self.md   = gpop.mdens
@@ -108,7 +123,7 @@ class ScreenGalHalo(Halo):
         lctm   = (time-tzero)
 
         for i in range(len(self.lam)):
-            deltat = time_delay(self.theta, self.htype.x, dist) * u.second.to(u.day)
+            deltat = time_delay(self.theta, self.x, dist) * u.second.to(u.day)
             t      = tnow - deltat
             for j in range(ntheta):
                 inten[i,j] += np.interp(t[j], lctm, lc * self.norm_int[i,j] * self.fabs[i])
