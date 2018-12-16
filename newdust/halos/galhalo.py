@@ -6,8 +6,7 @@ from .halo import Halo
 from ..grainpop import *
 from .. import constants as c
 
-__all__ = ['UniformGalHalo','ScreenGalHalo','path_diff',
-           'uniformISM','screenISM','time_delay']
+__all__ = ['UniformGalHalo','ScreenGalHalo','path_diff','time_delay']
 
 ANGLES = np.logspace(0.0, 3.5, np.int(3.5/0.05))
 
@@ -198,83 +197,3 @@ def time_delay(alpha, x, dkpc):
     delta_x = path_diff(alpha, x)
     d_cm    = dkpc * 1.e3 * c.pc2cm   # cm
     return delta_x * d_cm / c.clight  # seconds
-
-# 2018.12.15 -- keep this for backwards compatibility
-def uniformISM(halo, gpop, nx=500):
-    """
-    | Calculate the X-ray scattering intensity for dust distributed
-    | uniformly along the line of sight
-    |
-    | **MODIFIES**
-    | halo.htype, halo.taux, halo.norm_int
-    |
-    | **INPUTS**
-    | halo : Halo object
-    | gpop : SingleGrainPop object
-    """
-    assert isinstance(halo, Halo)
-    assert isinstance(gpop, SingleGrainPop)
-
-    NE, NA     = np.size(halo.lam), np.size(gpop.a)
-    halo.htype = UniformGalHalo(md=gpop.mdens)
-    halo.norm_int = np.zeros(shape=(NE, np.size(halo.theta)))
-
-    xgrid      = np.linspace(1.0/nx, 1.0, nx)
-    xmesh      = np.repeat(
-        np.repeat(xgrid.reshape(1, 1, nx), NE, axis=0),
-        NA, axis=1)
-    ndmesh     = np.repeat(
-        np.repeat(gpop.ndens.reshape(1, NA, 1), NE, axis=0),
-        nx, axis=2)
-    assert np.shape(xmesh) == (NE, NA, nx)
-    assert np.shape(ndmesh) == (NE, NA, nx)
-    i_th = 0
-    for al in halo.theta:
-        thscat = al / xgrid  # nx, goes from small to large angle
-        gpop.calculate_ext(halo.lam, unit=halo.lam_unit, theta=thscat)
-        dsig   = gpop.diff  # NE x NA x nx, [cm^2 arcsec^-2]
-        itemp  = dsig * ndmesh / xmesh**2  # NE x NA x nx, [um^-1 arcsec^-2]
-
-        intx      = trapz(itemp, xgrid, axis=2)  # NE x NA, [um^-1 arcsec^-2]
-        intensity = trapz(intx, gpop.a, axis=1)  # NE, [arcsec^-2]
-        halo.norm_int[:,i_th] = intensity
-        i_th += 1
-
-    halo.taux  = gpop.tau_sca
-
-    #thsca_grid = np.min(halo.theta) / xgrid[::-1]  # scattering angles go from min obs angle -> inf [arcsec]
-    #agrid      = np.repeat(gpop.a.reshape(1, NA, 1), NE, axis=0)  # NE x NA
-    #gpop.calculate_ext(halo.lam, unit=halo.lam_unit, theta=thsca_grid)
-    #dscat      = interp  ## Need to figure out multi-dimensional interpolation
-
-
-# 2018.12.15 -- keep this for backwards compatibility
-def screenISM(halo, gpop, x=0.5):
-    """
-    | Calculate the X-ray scattering intensity for dust in an
-    | infinitesimally thin wall somewhere on the line of sight.
-    |
-    | **MODIFIES**
-    | halo.htype, halo.taux, halo.norm_int
-    |
-    """
-    assert isinstance(halo, Halo)
-    assert isinstance(gpop, SingleGrainPop)
-    assert x != 0.0  # not allowed
-
-    NE, NA, NTH = np.size(halo.lam), np.size(gpop.a), np.size(halo.theta)
-    halo.htype = ScreenGalHalo(md=gpop.mdens, x=x)
-
-    thscat = halo.theta / x
-    gpop.calculate_ext(halo.lam, unit=halo.lam_unit, theta=thscat)
-    dsig   = gpop.diff  # NE x NA x NTH, [cm^2 arsec^-2]
-
-    ndmesh = np.repeat(
-        np.repeat(gpop.ndens.reshape(1, NA, 1), NE, axis=0),
-        NTH, axis=2)
-
-    itemp  = np.power(x, -2.0) * dsig * ndmesh  # NE x NA x NTH, [um^-1 arcsec^-2]
-    intensity = trapz(itemp, gpop.a, axis=1)  # NE x NTH, [arcsec^-2]
-
-    halo.norm_int = intensity
-    halo.taux     = gpop.tau_sca
