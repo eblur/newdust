@@ -157,7 +157,7 @@ class ScreenGalHalo(Halo):
             deltat = time_delay(self.theta, self.x, dist) * u.second.to(u.day)
             t      = tnow - deltat
             for j in range(ntheta):
-                inten[i,j] += np.interp(t[j], lctm, lc * self.norm_int[i,j] * self.fabs[i])
+                inten[i,j] += np.interp(t[j], time, lc * self.norm_int[i,j] * self.fabs[i])
 
         return inten
 
@@ -216,6 +216,11 @@ class ScreenGalHalo(Halo):
             # corresponding counts at each radial value in the grid
             pix_flux = h_interp(r_asec) * pix_scale**2 * exposure # phot
             result += pix_flux
+
+        if save_file is not None:
+            hdu  = fits.PrimaryHDU(result)
+            hdul = fits.HDUList([hdu])
+            hdul.writeto(save_file, overwrite=True)
 
         return result
 
