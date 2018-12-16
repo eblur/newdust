@@ -186,9 +186,9 @@ class Halo(object):
         self.htype = htype
 
     ##------ Make a fake image with a telescope arf
-    def fake_image(self, arf, src_flux, exposure, 
+    def fake_image(self, arf, src_flux, exposure,
                    pix_scale=0.5, num_pix=[2400,2400],
-                   imin=0, imax=-1, save_file=None, **kwargs):
+                   lmin=None, lmax=None, save_file=None, **kwargs):
         """Make a fake image file using a telescope ARF as input.
 
         Parameters
@@ -207,15 +207,16 @@ class Halo(object):
         pix_scale : float [arcsec]
             Size of simulated pixels
 
-        num_pix : ints (nx,ny) 
+        num_pix : ints (nx,ny)
             Size of pixel grid to use
 
-        imin : int
-            Energy index to start with (Default: 0)
+        lmin : float
+            Minimum halo.lam value
+            (Default:None uses entire range)
 
-        imax : int
-            Energy index to end with, exclusive, except when using
-            negative indexing (Default: -1)
+        lmax : float
+            Maximum halo.lam value
+            (Default:None uses entire range)
 
         save_file : string (Default:None)
             Filename to use if you want to save the output to a .fits
@@ -227,7 +228,7 @@ class Halo(object):
         energies are converted into counts using the ARF. Then a
         Poisson distribution is used to simulate the number of counts
         in each pixel.
-        
+
         If the user supplies a file name string using the save_file
         keyword, a FITS file will be saved.
 
@@ -255,10 +256,19 @@ class Halo(object):
             src_counts = src_flux * arf(self.lam) * exposure
 
         # Decide which energy indexes to use
-        iend = imax
-        if imax < 0:
-            iend = np.arange(len(self.lam)+1)[imax]
-            
+        if lmin is None:
+            imin = 0
+        else:
+            imin = min(np.arange(len(halo.lam))[halo.lam >= lmin])
+        if lmax is None:
+            iend = -1
+        else:
+            iend = max(np.arange(len(halo.lam))[halo.lam <= lmax]))
+
+        #iend = imax
+        #if imax < 0:
+        #    iend = np.arange(len(self.lam)+1)[imax]
+
         # Add up randomized image for each energy index value
         r_asec = radius * pix_scale
         result = np.zeros_like(radius)
