@@ -266,8 +266,11 @@ class ScreenGalHalo(Halo):
             h_interp = InterpolatedUnivariateSpline(
                     self.theta, var_profile[i,:] * int_conv[i], k=1) # ct/s/arcsec^2
             # corresponding counts at each radial value in the grid
-            pix_flux = h_interp(r_asec) * pix_scale**2 * exposure # phot
-            result += pix_flux
+            pix_flux = h_interp(r_asec) * pix_scale**2 * exposure # cts
+            # use poisson statistics to get a random value
+            pix_random = np.random.poisson(pix_counts)
+            # add it to the final result
+            result += pix_random
 
         if save_file is not None:
             hdu  = fits.PrimaryHDU(result)
