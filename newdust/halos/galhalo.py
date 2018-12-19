@@ -225,7 +225,7 @@ class ScreenGalHalo(Halo):
         else:
             time_now = tnow
 
-        var_profile = self.variable_profile(time, lc, tnow=time_now, **kwargs)
+        var_profile = self.variable_profile(time, lc, tnow=time_now, dist=dist)
         # intensity cube (NE x NTH), phot/cm^2/s/arcsec^2
 
         # Decide which energy indexes to use
@@ -268,7 +268,7 @@ class ScreenGalHalo(Halo):
             # corresponding counts at each radial value in the grid
             pix_flux = h_interp(r_asec) * pix_scale**2 * exposure # cts
             # use poisson statistics to get a random value
-            pix_random = np.random.poisson(pix_counts)
+            pix_random = np.random.poisson(pix_flux)
             # add it to the final result
             result += pix_random
 
