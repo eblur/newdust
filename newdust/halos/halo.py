@@ -259,7 +259,7 @@ class Halo(object):
         else:
             imin = min(np.arange(len(self.lam))[self.lam >= lmin])
         if lmax is None:
-            iend = -1
+            iend = len(self.lam)
         else:
             iend = max(np.arange(len(self.lam))[self.lam <= lmax])
 
@@ -273,10 +273,12 @@ class Halo(object):
         for i in np.arange(imin, iend):
             # interp object for halo grid (arcsec, counts/arcsec^2)
             h_interp = InterpolatedUnivariateSpline(
-                self.theta, self.norm_int[i,:] * src_counts[i], k=1)
-            # corresponding counts at each radial value in the grid
-            pix_counts = h_interp(r_asec) * pix_scale**2
-            # use poisson statistics to get a random value
+                self.theta, self.norm_int[i,:] * src_counts[i], k=1) # counts/arcsec^2
+            # Get the corresponding counts at each radial value in the grid
+            pix_counts = h_interp(r_asec) * pix_scale**2  # counts per pixel
+            # Some of the interpolated values are below zero. This is not okay. Set those to zero.
+            pix_counts[pix_counts < 0.0] = 0.0
+            # Use poisson statistics to get a random value
             pix_random = np.random.poisson(pix_counts)
             # add it to the final result
             result += pix_random
