@@ -34,8 +34,8 @@ angs2cm   = 1.e-8          # cm/angs
 arcs2rad  = (2.0*np.pi) / (360.*60.*60.)  # rad/arcsec
 arcm2rad  = (2.0*np.pi) / (360.*60.)      # rad/arcmin
 
-hc        = (c.c * c.h).to('keV cm')
-hc_angs   = (c.c * c.h).to('keV angstrom')
+hc        = (c.c * c.h).to('keV cm').value
+hc_angs   = (c.c * c.h).to('keV angstrom').value
 
 ##----------------------------------------------------------
 # Cosmology related constants
