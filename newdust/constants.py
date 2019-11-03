@@ -4,7 +4,7 @@ import numpy as np
 import scipy as sp
 
 # Allowed units for energy or wavelength arguments
-ALLOWED_LAM_UNITS = ['kev','angs','angstrom']
+ALLOWED_LAM_UNITS = ['kev','keV','angs','angstrom']
 
 ##----------------------------------------------------------
 # Generic constants
@@ -73,7 +73,7 @@ def trapezoidal_int(x, y):
 
 def _lam_cm(lam, unit='kev'):
     assert unit in ALLOWED_LAM_UNITS
-    if unit == 'kev':
+    if unit in ['kev', 'keV']:
         result  = hc / lam  # kev cm / kev
     if unit in ['angs', 'angstrom']:
         result  = angs2cm * lam  # cm/angs * angs
@@ -81,7 +81,7 @@ def _lam_cm(lam, unit='kev'):
 
 def _lam_kev(lam, unit='kev'):
     assert unit in ALLOWED_LAM_UNITS
-    if unit == 'kev':
+    if unit in ['kev', 'keV']:
         result = lam
     if unit in ['angs', 'angstrom']:
         result = hc_angs / lam  # kev angs / angs
