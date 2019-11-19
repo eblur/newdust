@@ -23,18 +23,16 @@ def test_Halo_dimensions():
 
 # ---- Test Galactic Halo stuff ---- #
 
-UNI_HALO = Halo(EVALS, THVALS, unit='kev')
-SCR_HALO = Halo(EVALS, THVALS, unit='kev')
+UNI_HALO = galhalo.UniformGalHalo(EVALS, THVALS, unit='kev')
+SCR_HALO = galhalo.ScreenGalHalo(EVALS, THVALS, unit='kev')
 
 # Test that calculations run
 def test_galhalo_uniform():
-    galhalo.uniformISM(UNI_HALO, GPOP)
-    assert isinstance(UNI_HALO.htype, galhalo.UniformGalHalo)
+    UNI_HALO.calculate(GPOP)
 
 @pytest.mark.parametrize('x', [1.0, 0.5])
 def test_galhalo_screen(x):
-    galhalo.screenISM(SCR_HALO, GPOP, x=x)
-    assert isinstance(SCR_HALO.htype, galhalo.ScreenGalHalo)
+    SCR_HALO.calculate(GPOP, x)
     # Observed angle should be equal to scattering angle when x = 1,
     # so halo should match differential scattering cross section integrated over dust grain size distributions
     if x == 1.0:
@@ -116,10 +114,9 @@ def test_halo_index(test):
 @pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
 def test_halo_io(test):
     test.write('test_halo_io.fits')
-    new_halo = Halo(from_file='test_halo_io.fits', htype=test.htype)
+    new_halo = Halo(from_file='test_halo_io.fits')
     assert np.all(percent_diff(new_halo.lam,test.lam) < 0.01)
     assert np.all(percent_diff(new_halo.theta,test.theta) < 0.01)
     assert np.all(percent_diff(new_halo.taux,test.taux) < 0.01)
     assert np.all(percent_diff(new_halo.norm_int.flatten(),test.norm_int.flatten()) < 0.01)
     assert new_halo.lam_unit == test.lam_unit
-    assert np.all(new_halo.htype.md == test.htype.md)
