@@ -220,7 +220,7 @@ class ScreenGalHalo(Halo):
         keyword, a FITS file will be saved.
         """
         assert np.all(time >= 0.0)
-        if tnow < 0:
+        if tnow is None:
             time_now = time[-1]
         else:
             time_now = tnow
