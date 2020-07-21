@@ -234,7 +234,7 @@ class ScreenGalHalo(Halo):
         else:
             imin = min(np.arange(len(self.lam))[self.lam >= lmin])
         if lmax is None:
-            iend = -1
+            iend = len(self.lam)
         else:
             iend = max(np.arange(len(self.lam))[self.lam <= lmax])
 
@@ -264,7 +264,8 @@ class ScreenGalHalo(Halo):
         result = np.zeros_like(radius)
         for i in np.arange(imin, iend):
             h_interp = InterpolatedUnivariateSpline(
-                    self.theta, var_profile[i,:] * int_conv[i], k=1) # ct/s/arcsec^2
+                    self.theta, var_profile[i,:] * int_conv[i], k=1,
+                    ext=1) # ct/s/arcsec^2
             # corresponding counts at each radial value in the grid
             pix_flux = h_interp(r_asec) * pix_scale**2 * exposure # cts
             # use poisson statistics to get a random value
