@@ -16,8 +16,10 @@ __all__ = ['PAH']
 
 def parse_PAH( option, ignore='#', flag='>', verbose=False ):
 
+    filename = None
     if option == 'ion': filename = _find_cmfile('PAHion_30')
     if option == 'neu': filename = _find_cmfile('PAHneu_30')
+    if verbose: print("Opening {}".format(filename))
 
     try : f = open( filename, 'r' )
     except:
@@ -37,6 +39,7 @@ def parse_PAH( option, ignore='#', flag='>', verbose=False ):
 
             # Characters flagged with '>' earn a dictionary entry with grain size
             elif line[0] == flag :
+                if verbose: print("Found a new grain size table")
                 gsize = np.float( line.split()[1] )
                 if verbose : print('Reading data for grain size:', gsize)
                 result[ gsize ] = {}
@@ -76,7 +79,7 @@ class PAH(ScatModel):
     def __init__(self, pahtype, **kwargs):
         ScatModel.__init__(self, **kwargs)
         self.pahtype  = pahtype
-        self.stype = 'PAH' + type
+        self.stype = 'PAH' + pahtype
         self.data  = None
         self.pars  = None
         self.qsca  = None
@@ -102,7 +105,7 @@ class PAH(ScatModel):
             qsca = np.zeros_like(NE, NA)
             qabs = np.zeros_like(NE, NA)
             qext = np.zeros_like(NE, NA)
-            for zip(aa,i) in (a, range(NA)):
+            for (aa,i) in zip(a, range(NA)):
                 qsca[:,i] = self._get_Q(lam, 'Q_sca', aa, lam_unit=unit)
                 qabs[:,i] = self._get_Q(lam, 'Q_abs', aa, lam_unit=unit)
                 qext[:,i] = self._get_Q(lam, 'Q_ext', aa, lam_unit=unit)
@@ -125,7 +128,7 @@ class PAH(ScatModel):
             print('ERROR: Cannot get grain size', a, 'for', self.stype)
             return
 
-        # Wavelengths were listed in reverse order
-        q_interp = interp1d( wavel[::-1], qvals[::-1] )
         lam_um = (lam * u.Unit(lam_unit)).to('micron', equivalencies=u.spectral()).value
-        return q_interp(lam_um)
+        # Wavelengths were listed in reverse order
+        result = np.interp(lam_um, wavel[::-1], qvals[::-1] )
+        return result
