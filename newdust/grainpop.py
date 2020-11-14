@@ -13,8 +13,6 @@ AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
 RHO_AVG       = 3.0  # g cm^-3
 UNIT_LABELS   = {'kev':'Energy (keV)', 'angs':'Wavelength (angs)'}
 
-SCATMODELS = {'RG':scatmodels.RGscat(),'Mie':scatmodels.Mie()}
-
 # Make this a subclass of GrainDist at some point
 class SingleGrainPop(graindist.GrainDist):
     """
@@ -58,8 +56,11 @@ class SingleGrainPop(graindist.GrainDist):
             self.scatm = stype
 
     def _assign_scatm_from_string(self, stype):
-        assert stype in SCATMODELS.keys()
-        self.scatm = SCATMODELS[stype]
+        assert stype in ['RG', 'Mie']
+        if stype == 'RG':
+            self.scatm = scatmodels.RGscat()
+        if stype == 'Mie':
+            self.scatm = scatmodels.Mie()
 
     # Run scattering model calculation, then compute optical depths
     def calculate_ext(self, lam, unit='kev', theta=0.0, **kwargs):
