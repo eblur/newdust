@@ -307,7 +307,7 @@ def _mie_helper(x, refrel, theta, memlim=MAX_RAM):
     qback = np.power(np.abs(s1_back)/x, 2) / np.pi
 
     Cdiff = 0.0
-    bad_theta = np.where(np.abs(theta_rad) > np.pi)  # Set to 0 values where theta > !pi
+    bad_theta = (np.abs(theta_rad) > np.pi)  # Set to 0 values where theta > !pi
     s1[...,bad_theta] = 0
     s2[...,bad_theta] = 0
     Cdiff = 0.5 * (np.power(np.abs(s1), 2) + np.power(np.abs(s2), 2)) / (np.pi * np.power(x_3d,2))
