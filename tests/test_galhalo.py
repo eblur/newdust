@@ -5,6 +5,7 @@ from scipy.integrate import trapz
 from newdust.halos import *
 from newdust import grainpop
 from . import percent_diff
+import newdust.constants as c
 
 NE, NTH = 10, 200
 EVALS   = np.logspace(-1, 1, NE)   # keV
@@ -36,7 +37,8 @@ def test_galhalo_screen(x):
     # Observed angle should be equal to scattering angle when x = 1,
     # so halo should match differential scattering cross section integrated over dust grain size distributions
     if x == 1.0:
-        test = np.abs(SCR_HALO.norm_int - GPOP.int_diff)
+        # have to convert int_diff to arcsec^-2
+        test = np.abs(SCR_HALO.norm_int - GPOP.int_diff * c.arcs2rad**2)
         assert np.all(test < 0.01)
 
 @pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])

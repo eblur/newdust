@@ -54,10 +54,7 @@ class UniformGalHalo(Halo):
         for al in self.theta:
             thscat = al / xgrid  # nx, goes from small to large angle
             gpop.calculate_ext(self.lam, unit=self.lam_unit, theta=thscat)
-            area = gpop.shape.cgeo(gpop.a) # cm^2
-            area_2d  = np.repeat(area.reshape(1,NA), NE, axis=1)
-            area_3d  = np.repeat(area_2d.reshape(NE, NA, 1), nx, axis=2)
-            dsig   = gpop.diff * area_3d # NE x NA x nx, [cm^2 arcsec^-2]
+            dsig   = gpop.diff * c.arcs2rad**2 # NE x NA x nx, [cm^2 arcsec^-2]
             itemp  = dsig * ndmesh / xmesh**2  # NE x NA x nx, [um^-1 arcsec^-2]
 
             intx      = trapz(itemp, xgrid, axis=2)  # NE x NA, [um^-1 arcsec^-2]
@@ -99,10 +96,7 @@ class ScreenGalHalo(Halo):
 
         thscat = self.theta / x
         gpop.calculate_ext(self.lam, unit=self.lam_unit, theta=thscat)
-        area = gpop.shape.cgeo(gpop.a) # cm^2
-        area_2d  = np.repeat(area.reshape(1,NA), NE, axis=1)
-        area_3d  = np.repeat(area_2d.reshape(NE, NA, 1), NTH, axis=2)
-        dsig   = gpop.diff * area_3d # NE x NA x NTH, [cm^2 arcsec^-2]
+        dsig   = gpop.diff * c.arcs2rad**2 # NE x NA x NTH, [cm^2 arcsec^-2]
 
         ndmesh = np.repeat(
             np.repeat(gpop.ndens.reshape(1, NA, 1), NE, axis=0),
