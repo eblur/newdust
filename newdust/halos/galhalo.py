@@ -11,7 +11,7 @@ from .. import constants as c
 
 __all__ = ['UniformGalHalo','ScreenGalHalo','path_diff','time_delay']
 
-ANGLES = np.logspace(0.0, 3.5, np.int(3.5/0.05))
+ANGLES = np.logspace(0.0, 3.5, int(3.5/0.05))
 
 class UniformGalHalo(Halo):
     def __init__(self, *args, **kwargs):

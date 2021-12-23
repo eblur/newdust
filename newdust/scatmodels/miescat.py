@@ -174,7 +174,7 @@ def _mie_helper(x, refrel, theta, memlim=MAX_RAM):
 
     p    = -1.0
 
-    for n in range(1,np.int(np.max(nstop))+1):  # for n=1, nstop do begin
+    for n in range(1,int(np.max(nstop))+1):  # for n=1, nstop do begin
         assert isinstance(n, int)
         en = n
         fn = (2.0*en+1.0) / (en * (en+1.0))
