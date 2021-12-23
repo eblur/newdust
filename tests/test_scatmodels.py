@@ -31,11 +31,10 @@ def test_rgscat():
     test.calculate(1.e-10, A_UM, CMD, unit='kev')
     assert np.exp(-test.qsca) == 0.0
 
-    # differential cross-section must sum to total cross-section
+    # differential cross-section must sum to Qsca
     test.calculate(E_KEV, A_UM, CMD, unit='kev', theta=TH_asec)
-    dtot   = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # cm^2
-    sigsca = test.qsca * np.pi * (A_UM * c.micron2cm)**2  # cm^2
-    assert percent_diff(dtot, sigsca) <= 0.05
+    dtot   = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # unitless
+    assert percent_diff(dtot, test.qsca) <= 0.05
 
     # Test that the absorption component for RG model is zero
     assert test.qsca == test.qext
@@ -84,11 +83,10 @@ def test_mie(cm):
     assert percent_diff(np.exp(test.qext), 1.0) < 0.001
     assert percent_diff(np.exp(test.qabs), 1.0) < 0.001
 
-    # Test that the differential scattering cross section integrates to total
+    # Test that the differential scattering cross section integrates to qsca
     test.calculate(LAM, A_UM, cm, unit='angs', theta=TH_asec)
-    dtot = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # cm^2
-    sigsca = test.qsca * np.pi * (A_UM * c.micron2cm)**2  # cm^2
-    assert percent_diff(dtot, sigsca) <= 0.01
+    dtot = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # unitless
+    assert percent_diff(dtot, test.qsca) <= 0.01
 
     # Test that the extinction values are correct
     assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
@@ -113,11 +111,3 @@ def test_dimensions(sm):
     assert np.shape(sm.qext) == (NE, NA)
     assert np.shape(sm.qabs) == (NE, NA)
     assert np.shape(sm.diff) == (NE, NA, NTH)
-
-    dtot1 = trapz(sm.diff[0,0,:] * 2.0*np.pi*np.sin(THETA), THETA)
-    dtot2 = trapz(sm.diff[-1,-1,:] * 2.0*np.pi*np.sin(THETA), THETA)
-    ssca1 = sm.qsca[0,0] * np.pi * (AVALS[0] * 1.e-4)**2
-    ssca2 = sm.qsca[-1,-1] * np.pi * (AVALS[-1] * 1.e-4)**2
-    assert percent_diff(dtot1, ssca1) <= 0.05
-    assert percent_diff(dtot2, ssca2) <= 0.05
-
