@@ -86,7 +86,9 @@ class SingleGrainPop(graindist.GrainDist):
             self.tau_abs = trapz(geo_2d * self.scatm.qabs, self.a, axis=1)
 
         # NE x NA x NTH
-        self.diff     = self.scatm.diff * c.arcs2rad**2  # NE x NA x NTH, [cm^2 arcsec^-2]
+        area_2d = np.repeat(self.cgeo.reshape(1, NA), NE, axis=0) # cm^2
+        area_3d = np.repeat(area_2d.reshape(NE, NA, 1), NTH, axis=2)
+        self.diff     = self.scatm.diff * area_3d * c.arcs2rad**2  # NE x NA x NTH, [cm^2 arcsec^-2]
 
         if np.size(self.a) == 1:
             int_diff = np.sum(self.scatm.diff * self.ndens[0] * c.arcs2rad**2, axis=1)
