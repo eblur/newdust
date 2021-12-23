@@ -19,7 +19,7 @@ class RGscat(ScatModel):
     | qsca  : array  : scattering efficiency (unitless, per geometric area)
     | qabs  : array  : absorption efficiency (unitless, per geometric area)
     | qext  : array  : extinction efficiency (unitless, per geometric area)
-    | diff  : array  : differential scattering cross-section (cm^2 ster^-1)
+    | diff  : array  : differential scattering cross-section (ster^-1)
     |
     | *properties*
     | qabs  : array  : absorption efficiency (unitless, per geometric area)
@@ -75,7 +75,11 @@ class RGscat(ScatModel):
         char_3d   = np.repeat(char.reshape(NE, NA, 1), NTH, axis=2)
         thdep     = _thdep(theta_3d, char_3d)
 
-        self.diff = dsig_3d * thdep  # cm^2 / ster
+        # Divide by geometric area cross-section, assumes spherical grains
+        geo    = np.pi * a_cm**2  # NE x NA
+        geo_3d = np.repeat(geo.reshape(NE, NA, 1), NTH, axis=2)
+        
+        self.diff = dsig_3d * thdep / geo_3d  # ster^-1
 
     # Standard deviation on scattering angle distribution
     def char(self, lam, a, unit='kev'):
