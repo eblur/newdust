@@ -38,7 +38,7 @@ class SingleGrainPop(graindist.GrainDist):
         self.tau_sca  = None  # NE
         self.tau_abs  = None  # NE
         self.tau_ext  = None  # NE
-        self.diff     = None  # NE x NA x NTH [cm^2 / arcsec^2]
+        self.diff     = None  # NE x NA x NTH [cm^2 ster^-1]
         self.int_diff = None  # NE x NTH [arcsec^2], differential xsect integrated over grain size
 
         # Handling scattering model FITS input, if requested
@@ -88,10 +88,10 @@ class SingleGrainPop(graindist.GrainDist):
         # NE x NA x NTH
         area_2d = np.repeat(self.cgeo.reshape(1, NA), NE, axis=0) # cm^2
         area_3d = np.repeat(area_2d.reshape(NE, NA, 1), NTH, axis=2)
-        self.diff     = self.scatm.diff * area_3d * c.arcs2rad**2  # NE x NA x NTH, [cm^2 arcsec^-2]
+        self.diff     = self.scatm.diff * area_3d # NE x NA x NTH, [cm^2 ster^-1]
 
         if np.size(self.a) == 1:
-            int_diff = np.sum(self.scatm.diff * self.ndens[0] * c.arcs2rad**2, axis=1)
+            int_diff = np.sum(self.scatm.diff * self.cgeo[0] * self.ndens[0] * c.arcs2rad**2, axis=1)
         else:
             agrid        = np.repeat(
                 np.repeat(self.a.reshape(1, NA, 1), NE, axis=0),
@@ -99,7 +99,7 @@ class SingleGrainPop(graindist.GrainDist):
             ndgrid       = np.repeat(
                 np.repeat(self.ndens.reshape(1, NA, 1), NE, axis=0),
                 NTH, axis=2)
-            int_diff = trapz(self.scatm.diff * ndgrid, agrid, axis=1) * c.arcs2rad**2
+            int_diff = trapz(self.scatm.diff * area_3d * ndgrid, agrid, axis=1) * c.arcs2rad**2
 
         self.int_diff = int_diff  # NE x NTH, [arcsec^-2]
 

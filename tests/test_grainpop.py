@@ -106,6 +106,16 @@ def test_ext_calculations(sd, cm, sc):
     assert all(percent_diff(test.tau_sca, new_test.tau_sca) <= 1.e-5)
     assert all(percent_diff(test.diff.flatten(), new_test.diff.flatten()) <= 1.e-5)
     assert all(percent_diff(test.int_diff.flatten(), new_test.int_diff.flatten()) <= 1.e-5)
+    # Test that the integrated differential cross-sections match the scattering cross sections
+    th_2d   = np.repeat(THETA.reshape(1, 1, NTH), NE, axis=0) # NE x 1 x NA
+    th_3d   = np.repeat(th_2d.reshape(NE, 1, NTH), len(test.a), axis=1) # NE x NA x NTH
+    integrated = trapz(test.diff * 2.0 * np.pi * np.sin(th_3d), THETA, axis=2) # NE x NA
+    if sd == 'Grain':
+        sigma_scat = test.scatm.qsca * test.cgeo
+    else:
+        sigma_scat = test.scatm.qsca * np.repeat(test.cgeo.reshape(1, NA), NE, axis=0) # NE x NA [cm^2]
+    assert all(percent_diff(integrated.flatten(), sigma_scat.flatten()))
+    
 
 # Make sure that doubling the dust mass doubles the extinction
 @pytest.mark.parametrize('estring', ALLOWED_SCATM)
