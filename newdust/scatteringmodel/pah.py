@@ -7,10 +7,9 @@ import os
 import numpy as np
 
 import astropy.units as u
-import astropy.constants as c
 
 from newdust.graindist.composition import _find_cmfile
-from .scatmodel import ScatModel
+from .scatteringmodel import ScatteringModel
 
 __all__ = ['PAH']
 
@@ -59,7 +58,7 @@ def parse_PAH( option, ignore='#', flag='>', verbose=False ):
 
     return result
 
-class PAH(ScatModel):
+class PAH(ScatteringModel):
     """
     | PAH properties loaded from Draine tables (public)
     !
@@ -77,7 +76,7 @@ class PAH(ScatModel):
     |     Calculates qsca, qabs, and qext attributes
     """
     def __init__(self, pahtype, **kwargs):
-        ScatModel.__init__(self, **kwargs)
+        ScatteringModel.__init__(self, **kwargs)
         self.pahtype  = pahtype
         self.stype = 'PAH' + pahtype
         self.data  = None

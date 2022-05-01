@@ -1,51 +1,50 @@
 import numpy as np
-from .. import constants as c
-from .scatmodel import ScatModel
+import astropy.units as u
+from .. import helpers
+from .scatteringmodel import ScatteringModel
 
 __all__ = ['RGscat']
 
 CHARSIG       = 1.04 * 60.0  # characteristic scattering angle [arcsec E(keV)^-1 a(um)^-1]
 
-class RGscat(ScatModel):
+class RGscat(ScatteringModel):
     """
-    | RAYLEIGH-GANS scattering model.
-    | *see* Mauche & Gorenstein (1986), ApJ 302, 371
-    | *see* Smith & Dwek (1998), ApJ, 503, 831
-    |
-    | **ATTRIBUTES**
-    | stype : string : 'RGscat'
-    | citation : string : citation string
-    | pars  : dict   : parameters used to run the calculation
-    | qsca  : array  : scattering efficiency (unitless, per geometric area)
-    | qabs  : array  : absorption efficiency (unitless, per geometric area)
-    | qext  : array  : extinction efficiency (unitless, per geometric area)
-    | diff  : array  : differential scattering cross-section (ster^-1)
-    |
-    | *properties*
-    | qabs  : array  : absorption efficiency (unitless, per geometric area)
-    |
-    | *functions*
-    | char( lam, a, unit='kev' )
-    |    *returns* characteristc scattering angle [arcsec]
-    | calculate( lam, a, cm, unit='kev', theta=0.0 )
-    |    calculates the relevant values (qsca, qext, diff)
+    Rayleigh-Gans scattering model. *See* Mauche & Gorenstein (1986), ApJ 302, 371; 
+    Smith & Dwek (1998), ApJ, 503, 831
     """
-
     def __init__(self, **kwargs):
-        ScatModel.__init__(self, **kwargs)
+        ScatteringModel.__init__(self, **kwargs)
         self.stype = 'RGscat'
         self.citation = 'Calculating RG-Drude approximation\nMauche & Gorenstein (1986), ApJ 302, 371\nSmith & Dwek (1998), ApJ, 503, 831'
 
-    def calculate(self, lam, a, cm, unit='kev', theta=0.0):
-        self.pars = dict(zip(['lam','a','cm','theta','unit'],[lam, a, cm, theta, unit]))
+    def calculate(self, lam, a, cm, theta=0.0):
+        """
+        Calculate the extinction efficiences with the Rayleigh-Gans approximation.
+
+        lam : astropy.units.Quantity -or- numpy.ndarray
+            Wavelength or energy values for calculating the cross-sections;
+            if no units specified, defaults to keV
+        
+        a : astropy.units.Quantity -or- numpy.ndarray
+            Grain radius value(s) to use in the calculation;
+            if no units specified, defaults to micron
+        
+        cm : newdust.graindist.composition object
+            Holds the optical constants and density for the compound.
+        
+        theta : astropy.units.Quantity -or- numpy.ndarray -or- float
+            Scattering angles for computing the differential scattering cross-section;
+            if no units specified, defaults to radian
+        """
+        
 
         NE, NA, NTH = np.size(lam), np.size(a), np.size(theta)
 
         # Deal with the 1d stuff first
         # Make sure every variable is an array
-        lam   = c._make_array(lam)
-        a     = c._make_array(a)
-        theta = c._make_array(theta)
+        lam   = helpers._make_array(lam)
+        a     = helpers._make_array(a)
+        theta = helpers._make_array(theta)
 
         # Convert to the appropriate units
         a_cm_1d   = a * c.micron2cm

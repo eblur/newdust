@@ -10,10 +10,15 @@ class Composition(object):
     Attributes
     ----------
     cmtype : string : label for the compound
+
     rho : float : density of the material (g cm^-3)
+
     citation : string : citation for the optical constants loaded
+
     wavel : astropy.units.Quantity : wavelength grid for optical constants
+
     revals : numpy.ndarray : real part of the complex index of refraction
+    
     imvals : numpy.ndarray : imaginary part of the complex index of refraction
     """
     def __init__(self):

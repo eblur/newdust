@@ -1,6 +1,6 @@
 import numpy as np
 from .. import constants as c
-from .scatmodel import ScatModel
+from .scatteringmodel import ScatteringModel
 
 __all__ = ['Mie']
 
@@ -15,7 +15,7 @@ MAX_RAM = 8.0
 #    to calculate scattering and absorption by a homogenous isotropic
 #    sphere.''
 #
-class Mie(ScatModel):
+class Mie(ScatteringModel):
     """
     | Mie scattering algorithms of Bohren & Hoffman
     | See their book: *Absorption and Scattering of Light by Small Particles*
