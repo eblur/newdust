@@ -30,6 +30,18 @@ class CmDrude(Composition):
         self.imvals = self.ip(self.wavel)
 
     def rp(self, x):
+        """
+        Calculate the real part of the complex index of refraction under the Drude approximation.
+
+        Inputs
+        ------
+        x : if astropy.units.Quantity, convert to same units as self.wavel;
+            if numpy.ndarray, assume keV units
+        
+        Returns
+        -------
+        (rho / 2 m_p) * (r_e / 2 pi) * wavel^2
+        """
         if isinstance(x, u.Quantity):
             lam_cm = x.to('cm', equivalencies=u.spectral()).value
         else:
@@ -39,6 +51,21 @@ class CmDrude(Composition):
         return mm1 + 1.0
 
     def ip(self, x):
+        """
+        Gives the imaginary part of the complex index of refraction under the Drude approximation.
+
+        Inputs
+        ------
+        x : if astropy.units.Quantity, convert to same units as self.wavel;
+            if numpy.ndarray, assume keV units
+        
+        Returns
+        -------
+        
+        0.0 if x is a float or quantity of no length
+
+        numpy.ndarray filled with zeros, same length as x
+        """
         if np.size(x) > 1:
             return np.zeros(np.size(x))
         else:
