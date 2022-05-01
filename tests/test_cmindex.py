@@ -1,26 +1,43 @@
 import pytest
 import numpy as np
+import astropy.units as u
 from newdust.graindist import composition
 
-LAMBDA = (np.logspace(0, 2.5, 100), 'angs')  # angs
-ENERGY = (np.logspace(-1, 1, 100), 'kev')    # kev
+WAVEL = np.logspace(0, 2.5, 100) * u.angstrom
+ENERGY = np.logspace(-1, 1, 100) * u.keV
+EN = np.linspace(0.1, 10.0, 50) # no units specified, assume keV
 RHO_TEST = 2.0  # g cm^-3
 
-@pytest.mark.parametrize('cm',
-                         [composition.CmDrude(),
-                          composition.CmSilicate(),
-                          composition.CmGraphite()])
+#CMS = [composition.CmDrude(), composition.CmSilicate(), composition.CmGraphite()]
+CMS = [composition.CmGraphite()]
+
+# Test that every method runs
+@pytest.mark.parametrize('cm', CMS)
 def test_abstract_class(cm):
     assert type(cm.cmtype) is str
     assert type(cm.rho) is float
-    assert len(cm.rp(LAMBDA[0], unit=LAMBDA[1])) == len(LAMBDA[0])
-    assert len(cm.rp(ENERGY[0], unit=ENERGY[1])) == len(ENERGY[0])
-    assert len(cm.ip(LAMBDA[0], unit=LAMBDA[1])) == len(LAMBDA[0])
-    assert len(cm.ip(ENERGY[0], unit=ENERGY[1])) == len(ENERGY[0])
-    assert len(cm.cm(LAMBDA[0], unit=LAMBDA[1])) == len(LAMBDA[0])
-    assert len(cm.cm(ENERGY[0], unit=ENERGY[1])) == len(ENERGY[0])
+    assert len(cm.rp(WAVEL)) == len(WAVEL)
+    assert len(cm.rp(ENERGY)) == len(ENERGY)
+    assert len(cm.rp(EN)) == len(EN)
+    assert len(cm.ip(WAVEL)) == len(WAVEL)
+    assert len(cm.ip(ENERGY)) == len(ENERGY)
+    assert len(cm.ip(EN)) == len(EN)
+    assert len(cm.cm(WAVEL)) == len(WAVEL)
+    assert len(cm.cm(ENERGY)) == len(ENERGY)
+    assert len(cm.cm(EN)) == len(EN)
     assert type(cm.cm(1.0)) is np.complex128
 
+# Test that it returns 0 (im part) or 1 (re part) when interpolating
+# outside the gid
+@pytest.mark.parametrize('cm', CMS)
+def test_limits(cm):
+    # Make the lower and upper test values -50% and +50% on either side
+    lam_low = 0.5 * np.min(cm.wavel.value) * cm.wavel.unit
+    lam_high = 1.5 * np.max(cm.wavel.value) * cm.wavel.unit
+    assert cm.rp(lam_low) == 1.0
+    assert cm.rp(lam_high) == 1.0
+    assert cm.ip(lam_low) == 0.0
+    assert cm.ip(lam_high) == 0.0
 
 @pytest.mark.parametrize(('sizes','orients'),
                          [('big','para'),
@@ -31,14 +48,3 @@ def test_cmgraphite(sizes, orients):
     test = composition.CmGraphite(rho=2.0, size=sizes, orient=orients)
     assert test.rho == RHO_TEST
     test_abstract_class(test)
-
-# Test that super high energy values go to rp = 1.0, ip = 0.0
-ELO, EHI = 1.e-10, 1.e10  # keV
-@pytest.mark.parametrize('cm',
-                         [composition.CmSilicate(),
-                          composition.CmGraphite()])
-def test_Elims(cm):
-    assert cm.rp(EHI, unit='kev') == 1.0
-    assert cm.rp(ELO, unit='kev') == 1.0
-    assert cm.ip(EHI, unit='kev') == 0.0
-    assert cm.ip(ELO, unit='kev') == 0.0
