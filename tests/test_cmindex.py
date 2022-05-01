@@ -9,7 +9,7 @@ EN = np.linspace(0.1, 10.0, 50) # no units specified, assume keV
 RHO_TEST = 2.0  # g cm^-3
 
 #CMS = [composition.CmDrude(), composition.CmSilicate(), composition.CmGraphite()]
-CMS = [composition.CmGraphite()]
+CMS = [composition.CmSilicate(), composition.CmGraphite()]
 
 # Test that every method runs
 @pytest.mark.parametrize('cm', CMS)
