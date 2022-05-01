@@ -8,8 +8,7 @@ ENERGY = np.logspace(-1, 1, 100) * u.keV
 EN = np.linspace(0.1, 10.0, 50) # no units specified, assume keV
 RHO_TEST = 2.0  # g cm^-3
 
-#CMS = [composition.CmDrude(), composition.CmSilicate(), composition.CmGraphite()]
-CMS = [composition.CmSilicate(), composition.CmGraphite()]
+CMS = [composition.CmDrude(), composition.CmSilicate(), composition.CmGraphite()]
 
 # Test that every method runs
 @pytest.mark.parametrize('cm', CMS)
@@ -28,8 +27,8 @@ def test_abstract_class(cm):
     assert type(cm.cm(1.0)) is np.complex128
 
 # Test that it returns 0 (im part) or 1 (re part) when interpolating
-# outside the gid
-@pytest.mark.parametrize('cm', CMS)
+# outside the grid. Only relevant for table models.
+@pytest.mark.parametrize('cm', [composition.CmSilicate(), composition.CmGraphite()])
 def test_limits(cm):
     # Make the lower and upper test values -50% and +50% on either side
     lam_low = 0.5 * np.min(cm.wavel.value) * cm.wavel.unit

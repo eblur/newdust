@@ -1,12 +1,20 @@
 import numpy as np
-from newdust import constants as c
+import astropy.units as u
+import astropy.constants as c
+
+from newdust.graindist.composition import Composition
 
 __all__ = ['CmDrude']
 
 RHO_DRUDE  = 3.0  # g cm^-3
-LAM_MAX    = c.hc / 0.01 # maximal wavelength that we will allow for RG-Drude
 
-class CmDrude(object):
+## -- Some constants to use for the calculation
+# Classical electron radius
+RE_CM = 2.8179403227e-15 * u.m.to('cm')
+# Mass of proton
+MP_G = c.m_p.to('g').value 
+
+class CmDrude(Composition):
     """
     | **ATTRIBUTES**
     | cmtype : 'Drude'
@@ -20,44 +28,27 @@ class CmDrude(object):
     | plot(lam, unit='kev') : Plots Re(m-1)
     """
     def __init__(self, rho=RHO_DRUDE):  # Returns a CM using the Drude approximation
+        Composition.__init__(self)
         self.cmtype = 'Drude'
         self.rho    = rho
         self.citation = "Using the Drude approximation.\nBohren, C. F. & Huffman, D. R., 1983, Absorption and Scattering of Light by Small Particles (New York: Wiley)"
 
-    def rp(self, lam, unit='kev'):
-        assert unit in c.ALLOWED_LAM_UNITS
-        lam_cm = c._lam_cm(lam, unit)
+        # Set up default values so that inherited plotting method from Composition will work
+        self.wavel = np.linspace(1.0, 10.0, 50) * u.keV
+        self.revals = self.rp(self.wavel)
+        self.imvals = self.ip(self.wavel)
 
-        mm1 = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(lam_cm, 2)
+    def rp(self, x):
+        if isinstance(x, u.Quantity):
+            lam_cm = x.to('cm', equivalencies=u.spectral()).value
+        else:
+            lam_cm = (x * u.keV).to('cm', equivalencies=u.spectral()).value
+
+        mm1 = self.rho / (2.0*MP_G) * RE_CM/(2.0*np.pi) * np.power(lam_cm, 2)
         return mm1 + 1.0
 
-        '''# Returns 1 if the wavelength supplied is too low energy (i.e. inappropriate for applying Drude)
-        mm1 = np.zeros(np.size(lam_cm))
-        if (np.size(lam_cm) == 1):
-            if lam_cm >= LAM_MAX:
-                pass
-            else:
-                mm1 = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(lam_cm, 2)
-        else:
-            ii = (lam_cm <= LAM_MAX)
-            mm1[ii] = self.rho / (2.0*c.m_p) * c.r_e/(2.0*np.pi) * np.power(lam_cm[ii], 2)
-        return mm1 + 1.0'''
-
-    def ip(self, lam, unit='kev'):
-        if np.size(lam) > 1:
-            return np.zeros(np.size(lam))
+    def ip(self, x):
+        if np.size(x) > 1:
+            return np.zeros(np.size(x))
         else:
             return 0.0
-
-    def cm(self, lam, unit='kev'):
-        return self.rp(lam, unit=unit) + 0j
-
-    def plot(self, ax, lam, unit='kev', **kwargs):
-        assert unit in c.ALLOWED_LAM_UNITS
-        rp = self.rp(lam, unit=unit)
-        ax.plot(lam, rp-1.0, **kwargs)
-        ax.set_ylabel("m-1")
-        if unit == 'kev':
-            ax.set_xlabel("Energy (keV)")
-        if unit == 'angs':
-            ax.set_xlabel("Wavelength (Angstroms)")
