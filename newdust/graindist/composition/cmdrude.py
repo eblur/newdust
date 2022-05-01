@@ -16,16 +16,7 @@ MP_G = c.m_p.to('g').value
 
 class CmDrude(Composition):
     """
-    | **ATTRIBUTES**
-    | cmtype : 'Drude'
-    | rho    : grain density [g cm^-3]
-    | citation : A string containing citation to original work
-    |
-    | *functions*
-    | rp(lam, unit='kev') : Returns real part (unit='kev'|'angs')
-    | ip(lam, unit='kev') : Returns imaginary part (always 0.0)
-    | cm(lam, unit='kev') : Complex index of refraction of dtype='complex'
-    | plot(lam, unit='kev') : Plots Re(m-1)
+    Optical constants under the Drude approximation.
     """
     def __init__(self, rho=RHO_DRUDE):  # Returns a CM using the Drude approximation
         Composition.__init__(self)
