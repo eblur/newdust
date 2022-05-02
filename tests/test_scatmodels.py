@@ -72,23 +72,22 @@ def test_rgscat():
     assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
     assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
 
-"""
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),
                           composition.CmSilicate(),
                           composition.CmGraphite()])
 def test_mie(cm):
     test = scatteringmodel.Mie()
-    test.calculate(LAM, A_UM, cm, unit='angs')
+    test.calculate(LAM * u.angstrom, A_UM, cm)
 
     # Test that cross-section asymptotes to a small number when grain size gets very small
-    test.calculate(LAM, 1.e-10, cm, unit='angs')
+    test.calculate(LAM * u.angstrom, 1.e-10, cm, unit='angs')
     assert percent_diff(np.exp(test.qsca), 1.0) < 0.001
     assert percent_diff(np.exp(test.qext), 1.0) < 0.001
     assert percent_diff(np.exp(test.qabs), 1.0) < 0.001
 
     # Test that the differential scattering cross section integrates to qsca
-    test.calculate(LAM, A_UM, cm, unit='angs', theta=TH_asec)
+    test.calculate(LAM * u.angstrom, A_UM, cm, theta=THETA_ARCSEC)
     dtot = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # unitless
     assert percent_diff(dtot, test.qsca) <= 0.01
 
@@ -103,16 +102,16 @@ def test_mie(cm):
     assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
     assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
 
+
 @pytest.mark.parametrize('sm',
-                         [scatteringmodel.RGscat(),
+                         [scatteringmodel.RGscattering(),
                           scatteringmodel.Mie()])
 def test_dimensions(sm):
-    NE, NA, NTH = 2, 20, len(TH_asec)
-    LAMVALS = np.linspace(1000.,5000.,NE)  # angs
-    AVALS   = np.linspace(0.1, 0.5, NA)    # um
-    sm.calculate(LAMVALS, AVALS, composition.CmSilicate(), unit='angs', theta=TH_asec)
+    NE, NA, NTH = 2, 20, len(THETA_ARCSEC)
+    LAMVALS = np.linspace(1000.,5000.,NE) * u.angstrom
+    AVALS   = np.linspace(0.1, 0.5, NA) * u.micron
+    sm.calculate(LAMVALS, AVALS, composition.CmSilicate(), theta=THETA_ARCSEC)
     assert np.shape(sm.qsca) == (NE, NA)
     assert np.shape(sm.qext) == (NE, NA)
     assert np.shape(sm.qabs) == (NE, NA)
     assert np.shape(sm.diff) == (NE, NA, NTH)
-"""

@@ -14,7 +14,9 @@ from .scatteringmodel import ScatteringModel
 __all__ = ['PAH']
 
 def parse_PAH( option, ignore='#', flag='>', verbose=False ):
-
+    """
+    Function for parsing the PAH files from Draine
+    """
     filename = None
     if option == 'ion': filename = _find_cmfile('PAHion_30')
     if option == 'neu': filename = _find_cmfile('PAHneu_30')
@@ -60,23 +62,22 @@ def parse_PAH( option, ignore='#', flag='>', verbose=False ):
 
 class PAH(ScatteringModel):
     """
-    | PAH properties loaded from Draine tables (public)
-    !
-    | **ATTRIBUTES**
-    | pahtype  : string : 'ion' (ionized) or 'neu' (neutral)
-    | stype : string : 'PAH' + type
-    |
-    | pars  : dict   : parameters used to run the calculation
-    | qsca  : array  : scattering efficiency (unitless, per geometric area)
-    | qabs  : array  : absorption efficiency (unitless, per geometric area)
-    | qext  : array  : extinction efficiency (unitless, per geometric area)
-    |
-    | **FUNCTIONS**
-    | calculate(lam, a=0.01, unit='keV')
-    |     Calculates qsca, qabs, and qext attributes
+    PAH properties loaded from Draine tables (public on B. Draine's website). 
+    *See* Li & Draine (2001)
+
+    Attributes
+    ----------
+    In addition to those inherited from ScatteringModel
+
+    pahtype  : string : 'ion' (ionized) or 'neu' (neutral)
+    
+    stype : string : 'PAH' + type
+
+    No differential scattering cross-section calculation.
     """
     def __init__(self, pahtype, **kwargs):
         ScatteringModel.__init__(self, **kwargs)
+        self.citation = "PAH files from Li & Draine (2001), ApJ, 554, 778\nhttps://ui.adsabs.harvard.edu/abs/2001ApJ...554..778L"
         self.pahtype  = pahtype
         self.stype = 'PAH' + pahtype
         self.data  = None
@@ -91,34 +92,73 @@ class PAH(ScatteringModel):
             print('ERROR: Cannot find PAH type', self.type)
 
     def calculate(self, lam, a=0.01, unit='keV'):
-        self.pars = dict(zip(['lam', 'a', 'unit'],
-                             [lam, a, unit]))
+        """
+        Get the extinction efficiences by interpolating the tables from Li & Draine (2001).
 
-        NE, NA = np.size(lam), np.size(a)
+        lam : astropy.units.Quantity -or- numpy.ndarray
+            Wavelength or energy values for calculating the cross-sections;
+            if no units specified, defaults to keV
+        
+        a : astropy.units.Quantity -or- numpy.ndarray
+            Grain radius value(s) to use in the calculation;
+            if no units specified, defaults to micron
+        
+        cm : newdust.graindist.composition object
+            Holds the optical constants and density for the compound.
+        
+        theta : astropy.units.Quantity -or- numpy.ndarray -or- float
+            Scattering angles for computing the differential scattering cross-section;
+            if no units specified, defaults to radian
+
+        Updates the `qsca`, `qext`, `qabs`, `diff`, `gsca`, and `qback` attributes
+        """
+        # Parameters are not stored the same with this moel type
+        self.pars = dict()
+        
+        wavel_um = None
+        if isinstance(lam, u.Quantity):
+            self.pars['lam'] = lam.value
+            self.pars['unit'] = lam.unit.to_string()
+            wavel_um = lam.to('micron', equivalencies=u.spectral()).value
+        else:
+            self.pars['lam'] = lam
+            self.pars['unit'] = 'keV'
+            wavel_um = (lam * u.keV).to('micron', equivalencies=u.spectral()).value
+        
+        a_um = None
+        if isinstance(a, u.Quantity):
+            a_um = a.to('micron').value
+            self.pars['a'] = a_um
+        else:
+            self.pars['a'] = a
+            a_um = a
+        
+        NE, NA = np.size(wavel_um), np.size(a_um)
 
         if NA == 1:
-            qsca = self._get_Q(lam, 'Q_sca', a, lam_unit=unit)
-            qabs = self._get_Q(lam, 'Q_abs', a, lam_unit=unit)
-            qext = self._get_Q(lam, 'Q_ext', a, lam_unit=unit)
+            qsca = self._get_Q(wavel_um, 'Q_sca', a_um)
+            qabs = self._get_Q(wavel_um, 'Q_abs', a_um)
+            qext = self._get_Q(wavel_um, 'Q_ext', a_um)
         else:
             qsca = np.zeros_like(NE, NA)
             qabs = np.zeros_like(NE, NA)
             qext = np.zeros_like(NE, NA)
-            for (aa,i) in zip(a, range(NA)):
-                qsca[:,i] = self._get_Q(lam, 'Q_sca', aa, lam_unit=unit)
-                qabs[:,i] = self._get_Q(lam, 'Q_abs', aa, lam_unit=unit)
-                qext[:,i] = self._get_Q(lam, 'Q_ext', aa, lam_unit=unit)
+            for (aa,i) in zip(a_um, range(NA)):
+                qsca[:,i] = self._get_Q(wavel_um, 'Q_sca', aa)
+                qabs[:,i] = self._get_Q(wavel_um, 'Q_abs', aa)
+                qext[:,i] = self._get_Q(wavel_um, 'Q_ext', aa)
 
         self.qsca = qsca
         self.qabs = qabs
         self.qext = qext
         
-    def _get_Q(self, lam, qtype, a, lam_unit='keV'):
+    def _get_Q(self, wavel_um, qtype, a, lam_unit='keV'):
         """
-        lam : float
-        qtype : string : Q_abs, Q_ext, Q_sca
+        wavel_um : numpy.ndarray : wavelength in microns
+
+        qtype : string : 'Q_abs', 'Q_ext', 'Q_sca'
+        
         a : float : PAH size [micron]
-        lam_unit : string : unit parsable by astropy.units
         """
         try:
             qvals = np.array(self.data[a][qtype] )
@@ -126,8 +166,7 @@ class PAH(ScatteringModel):
         except:
             print('ERROR: Cannot get grain size', a, 'for', self.stype)
             return
-
-        lam_um = (lam * u.Unit(lam_unit)).to('micron', equivalencies=u.spectral()).value
-        # Wavelengths were listed in reverse order
-        result = np.interp(lam_um, wavel[::-1], qvals[::-1] )
+        
+        # Wavelengths in the Draine files were listed in reverse order
+        result = np.interp(wavel_um, wavel[::-1], qvals[::-1] )
         return result

@@ -35,6 +35,8 @@ class RGscattering(ScatteringModel):
         theta : astropy.units.Quantity -or- numpy.ndarray -or- float
             Scattering angles for computing the differential scattering cross-section;
             if no units specified, defaults to radian
+
+        Updates the `qsca`, `qext`, `qabs`, and `diff` attributes
         """
         # Store the parameters
         lam_cm0, a_cm0, theta_rad0 = self._store_parameters(lam, a, cm, theta)
@@ -48,15 +50,14 @@ class RGscattering(ScatteringModel):
         # Get the complex index of refraction minus one (m-1)
         cmi_1d    = cm.cm(lam_cm_1d * u.cm) - 1.0
 
-        # Characteristic scattering angle (sigma in Gaussian approximation)
-        sigma_rad = self.characteristic_angle(lam, a).to('radian').value
-
         # Make everything NE x NA
         a_cm   = np.repeat(a_cm_1d.reshape(1, NA), NE, axis=0)
         lam_cm = np.repeat(lam_cm_1d.reshape(NE, 1), NA, axis=1)
         mm1    = np.repeat(cmi_1d.reshape(NE, 1), NA, axis=1)
         # Size parameter (grain circumference to incoming wavelength)
         x      = 2.0 * np.pi * a_cm / lam_cm # (NE x NA)
+        # Characteristic scattering angle (sigma in Gaussian approximation)
+        sigma_rad = self.characteristic_angle(lam_cm*u.cm, a_cm*u.micron).to('radian').value # (NE x NA)
         
         # Calculate the scattering efficiencies (1-d)
         qsca = _qsca(x, mm1)
