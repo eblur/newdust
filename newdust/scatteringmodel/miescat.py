@@ -1,5 +1,5 @@
 import numpy as np
-from .. import constants as c
+from .. import helpers
 from .scatteringmodel import ScatteringModel
 
 __all__ = ['Mie']
@@ -55,13 +55,13 @@ class Mie(ScatteringModel):
 
         # Deal with the 1d stuff first
         # Make sure every variable is an array
-        lam   = c._make_array(lam)
-        a     = c._make_array(a)
-        th_1d = c._make_array(theta)
+        lam   = helpers._make_array(lam)
+        a     = helpers._make_array(a)
+        th_1d = helpers._make_array(theta)
 
         # Convert to the appropriate units
-        a_cm_1d   = a * c.micron2cm
-        lam_cm_1d = c._lam_cm(lam, unit)
+        a_cm_1d   = a * helpers.micron2cm
+        lam_cm_1d = helpers._lam_cm(lam, unit)
         refrel_1d = cm.cm(lam, unit)
 
         # Make everything NE x NA
@@ -97,7 +97,7 @@ def _mie_helper(x, refrel, theta, memlim=MAX_RAM):
         NA, axis=1)
     x_3d      = np.repeat(x.reshape(NE,NA,1), NTH, axis=2)
 
-    theta_rad = theta_3d * c.arcs2rad
+    theta_rad = theta_3d * helpers.arcs2rad
     amu       = np.abs(np.cos(theta_rad))
     indl90    = (theta_rad < np.pi/2.0)
     indg90    = (theta_rad >= np.pi/2.0)

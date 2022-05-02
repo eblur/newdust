@@ -1,19 +1,8 @@
+import astropy.units as u
 from astropy.io import fits
+from .. import helpers
 
 __all__ = ['ScatteringModel']
-
-# Make sure that a scalar number is stored as an array
-def _make_array(scalar):
-    result = scalar
-    if isinstance(scalar, list):
-        result = np.array([scalar])
-    else:
-        try:
-            len(scalar)
-        except:
-            result = np.array([scalar])
-            assert len(result) == 1
-    return result
 
 ## See __init__ for API
 class ScatteringModel(object):
@@ -79,41 +68,62 @@ class ScatteringModel(object):
     def _store_parameters(self, lam, a, cm, theta):
         """
         Parses parameter units and stores them.
+
+         lam : astropy.units.Quantity -or- numpy.ndarray
+            Wavelength or energy values for calculating the cross-sections;
+            if no units specified, defaults to keV
         
-        Returns `lam` in units of keV, `a` in units of micron,
-         and `theta` in units of radians
+        a : astropy.units.Quantity -or- numpy.ndarray
+            Grain radius value(s) to use in the calculation;
+            if no units specified, defaults to micron
+        
+        cm : newdust.graindist.composition object
+            Holds the optical constants and density for the compound.
+        
+        theta : astropy.units.Quantity -or- numpy.ndarray -or- float
+            Scattering angles for computing the differential scattering cross-section;
+            if no units specified, defaults to radian
+        
+        Returns
+        -------
+        A three element tuple:
+        |   `lam` in units of keV, 
+        |   `a` in units of cm, and 
+        |   `theta` in units of radians
         """
         # Store the parameters
         self.pars = dict()
 
-        lam_keV = None
+        lam_cm = None
         if isinstance(lam, u.Quantity):
             self.pars['lam'] = lam.value
             self.pars['unit'] = lam.unit.to_string()
-            lam_keV = lam.to('keV', equivalencies=u.spectral()).value
+            lam_cm = lam.to('cm', equivalencies=u.spectral()).value
         else:       
             self.pars['lam'] = lam
             self.pars['unit'] = 'keV'
-            lam_keV = lam
+            lam_cm = (lam * u.keV).to('cm', equivalencies=u.spectral()).value
         
-        a_um = None
+        # Save the value as microns, but return in cgs units
+        a_cm = None
         if isinstance(a, u.Quantity):
-            a_um = a.to('micron').value
-            self.pars['a'] = a_um
+            self.pars['a'] = a.to('micron').value
+            a_cm = a.to('cm').value
         else:
             self.pars['a'] = a
-            a_um = a
+            a_cm = (a * u.micron).to('cm').value
         
         self.pars['cm'] = cm.cmtype
 
         theta_rad = None
         if isinstance(theta, u.Quantity):
-            theta_rad = theta.to('radian'.value)
+            theta_rad = theta.to('radian').value
             self.pars['theta'] = theta_rad
         else:
             self.pars['theta'] = theta
             theta_rad = theta
-        return lam_keV, a_um, theta_rad
+
+        return lam_cm, a_cm, theta_rad
         
 
     def write_table(self, outfile, overwrite=True):
@@ -190,12 +200,12 @@ class ScatteringModel(object):
         # e.g. pars['lam'], pars['a']
         # should this be part of WCS?
         c1 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='lam', array=_make_array(self.pars['lam']),
+             [fits.Column(name='lam', array=helpers._make_array(self.pars['lam']),
              format='E', unit=self.pars['unit'])])
         c2 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='a', array=_make_array(self.pars['a']),
+             [fits.Column(name='a', array=helpers._make_array(self.pars['a']),
              format='E', unit='micron')])
         c3 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='theta', array=_make_array(self.pars['theta']),
+             [fits.Column(name='theta', array=helpers._make_array(self.pars['theta']),
              format='E', unit='arcsec')])
         return [c1, c2, c3]

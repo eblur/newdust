@@ -3,8 +3,7 @@ from scipy.integrate import trapz
 from astropy.io import fits
 
 from . import graindist
-from . import scatmodels
-from . import constants as c
+from . import scatteringmodel
 
 __all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
 
@@ -43,7 +42,7 @@ class SingleGrainPop(graindist.GrainDist):
 
         # Handling scattering model FITS input, if requested
         if scatm_from_file is not None:
-            self.scatm = scatmodels.ScatModel(from_file=scatm_from_file)
+            self.scatm = scatteringmodel.ScatModel(from_file=scatm_from_file)
             assert isinstance(stype, str)
             self.scatm.stype = stype
             self.lam = self.scatm.pars['lam']
@@ -58,9 +57,9 @@ class SingleGrainPop(graindist.GrainDist):
     def _assign_scatm_from_string(self, stype):
         assert stype in ['RG', 'Mie']
         if stype == 'RG':
-            self.scatm = scatmodels.RGscat()
+            self.scatm = scatteringmodel.RGscat()
         if stype == 'Mie':
-            self.scatm = scatmodels.Mie()
+            self.scatm = scatteringmodel.Mie()
 
     # Run scattering model calculation, then compute optical depths
     def calculate_ext(self, lam, unit='kev', theta=0.0, **kwargs):

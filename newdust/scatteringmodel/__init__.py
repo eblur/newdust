@@ -1,4 +1,4 @@
-from .rgscat import RGscat
+from .rgscat import RGscattering
 from .miescat import Mie
 from .pah import PAH
 from .scatteringmodel import ScatteringModel

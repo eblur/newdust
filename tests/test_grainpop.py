@@ -4,7 +4,7 @@ from scipy.integrate import trapz
 
 from newdust.grainpop import *
 from newdust import graindist
-from newdust import scatmodels
+from newdust import scatteringmodel
 from . import percent_diff
 
 MD = 1.e-5  # g cm^-2
@@ -133,7 +133,7 @@ def test_mass_double(estring):
 def test_custom_SingleGrainPop():
     sdist = graindist.sizedist.Powerlaw()
     compo = graindist.composition.CmSilicate(rho=3.0)
-    mscat = scatmodels.Mie()
+    mscat = scatteringmodel.Mie()
     test  = SingleGrainPop(sdist, compo, mscat)
     test  = SingleGrainPop(sdist, compo, 'RG')
     test  = SingleGrainPop('Powerlaw', compo, mscat)
