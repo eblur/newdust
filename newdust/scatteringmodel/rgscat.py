@@ -5,7 +5,7 @@ from .scatteringmodel import ScatteringModel
 
 __all__ = ['RGscattering']
 
-CHARSIG       = 1.04  # characteristic scattering angle [arcmin E(keV)^-1 a(um)^-1]
+CHARSIG       = 1.04 * u.arcmin # characteristic scattering angle [arcmin E(keV)^-1 a(um)^-1]
 
 class RGscattering(ScatteringModel):
     """
@@ -57,7 +57,8 @@ class RGscattering(ScatteringModel):
         # Size parameter (grain circumference to incoming wavelength)
         x      = 2.0 * np.pi * a_cm / lam_cm # (NE x NA)
         # Characteristic scattering angle (sigma in Gaussian approximation)
-        sigma_rad = self.characteristic_angle(lam_cm*u.cm, a_cm*u.micron).to('radian').value # (NE x NA)
+        sigma = self.characteristic_angle(lam_cm*u.cm, a_cm*u.cm)
+        sigma_rad = sigma.to('radian').value # (NE x NA)
         
         # Calculate the scattering efficiencies (1-d)
         qsca = _qsca(x, mm1)
@@ -109,7 +110,7 @@ class RGscattering(ScatteringModel):
         if isinstance(a, u.Quantity):
             a_um = a.to('micron', equivalencies=u.spectral()).value
         
-        return CHARSIG * u.arcmin / (lam_keV * a_um)
+        return CHARSIG / (lam_keV * a_um)
 
 #--------------- Helper functions
 

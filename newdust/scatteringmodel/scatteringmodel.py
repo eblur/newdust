@@ -107,6 +107,7 @@ class ScatteringModel(object):
         # Save the value as microns, but return in cgs units
         a_cm = None
         if isinstance(a, u.Quantity):
+            # Store `a` value as microns
             self.pars['a'] = a.to('micron').value
             a_cm = a.to('cm').value
         else:
