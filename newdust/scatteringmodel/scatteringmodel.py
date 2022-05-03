@@ -96,32 +96,30 @@ class ScatteringModel(object):
 
         lam_cm = None
         if isinstance(lam, u.Quantity):
-            self.pars['lam'] = lam.value
-            self.pars['unit'] = lam.unit.to_string()
+            self.pars['lam'] = lam
             lam_cm = lam.to('cm', equivalencies=u.spectral()).value
         else:       
-            self.pars['lam'] = lam
-            self.pars['unit'] = 'keV'
+            self.pars['lam'] = lam * u.keV
             lam_cm = (lam * u.keV).to('cm', equivalencies=u.spectral()).value
         
         # Save the value as microns, but return in cgs units
         a_cm = None
         if isinstance(a, u.Quantity):
             # Store `a` value as microns
-            self.pars['a'] = a.to('micron').value
+            self.pars['a'] = a
             a_cm = a.to('cm').value
         else:
-            self.pars['a'] = a
+            self.pars['a'] = a * u.micron
             a_cm = (a * u.micron).to('cm').value
         
         self.pars['cm'] = cm.cmtype
 
         theta_rad = None
         if isinstance(theta, u.Quantity):
-            theta_rad = theta.to('radian').value
-            self.pars['theta'] = theta_rad
-        else:
             self.pars['theta'] = theta
+            theta_rad = theta.to('radian').value
+        else:
+            self.pars['theta'] = theta * u.radian
             theta_rad = theta
 
         return lam_cm, a_cm, theta_rad
@@ -149,7 +147,7 @@ class ScatteringModel(object):
         # qext, qsca, and qext will be separate image cards in the FITS file
         img_list = []
         for (q, h) in zip([self.qext, self.qabs, self.qsca, self.diff],
-                          ['Qext', 'Qabs', 'Qsca', 'Diff-xsect (cm^2/ster)']):
+                          ['Qext', 'Qabs', 'Qsca', 'Diff-xsect (ster^-1)']):
             htemp = fits.Header()
             htemp['TYPE'] = h
             img_list.append(fits.ImageHDU(q, header=htemp))
@@ -170,11 +168,10 @@ class ScatteringModel(object):
         """
         ff = fits.open(infile)
         # Load parameteric information
-        lam   = ff[1].data['lam']
-        unit  = ff[1].data.columns['lam'].unit
-        a     = ff[2].data['a']
-        theta = ff[3].data['theta']
-        self.pars = {'lam':lam, 'a':a, 'unit':unit, 'theta':theta}
+        lam   = ff[1].data['lam'] * u.Unit(ff[1].header['TUNIT1'])
+        a     = ff[2].data['a'] * u.Unit(ff[2].header['TUNIT1'])
+        theta = ff[3].data['theta'] * u.Unit(ff[3].header['TUNIT1'])
+        self.pars = {'lam':lam, 'a':a, 'theta':theta}
 
         # Load extinction information
         qvals = dict()
@@ -184,7 +181,7 @@ class ScatteringModel(object):
         self.qext = qvals['Qext']
         self.qabs = qvals['Qabs']
         self.qsca = qvals['Qsca']
-        self.diff = qvals['Diff-xsect (cm^2/ster)']
+        self.diff = qvals['Diff-xsect (ster^-1)']
         return
 
     ##----- Helper material
@@ -193,7 +190,7 @@ class ScatteringModel(object):
         result = fits.Header()
         result['COMMENT']  = "Extinction efficiency and differential cross-sections"
         result['COMMENT']  = "HDUS 4-6 are Qext, Qsca, Qabs in wavelength (or energy) vs grain radius"
-        result['COMMENT']  = "HDU 7 is differential cross-section (cm^2/ster)"
+        result['COMMENT']  = "HDU 7 is the differential scattering cross-section (ster^-1)"
         return fits.PrimaryHDU(header=result)
 
     def _write_table_pars(self):
@@ -201,12 +198,12 @@ class ScatteringModel(object):
         # e.g. pars['lam'], pars['a']
         # should this be part of WCS?
         c1 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='lam', array=helpers._make_array(self.pars['lam']),
-             format='E', unit=self.pars['unit'])])
+             [fits.Column(name='lam', array=helpers._make_array(self.pars['lam'].value),
+             format='E', unit=self.pars['lam'].unit.to_string())])
         c2 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='a', array=helpers._make_array(self.pars['a']),
-             format='E', unit='micron')])
+             [fits.Column(name='a', array=helpers._make_array(self.pars['a'].value),
+             format='E', unit=self.pars['a'].unit.to_string())])
         c3 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='theta', array=helpers._make_array(self.pars['theta']),
-             format='E', unit='arcsec')])
+             [fits.Column(name='theta', array=helpers._make_array(self.pars['theta'].value),
+             format='E', unit=self.pars['theta'].unit.to_string())])
         return [c1, c2, c3]

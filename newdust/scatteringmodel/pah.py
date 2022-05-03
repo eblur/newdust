@@ -41,7 +41,7 @@ def parse_PAH( option, ignore='#', flag='>', verbose=False ):
             # Characters flagged with '>' earn a dictionary entry with grain size
             elif line[0] == flag :
                 if verbose: print("Found a new grain size table")
-                gsize = np.float( line.split()[1] )
+                gsize = float( line.split()[1] )
                 if verbose : print('Reading data for grain size:', gsize)
                 result[ gsize ] = {}
                 # Initialize dictionaries with lists
@@ -51,7 +51,7 @@ def parse_PAH( option, ignore='#', flag='>', verbose=False ):
             else:
                 row_vals = line.split()
                 for i in range( len(COLS) ) :
-                    result[ gsize ][ COLS[i] ].append( np.float( row_vals[i] ) )
+                    result[ gsize ][ COLS[i] ].append( float( row_vals[i] ) )
         except:
             if verbose : print(line)
             end_of_file = True

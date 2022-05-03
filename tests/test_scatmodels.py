@@ -22,6 +22,11 @@ LAM   = 4500.  # angs
 THETA    = np.logspace(-10.0, np.log10(np.pi), 1000)  # 0->pi scattering angles (rad)
 THETA_ARCSEC = (THETA * u.radian).to('arcsec')
 
+#WAVEL_GRID = np.linspace(3000., 4000., 10) * u.angstrom
+WAVEL_GRID = np.linspace(1.0, 40., 10) * u.angstrom
+A_CM = (A_UM*u.micron).to('cm')
+
+
 def test_rgscat():
     test = scatteringmodel.RGscattering()
 
@@ -66,14 +71,6 @@ def test_rgscat():
 
     # Test that the extinction values are correct
     assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
-    
-    # Test the write function
-    test.write_table('qrg.fits')
-    # Test the read function
-    new_test = scatteringmodel.ScatteringModel(from_file='qrg.fits')
-    assert percent_diff(test.qext, new_test.qext) <= 1.e-5
-    assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
-    assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
 
 @pytest.mark.parametrize('cm',
                          [composition.CmDrude(),
@@ -97,14 +94,6 @@ def test_mie(cm):
     # Test that the extinction values are correct
     assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01
 
-    # Test the write function
-    test.write_table('qmie.fits')
-    # Test the read function
-    new_test = scatteringmodel.ScatteringModel(from_file='qmie.fits')
-    assert percent_diff(test.qext, new_test.qext) <= 1.e-5
-    assert percent_diff(test.qabs, new_test.qabs) <= 1.e-5
-    assert percent_diff(test.qsca, new_test.qsca) <= 1.e-5
-
 
 @pytest.mark.parametrize('sm',
                          [scatteringmodel.RGscattering(),
@@ -118,6 +107,31 @@ def test_dimensions(sm):
     assert np.shape(sm.qext) == (NE, NA)
     assert np.shape(sm.qabs) == (NE, NA)
     assert np.shape(sm.diff) == (NE, NA, NTH)
+
+def test_read_write():
+    cm = composition.CmDrude()
+    test = scatteringmodel.RGscattering()
+    test.calculate(WAVEL_GRID, A_CM, cm, THETA)
+    test.write_table('qtest.fits')
+
+    # Test the read function
+    new_test = scatteringmodel.ScatteringModel(from_file='qtest.fits')
+    assert np.all(percent_diff(test.qext, new_test.qext) <= 1.e-5)
+    assert np.all(percent_diff(test.qabs, new_test.qabs) <= 1.e-5)
+    assert np.all(percent_diff(test.qsca, new_test.qsca) <= 1.e-5)
+    assert np.shape(new_test.qext) == (np.size(WAVEL_GRID), np.size(A_CM))
+
+    # Test that the parameters are the same
+    # Astropy units didn't have enoug accuracy to use equalities
+    assert np.all(percent_diff(
+        new_test.pars['lam'].to('cm', equivalencies=u.spectral()).value,
+        test.pars['lam'].to('cm', equivalencies=u.spectral()).value) <= 1.e-4)
+    assert np.all(percent_diff(
+        new_test.pars['a'].to('cm', equivalencies=u.spectral()).value,
+        test.pars['a'].to('cm', equivalencies=u.spectral()).value) <= 1.e-4)
+    assert np.all(percent_diff(
+        new_test.pars['theta'].to('arcsec').value, 
+        test.pars['theta'].to('arcsec').value) <= 1.e-4)
 
 def test_PAHs():
     neutral_PAH = scatteringmodel.PAH('neu')
