@@ -1,3 +1,5 @@
+from re import A
+from matplotlib.pyplot import ion
 import numpy as np
 from scipy.integrate import trapz
 import pytest
@@ -14,6 +16,7 @@ from . import percent_diff
 CMD   = composition.CmDrude()
 CMS   = composition.CmSilicate()
 A_UM  = 0.5  # um
+PAH_UM = 0.01 # um
 E_KEV = 2.0    # keV
 LAM   = 4500.  # angs
 THETA    = np.logspace(-10.0, np.log10(np.pi), 1000)  # 0->pi scattering angles (rad)
@@ -115,3 +118,26 @@ def test_dimensions(sm):
     assert np.shape(sm.qext) == (NE, NA)
     assert np.shape(sm.qabs) == (NE, NA)
     assert np.shape(sm.diff) == (NE, NA, NTH)
+
+def test_PAHs():
+    neutral_PAH = scatteringmodel.PAH('neu')
+    neutral_PAH.calculate(E_KEV, PAH_UM)
+
+    ionized_PAH = scatteringmodel.PAH('neu')
+    ionized_PAH.calculate(E_KEV, PAH_UM)
+    
+    # Test that qext = qsca+qabs
+    assert percent_diff(neutral_PAH.qext, neutral_PAH.qabs + neutral_PAH.qsca) <= 0.01
+    assert percent_diff(ionized_PAH.qext, ionized_PAH.qabs + ionized_PAH.qsca) <= 0.01
+
+    # Test that an absurdly high energy if off th grid and returns zero
+    neutral_PAH.calculate(1.e10, PAH_UM)
+    assert neutral_PAH.qext == 0
+    ionized_PAH.calculate(1.e10, PAH_UM)
+    assert ionized_PAH.qext == 0
+
+    # Test that units work
+    neutral_PAH.calculate(LAM * u.angstrom, PAH_UM)
+    neutral_PAH.calculate(E_KEV, (PAH_UM * u.micron).to('cm'))
+    # if it runs, assume all is well
+

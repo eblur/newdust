@@ -168,5 +168,6 @@ class PAH(ScatteringModel):
             return
         
         # Wavelengths in the Draine files were listed in reverse order
-        result = np.interp(wavel_um, wavel[::-1], qvals[::-1] )
+        # If the input wavelength is beyond the file range, returns 0
+        result = np.interp(wavel_um, wavel[::-1], qvals[::-1], left=0.0, right=0.0)
         return result
