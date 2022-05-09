@@ -9,10 +9,6 @@ from newdust.graindist import composition
 from newdust import scatteringmodel
 from . import percent_diff
 
-# -- Some Notes (March 27, 2017) -- Lia
-# I couldn't get differential scattering cross section to integrate to total
-# scattering cross-section within < 5%.  Could be the integration method?
-
 CMD   = composition.CmDrude()
 CMS   = composition.CmSilicate()
 A_UM  = 0.5  # um

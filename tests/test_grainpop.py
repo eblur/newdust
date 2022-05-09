@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 from scipy.integrate import trapz
+import astropy.units as u
 
 from newdust.grainpop import *
 from newdust import graindist
@@ -26,10 +27,10 @@ EVALS    = np.logspace(-1, 1, NE)  # kev
 
 # test that everything runs on both kev and angs
 test1 = SingleGrainPop('Powerlaw', 'Silicate', 'Mie')
-test1.calculate_ext(LAMVALS, unit='angs', theta=THETA)
+test1.calculate_ext(LAMVALS * u.angstrom, theta=THETA)
 
 test2 = SingleGrainPop('Powerlaw', 'Silicate', 'RG')
-test2.calculate_ext(EVALS, unit='kev', theta=THETA)
+test2.calculate_ext(EVALS, theta=THETA)
 
 def test_SingleGrainPop():
     assert len(test1.a) == NA
@@ -37,13 +38,14 @@ def test_SingleGrainPop():
     assert len(test1.mdens) == NA
     assert len(test1.cgeo) == NA
     assert len(test1.vol) == NA
-    assert test1.lam_unit == 'angs'
-    assert test2.lam_unit == 'kev'
+    assert test1.lam.unit.to_string() == 'Angstrom'
+    assert test2.lam.unit.to_string() == 'keV' # test the automatic units
     assert len(test1.lam) == NE
     assert len(test1.tau_ext) == NE
     assert len(test1.tau_abs) == NE
     assert len(test1.tau_sca) == NE
 
+"""
 def test_GrainPop_keys():
     test = GrainPop([test1, test2])
     assert test[0].description == '0'
@@ -138,3 +140,5 @@ def test_custom_SingleGrainPop():
     test  = SingleGrainPop(sdist, compo, 'RG')
     test  = SingleGrainPop('Powerlaw', compo, mscat)
     test  = SingleGrainPop(sdist, 'Silicate', mscat)
+
+"""

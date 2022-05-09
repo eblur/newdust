@@ -15,7 +15,7 @@ __all__ = ['GrainDist']
 
 class GrainDist(object):
     """
-    Graindist ties togehter the size distribution (which has no set abundance) 
+    Graindist ties together the size distribution (which has no set abundance) 
     and composition (which contains optical constants and density) and anchors them
     with dust mass density and a series of convenience functions to get at some of the
     frequently needed information.
