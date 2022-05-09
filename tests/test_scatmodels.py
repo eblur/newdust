@@ -22,6 +22,9 @@ THETA_ARCSEC = (THETA * u.radian).to('arcsec')
 WAVEL_GRID = np.linspace(1.0, 40., 10) * u.angstrom
 A_CM = (A_UM*u.micron).to('cm')
 
+## WARNING: As of 2022.05.09 -- 
+## Can only get RG-Drude to integrate (agree) between qsca and 
+## differential cross-section to about 5%
 
 def test_rgscat():
     test = scatteringmodel.RGscattering()
@@ -64,6 +67,12 @@ def test_rgscat():
     # Test that differential cross section goes to zero at large ANGLES
     test.calculate(E_KEV, A_UM, CMD, theta=1.e10)
     assert test.diff == 0.0
+
+    ## WARNING -- See note above
+    # Test that the differential scattering cross section integrates to qsca
+    test.calculate(E_KEV, A_UM, CMD, theta=THETA_ARCSEC)
+    dtot = trapz(test.diff * 2.0*np.pi*np.sin(THETA), THETA)  # unitless
+    assert percent_diff(dtot, test.qsca) <= 0.05
 
     # Test that the extinction values are correct
     assert percent_diff(test.qext, test.qabs + test.qsca) <= 0.01

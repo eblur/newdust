@@ -1,11 +1,11 @@
 import numpy as np
 from scipy.integrate import trapz
-from astropy.io import fits
+import astropy.units as u
 
 from . import graindist
 from . import scatteringmodel
 
-__all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_drude']
+__all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_RGDrude']
 
 MD_DEFAULT    = 1.e-4  # g cm^-2
 AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
@@ -70,11 +70,10 @@ class SingleGrainPop(graindist.GrainDist):
 
         # Handling scattering model FITS input, if requested
         if scatm_from_file is not None:
-            self.scatm = scatteringmodel.ScatModel(from_file=scatm_from_file)
+            self.scatm = scatteringmodel.ScatteringModel(from_file=scatm_from_file)
             assert isinstance(stype, str)
             self.scatm.stype = stype
             self.lam = self.scatm.pars['lam']
-            self.lam_unit = self.scatm.pars['unit']
             self._calculate_tau()
         # Otherwise choose from existing (or custom) scattering calculators
         elif isinstance(stype, str):
@@ -173,7 +172,8 @@ class SingleGrainPop(graindist.GrainDist):
 
         keyword : string ('ext', 'sca', 'abs', 'all') : extinction value(s) to plot
 
-        unit : string parsable by astropy.units : unit to use for the x-axis values
+        unit : string parsable by astropy.units : unit to use for the x-axis values. 
+            If None, defaults to the unit assigned to self.lam
 
         **kwargs passed to ax.legend()
         """
@@ -239,30 +239,43 @@ class SingleGrainPop(graindist.GrainDist):
 
 class GrainPop(object):
     """
-    | A collection of dust grain distributions (SingeGrainPop).
-    | Can add a string describing this Grain population using the `description` keyword
-    |
-    | **ATTRIBUTES**
-    | keys     : A list of keys corresponding to each SingleGrainPop (default: list of integers starting with 0)
-    | gpoplist : A list of SingleGrainPop objects
-    | description : A string describing this collection
-    | lam      : The energy / wavelength used for calculating extinction
-    | lam_unit : The unit for energy ('kev') or wavelength ('angs') used for calculating extinction
-    |
-    | *properties*
-    | tau_ext : Total extinction optical depth as a function of wavelength / energy
-    | tau_sca : Total scattering optical depth as a function of wavelength / energy
-    | tau_abs : Total absorption optical depth as a function of wavelength / energy
-    |
-    | *functions*
-    | __getitem__(key) will return the SingleGrainPop indexed by ``key``
-    | calculate_ext(lam, unit='kev', **kwargs) runs the extinction calculation on the wavelength grid specified by lam and unit
-    | plot_ext(ax, keyword, **kwargs) plots the extinction properties (see *astrodust.extinction*)
-    |   - ``keyword`` options are "ext", "sca", "abs", "all"
-    | info(key=None) prints information about the SingleGrainPop indexed by ``key``
-    |   - if ``key`` is *None*, information about every grain population will be printed to screen
+    A collection of SingleGrainPop objects. Each SingleGrainPop represents 
+    a different composition (or perhaps different geometries of grain size distribution). 
+    Each SingleGrainPop object has a label string, and can be accessed in the same was as 
+    key-value pairs are accessed in a Python dictionary.
+
+    Attributes
+    ----------
+
+    keys : Python list of strings : labels for each SingleGrainPop object.
+    (Default: A list of integers starting with 0)
+
+    gpoplist : Python list of SingleGrainPop objects : Paired, in order, with the values in `keys`
+
+    description : string : A description for this collection
+
+    lam : astropy.units.Quantity : wavelength or energy used for the extinction computation
+    
+    *properties*
+    tau_ext : numpy.ndarray : Total extinction optical depth as a function of wavelength / energy
+    
+    tau_sca : numpy.ndarray : Total scattering optical depth as a function of wavelength / energy
+    
+    tau_abs : numpy.ndarray : Total absorption optical depth as a function of wavelength / energy
     """
     def __init__(self, gpoplist, keys=None, description='Custom_GrainPopDict'):
+        """
+        Inputs
+        ------
+        
+        gpoplist : Python list of SingleGrainPop objects : Will be paired, in order, 
+        with the values in `keys`
+
+        keys : Python list of strings : labels for each SingleGrainPop object.
+        (Default: None, will make the keys a list of integers starting with 0)
+
+        description : string : A description for this collection
+        """
         assert isinstance(gpoplist, list)
         if keys is None:
             self.keys = list(range(len(gpoplist)))
@@ -270,18 +283,42 @@ class GrainPop(object):
             self.keys = keys
         self.description = description
         self.gpoplist    = gpoplist
+
+        # Assign the key as a description on each SingleGrainPop, helps with testing
         for k in self.keys:
             i = self.keys.index(k)
             self.gpoplist[i].description = str(self.keys[i])
+
+        # No wavelength/energy grid assigned until the calculation is done
         self.lam = None
-        self.lam_unit = None
+        
+    def calculate_ext(self, lam, **kwargs):
+        """
+        Calculate the extinction model.
 
-    def calculate_ext(self, lam, unit='kev', **kwargs):
+        lam : astropy.units.Quantity -or- numpy.ndarray
+            Wavelength or energy values for calculating the cross-sections;
+            if no units specified, defaults to keV
+        
+        theta : astropy.units.Quantity -or- numpy.ndarray -or- float
+            Scattering angles for computing the differential scattering cross-section;
+            if no units specified, defaults to radian
+        
+        **kwargs passed to SingleGrainPop.scatm.calculate for each grain population in the list
+        """
+        # Assing units if an Astropy Quantity is not input
+        input_lam = lam
+        if not isinstance(lam, u.Quantity):
+            input_lam = lam * u.keV
+        
+        # Run extinction calculation on each SingleGrainPop in the list
         for gp in self.gpoplist:
-            gp.calculate_ext(lam, unit=unit, **kwargs)
-        self.lam = lam
-        self.lam_unit = unit
+            gp.calculate_ext(input_lam, **kwargs)
 
+        # If everything went fine, store inthe input wavlength/energy grid
+        self.lam = input_lam
+
+    # Makes this object work like a dictionary
     def __getitem__(self, key):
         if isinstance(key, int):
             return self.gpoplist[key]
@@ -292,6 +329,9 @@ class GrainPop(object):
 
     @property
     def md(self):
+        """
+        Return the sum of the `md` values from each SingleGrainPop
+        """
         result = 0.0
         for gp in self.gpoplist:
             result += gp.md
@@ -299,6 +339,9 @@ class GrainPop(object):
 
     @property
     def tau_ext(self):
+        """
+        Return the sum of the `tau_ext` values from each SingleGrainPop
+        """
         result = 0.0
         if self.lam is None:
             print("ERROR: Extinction properties need to be calculated")
@@ -309,6 +352,9 @@ class GrainPop(object):
 
     @property
     def tau_sca(self):
+        """
+        Return the sum of the `tau_sca` values from each SingleGrainPop
+        """
         result = 0.0
         if self.lam is None:
             print("ERROR: Extinction properties need to be calculated")
@@ -319,6 +365,9 @@ class GrainPop(object):
 
     @property
     def tau_abs(self):
+        """
+        Return the sum of the `tau_abs` values from each SingleGrainPop
+        """
         result = 0.0
         if self.lam is None:
             print("ERROR: Extinction properties need to be calculated")
@@ -327,30 +376,62 @@ class GrainPop(object):
                 result += gp.tau_abs
         return result
 
-    def plot_ext(self, ax, keyword, **kwargs):
+    def plot_ext(self, ax, keyword, unit=None, **kwargs):
+        """
+        Plot the sum of the extinction properties across all grain populations
+
+        Inputs
+        ------
+
+        ax : matplotlib.pyplot.axes object
+
+        keyword : string ('ext', 'sca', 'abs', 'all') : extinction value(s) to plot
+
+        unit : string parsable by astropy.units : unit to use for the x-axis values
+            If None, defaults to the unit assigned to self.lam
+
+        **kwargs passed to ax.legend()
+        """
         assert keyword in ['all','ext','sca','abs']
+
+        # Handle units on the wavelength/energy scale
+        xval = self.lam.value
+        xunit = self.lam.unit.to_string()
+        if unit is not None:
+            xval = self.lam.to(unit, equivalencies=u.spectral()).value
+            xunit = unit
+
         if keyword == 'ext':
-            ax.plot(self.lam, self.tau_ext, **kwargs)
-            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.plot(xval, self.tau_ext, **kwargs)
+            ax.set_xlabel(xunit)
             ax.set_ylabel(r"$\tau_{ext}$")
         if keyword == 'sca':
-            ax.plot(self.lam, self.tau_sca, **kwargs)
-            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.plot(xval, self.tau_sca, **kwargs)
+            ax.set_xlabel(xunit)
             ax.set_ylabel(r"$\tau_{sca}$")
         if keyword == 'abs':
-            ax.plot(self.lam, self.tau_abs, **kwargs)
-            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.plot(xval, self.tau_abs, **kwargs)
+            ax.set_xlabel(xunit)
             ax.set_ylabel(r"$\tau_{abs}$")
         if keyword == 'all':
-            ax.plot(self.lam, self.tau_ext, 'k-', lw=2, label='Extinction')
-            ax.plot(self.lam, self.tau_sca, 'r--', label='Scattering')
-            ax.plot(self.lam, self.tau_abs, 'r:', label='Absorption')
-            ax.set_xlabel(UNIT_LABELS[self.lam_unit])
+            ax.plot(xval, self.tau_ext, 'k-', lw=2, label='Extinction')
+            ax.plot(xval, self.tau_sca, 'r--', label='Scattering')
+            ax.plot(xval, self.tau_abs, 'r:', label='Absorption')
+            ax.set_xlabel(xunit)
             ax.set_ylabel(r"$\tau$")
             ax.set_title(self.description)
             ax.legend(**kwargs)
 
     def info(self, key=None):
+        """
+        Print information about this collection of grain populations
+
+        Inputs
+        ------
+
+        key : int or string : key-value for the SingleGrainPopulation of interest. 
+            If None, systematically prints information for every SingleGrainPop in the collection.
+        """
         if key is None:
             print("General information for %s dust grain population" % self.description)
             for gp in self.gpoplist:
@@ -365,15 +446,24 @@ class GrainPop(object):
 
 def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6, **kwargs):
     """
-    | Returns a GrainPop describing an MRN dust grain size distribution, which is a mixture of silicate and graphite grains.
-    | Applies the 1/3 parallel, 2/3 perpendicular assumption of graphite grain orientations.
-    |
-    | **INPUTS**
-    | amin : minimum grain size in microns
-    | amax : maximum grain size in microns
-    | p    : power law slope for grain size distribution
-    | md   : dust mass column [g cm^-2]
-    | fsil : fraction of dust mass in silicate grains
+    Returns a GrainPop describing an MRN dust grain size distribution, 
+    which is a mixture of silicate and graphite grains. Applies the 1/3 parallel, 
+    2/3 perpendicular assumption of graphite grain orientations.
+
+    Inputs
+    ------
+    
+    amin : astropy.units.Quantity -or- float :  minimum grain radius; if a float, micron units assumed
+
+    amax : astropy.units.Quantity -or- float : maximum grain radius; if a float, micron units assumed
+
+    p : float : powerlaw slope for grain size distribution
+
+    md : float : dust mass column [g cm^-2]
+
+    fsil : float : fraction of dust mass in silicate grains
+
+    **kwargs passed to graindist.sizedist.Powerlaw()
     """
     assert isinstance(fsil, float)
     assert fsil >= 0.0 and fsil <= 1.0
@@ -397,21 +487,28 @@ def make_MRN(amin=AMIN, amax=AMAX, p=P, md=MD_DEFAULT, fsil=0.6, **kwargs):
     keys   = ['sil','gra_para','gra_perp']
     return GrainPop(gplist, keys=keys, description='MRN')
 
-def make_MRN_drude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT, **kwargs):
+def make_MRN_RGDrude(amin=AMIN, amax=AMAX, p=P, rho=RHO_AVG, md=MD_DEFAULT, **kwargs):
     """
-    | Returns a GrainPop describing an MRN dust grain size distribution, and uses the Drude approximation,
-    | which approximates the dust grain as a sphere of free electrons
-    |
-    | **INPUTS**
-    | amin : minimum grain size in microns
-    | amax : maximum grain size in microns
-    | p    : power law slope for grain size distribution
-    | rho  : density of dust grain material [g cm^-3]
-    | md   : dust mass column [g cm^-2]
+    Returns a SingleGrainPop describing an MRN dust grain size distribution, but uses 
+    Rayleigh-Gans scattering with the  Drude approximation, which approximates 
+    the dust grain as a sphere of free electrons.
+
+    Inputs
+    ------
+
+    amin : astropy.units.Quantity -or- float :  minimum grain radius; if a float, micron units assumed
+
+    amax : astropy.units.Quantity -or- float : maximum grain radius; if a float, micron units assumed
+
+    p : float : powerlaw slope for grain size distribution
+
+    rho : float : density of the dust grain material [g cm^-3]
+
+    md : float : dust mass column [g cm^-2]
+
+    **kwargs passed to graindist.sizedist.Powerlaw()
     """
     pl      = graindist.sizedist.Powerlaw(amin=amin, amax=amax, p=p, **kwargs)
     dru     = graindist.composition.CmDrude(rho=rho)
-    mrn_dru = SingleGrainPop(pl, dru, 'RG', md=md)
-    gplist  = [mrn_dru]
-    keys    = ['RGD']
-    return GrainPop(gplist, keys=keys, description='MRN_rgd')
+    mrn_rgd = SingleGrainPop(pl, dru, 'RG', md=md)
+    return mrn_rgd
