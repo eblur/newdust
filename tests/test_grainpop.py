@@ -5,6 +5,7 @@ import astropy.units as u
 
 from newdust.grainpop import *
 from newdust import graindist
+from newdust import scatteringmodel
 from . import percent_diff
 
 MD = 1.e-5  # g cm^-2
@@ -144,17 +145,15 @@ def test_ext_calculations(sd, cm, sc):
     assert np.all(percent_diff(test.tau_abs, new_test.tau_abs) <= 1.e-5)
     assert np.all(percent_diff(test.tau_sca, new_test.tau_sca) <= 1.e-5)
     assert np.all(percent_diff(test.diff.flatten(), new_test.diff.flatten()) <= 1.e-5)
-    assert np.all(percent_diff(test.int_diff.flatten(), new_test.int_diff.flatten()) <= 1.e-5)
+    assert np.all(percent_diff(test.int_diff.flatten(), new_test.int_diff.flatten()) <= 1.e-5) 
     
-    
-"""
 # Make sure that doubling the dust mass doubles the extinction
 @pytest.mark.parametrize('estring', ALLOWED_SCATM)
 def test_mass_double(estring):
     gp1 = SingleGrainPop('Powerlaw','Silicate', estring)
-    gp1.calculate_ext(LAMVALS, unit='angs')
+    gp1.calculate_ext(LAMVALS * u.angstrom)
     gp2 = SingleGrainPop('Powerlaw','Silicate', estring, md=2.0*gp1.md)
-    gp2.calculate_ext(LAMVALS, unit='angs')
+    gp2.calculate_ext(LAMVALS * u.angstrom)
 
     assert all(percent_diff(gp2.tau_ext, 2.0 * gp1.tau_ext) <= 0.01)
     assert all(percent_diff(gp2.tau_abs, 2.0 * gp1.tau_abs) <= 0.01)
@@ -169,5 +168,3 @@ def test_custom_SingleGrainPop():
     test  = SingleGrainPop(sdist, compo, 'RG')
     test  = SingleGrainPop('Powerlaw', compo, mscat)
     test  = SingleGrainPop(sdist, 'Silicate', mscat)
-
-"""
