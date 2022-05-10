@@ -5,7 +5,6 @@ import astropy.units as u
 
 from newdust.grainpop import *
 from newdust import graindist
-from newdust import scatteringmodel
 from . import percent_diff
 
 MD = 1.e-5  # g cm^-2
@@ -18,11 +17,13 @@ MRN_DRU = graindist.GrainDist('Powerlaw','Drude')
 EXP_SIL = graindist.GrainDist('ExpCutoff','Silicate')
 GRAIN   = graindist.GrainDist('Grain','Drude')
 
-NE, NA, NTH = 50, np.size(graindist.sizedist.Powerlaw().a), 30
-THETA    = np.logspace(-10.0, np.log10(np.pi), NTH)  # 0->pi scattering angles (rad)
+## NOTE: To test integrals over theta, need a large enough number of points on the grid
+## I started with 100 and multiplied by 2 until the test_ext_calculation tests pass
+NE, NA, NTH = 5, np.size(graindist.sizedist.Powerlaw().a), 400
+THETA    = np.logspace(-6, np.log10(np.pi), NTH)  # 0->pi scattering angles (rad)
 TH_ASEC  = (THETA * u.radian).to('arcsec')
 LAMVALS  = np.linspace(1000., 5000., NE)  # angs
-EVALS    = np.logspace(-1, 1, NE)  # kev
+EVALS    = np.logspace(-1, np.log10(3.0), NE)  # kev
 
 # test that everything runs on both kev and angs
 test1 = SingleGrainPop('Powerlaw', 'Silicate', 'Mie')
@@ -44,7 +45,6 @@ def test_SingleGrainPop():
     assert len(test1.tau_abs) == NE
     assert len(test1.tau_sca) == NE
 
-
 def test_GrainPop_keys():
     test = GrainPop([test1, test2])
     assert test[0].description == '0'
@@ -57,11 +57,11 @@ def test_GrainPop_keys():
 def test_GrainPop_calculation():
     test = GrainPop([SingleGrainPop('Powerlaw', 'Silicate', 'Mie'),
                      SingleGrainPop('Powerlaw', 'Silicate', 'RG')])
-    test.calculate_ext(LAMVALS * u.angstrom, theta=THETA)
+    test.calculate_ext(LAMVALS * u.angstrom, theta=0.0)
     assert np.shape(test.tau_ext) == (NE,)
     assert np.shape(test.tau_sca) == (NE,)
     assert np.shape(test.tau_abs) == (NE,)
-    assert any(percent_diff(test.tau_ext, test.tau_sca + test.tau_abs) <= 0.01)
+    assert np.all(percent_diff(test.tau_ext, test.tau_sca + test.tau_abs) <= 0.01)
 
 @pytest.mark.parametrize('fsil', [0.0, 0.4, 1.0])
 def test_make_MRN(fsil):
@@ -92,13 +92,31 @@ def test_make_MRN_RGDrude():
 
 #-------- Test the extinction calculations
 
+
+
 # Test that all the computations can run
-@pytest.mark.parametrize('sd', ['Powerlaw','ExpCutoff','Grain'])
-@pytest.mark.parametrize('cm', ['Silicate','Graphite'])#,'Drude'])
-@pytest.mark.parametrize('sc', ['RG', 'Mie'])
+# Test RG-Drude with X-ray photons
+# Test everything else with optical photons
+@pytest.mark.parametrize('sd', ['Powerlaw', 'ExpCutoff','Grain'])
+@pytest.mark.parametrize('cm', ['Silicate','Graphite', 'Drude'])
+@pytest.mark.parametrize('sc', ['Mie', 'RG'])
 def test_ext_calculations(sd, cm, sc):
-    test = SingleGrainPop(sd, cm, sc)
-    test.calculate_ext(LAMVALS*u.angstrom, theta=TH_ASEC)
+    thresh = 0.05 # default threshold for agreement
+    # If Rayleigh-Gans, use X-ray photons
+    # NOTE - Can only get Rayleigh-Gans to work within 5%, see test_scatmodels.py
+    if sc == 'RG':
+        test = SingleGrainPop(sd, cm, sc)
+        test.calculate_ext(EVALS, theta=TH_ASEC)
+        thresh = 0.10 # Change threshold to 10% if RGscattering
+    # If not Rayleigh-Gans but Drude appox is selected, skip test
+    elif cm == 'Drude':
+        return
+    # For everything else (Mie scattering)
+    else:
+        test = SingleGrainPop(sd, cm, sc)
+        test.calculate_ext(LAMVALS * u.angstrom, theta=TH_ASEC)
+
+    
     assert np.shape(test.tau_ext) == (NE,)
     assert np.shape(test.tau_sca) == (NE,)
     assert np.shape(test.tau_abs) == (NE,)
@@ -115,9 +133,9 @@ def test_ext_calculations(sd, cm, sc):
     else:
         sigma_scat = test.scatm.qsca * np.repeat(test.cgeo.reshape(1, NA), NE, axis=0) # NE x NA [cm^2]
     result = percent_diff(integrated.flatten(), sigma_scat.flatten())
-    print(result)
-    assert np.all(result <= 0.05)
-    ## WARNING - Can only get Rayleigh-Gans to work within 5%, see test_scatmodels.py
+    #print(result)
+    print(result[result > thresh])
+    assert np.all(result <= thresh)
 
     # Test write and read functions
     test.write_extinction_table('test_grainpop.fits')

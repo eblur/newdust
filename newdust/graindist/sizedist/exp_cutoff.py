@@ -13,7 +13,7 @@ PDIST    = 3.5     # default slope for power law distribution
 
 # min and max grain radii for MRN distribution
 AMIN     = 0.005   # micron
-ACUT     = 0.3     # micron
+ACUT     = 0.1     # micron
 NFOLD    = 5       # Number of e-foldings (a/amax) to cover past the amax point
 
 SHAPE    = shape.Sphere()
