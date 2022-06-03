@@ -35,8 +35,8 @@ class SingleGrainPop(graindist.GrainDist):
     diff : astropy.units.Quantity : [cm^2 rad^-2] differential scattering cross-section 
     as a function of wavelength/energy, grain size, and angle (NE x NA x NTH)
 
-    int_diff : astropy.units.Quantity : [ster^-1] differential cross-section integrated 
-    over grain size distribution effectively $d\tau / d\Omega$  (NE x NTH)
+    int_diff : astropy.units.Quantity : [rad^-2] differential cross-section integrated 
+    over grain size distribution effectively dtau / dOmega$  (NE x NTH)
     """
     def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, scatm_from_file=None, **kwargs):
         """

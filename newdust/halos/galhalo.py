@@ -3,6 +3,8 @@ from scipy.integrate import trapz
 from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
 
 import astropy.units as u
+import astropy.constants as c
+
 from astropy.io import fits
 
 from .halo import Halo
@@ -307,7 +309,7 @@ def path_diff(alpha, x):
     assert (np.max(x) < 1.0) & (np.min(x) > 0)
     if (np.size(alpha) > 1) & (np.size(x) > 1):
         assert len(alpha) == len(x)
-    alpha_rad = alpha * c.arcs2rad
+    alpha_rad = alpha * u.arcsec.to('rad')
     if not _is_small_angle(alpha_rad):
         print("WARNING: astrodust.halos.galhalo functions assume small angle scattering and the largest angle is > 0.01 rad")
     return alpha_rad**2 * (1-x) / (2*x)
@@ -323,5 +325,5 @@ def time_delay(alpha, x, dkpc):
     | D     : distance to the X-ray source [kpc]
     """
     delta_x = path_diff(alpha, x)
-    d_cm    = dkpc * 1.e3 * c.pc2cm   # cm
-    return delta_x * d_cm / c.clight  # seconds
+    d_cm    = dkpc * 1.e3 * u.pc.to('cm')  # cm
+    return delta_x * (d_cm / c.c).to('s').value # seconds
