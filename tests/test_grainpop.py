@@ -93,8 +93,6 @@ def test_make_MRN_RGDrude():
 
 #-------- Test the extinction calculations
 
-
-
 # Test that all the computations can run
 # Test RG-Drude with X-ray photons
 # Test everything else with optical photons
@@ -128,7 +126,7 @@ def test_ext_calculations(sd, cm, sc):
     # Test that the integrated differential cross-sections match the scattering cross sections
     th_2d   = np.repeat(THETA.reshape(1, 1, NTH), NE, axis=0) # NE x 1 x NA
     th_3d   = np.repeat(th_2d.reshape(NE, 1, NTH), len(test.a.value), axis=1) # NE x NA x NTH
-    integrated = trapz(test.diff * 2.0 * np.pi * np.sin(th_3d), THETA, axis=2) # NE x NA, [cm^2]
+    integrated = trapz(test.diff.value * 2.0 * np.pi * np.sin(th_3d), THETA, axis=2) # NE x NA, [cm^2]
     if sd == 'Grain':
         sigma_scat = test.scatm.qsca * test.cgeo
     else:
@@ -144,9 +142,9 @@ def test_ext_calculations(sd, cm, sc):
     assert np.all(percent_diff(test.tau_ext, new_test.tau_ext) <= 1.e-5)
     assert np.all(percent_diff(test.tau_abs, new_test.tau_abs) <= 1.e-5)
     assert np.all(percent_diff(test.tau_sca, new_test.tau_sca) <= 1.e-5)
-    assert np.all(percent_diff(test.diff.flatten(), new_test.diff.flatten()) <= 1.e-5)
-    assert np.all(percent_diff(test.int_diff.flatten(), new_test.int_diff.flatten()) <= 1.e-5) 
-    
+    assert np.all(percent_diff(test.diff.value.flatten(), new_test.diff.value.flatten()) <= 1.e-5)
+    assert np.all(percent_diff(test.int_diff.value.flatten(), new_test.int_diff.value.flatten()) <= 1.e-5) 
+
 # Make sure that doubling the dust mass doubles the extinction
 @pytest.mark.parametrize('estring', ALLOWED_SCATM)
 def test_mass_double(estring):

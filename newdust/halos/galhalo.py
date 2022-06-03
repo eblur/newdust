@@ -56,7 +56,7 @@ class UniformGalHalo(Halo):
         for al in self.theta:
             thscat = al / xgrid  # nx, goes from small to large angle
             gpop.calculate_ext(self.lam, theta=thscat)
-            dsig  = (gpop.diff / u.rad**2).to('arcsec^-2').value # NE x NA x nx, [cm^2 arcec^-2]
+            dsig  = gpop.diff.to('cm^2 arcsec^-2').value # NE x NA x nx, [cm^2 arcec^-2]
             itemp  = dsig * ndmesh / xmesh**2  # NE x NA x nx, [um^-1 arcsec^-2]
 
             intx      = trapz(itemp, xgrid, axis=2)  # NE x NA, [um^-1 arcsec^-2]
@@ -100,11 +100,12 @@ class ScreenGalHalo(Halo):
 
         thscat = self.theta / x
         gpop.calculate_ext(self.lam, theta=thscat)
-        dsig   = (gpop.diff / u.rad**2).to('arcsec^-2') # NE x NA x NTH, [cm^2 arcsec^-2]
+        dsig   = gpop.diff.to('cm^2 arcsec^-2') # NE x NA x NTH, [cm^2 arcsec^-2]
 
         ndmesh = np.repeat(
             np.repeat(gpop.ndens.reshape(1, NA, 1), NE, axis=0),
-            NTH, axis=2)
+            NTH, axis=2) * u.Unit('cm^-2')
+        # dust column density, size distribution per micron (hidden unit)
 
         itemp  = np.power(x, -2.0) * dsig * ndmesh  # NE x NA x NTH, [um^-1 arcsec^-2]
         intensity = trapz(itemp, gpop.a.to('micron').value, axis=1)  # NE x NTH, [arcsec^-2]

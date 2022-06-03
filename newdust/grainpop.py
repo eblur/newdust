@@ -32,11 +32,11 @@ class SingleGrainPop(graindist.GrainDist):
     tau_ext : numpy.ndarray float : extinction (scattering + absorption) optical depth 
     for this grain population
 
-    diff : numpy.ndarray float : [cm^2 ster^-1] differential scattering cross-section 
+    diff : astropy.units.Quantity : [cm^2 rad^-2] differential scattering cross-section 
     as a function of wavelength/energy, grain size, and angle (NE x NA x NTH)
 
-    int_diff : numpy.ndarray float : [ster^-1] differential cross-section integrated 
-    over grain size, effectively $d\tau / d\Omega$  (NE x NTH)
+    int_diff : astropy.units.Quantity : [ster^-1] differential cross-section integrated 
+    over grain size distribution effectively $d\tau / d\Omega$  (NE x NTH)
     """
     def __init__(self, dtype, cmtype, stype, shape='Sphere', md=MD_DEFAULT, scatm_from_file=None, **kwargs):
         """
@@ -129,7 +129,7 @@ class SingleGrainPop(graindist.GrainDist):
         # diff shape is NE x NA x NTH
         area_2d = np.repeat(self.cgeo.reshape(1, NA), NE, axis=0) # cm^2
         area_3d = np.repeat(area_2d.reshape(NE, NA, 1), NTH, axis=2)
-        self.diff = self.scatm.diff * area_3d # NE x NA x NTH, [cm^2 ster^-1]
+        self.diff = self.scatm.diff * area_3d * u.Unit('cm^2 rad^-2') # NE x NA x NTH, [cm^2 ster^-1]
 
         # If a single grain size, operate in 2D (shape: NE x NTH)
         if np.size(self.a) == 1:
@@ -145,7 +145,7 @@ class SingleGrainPop(graindist.GrainDist):
                 NTH, axis=2)
             int_diff = trapz(self.scatm.diff * area_3d * ndgrid, agrid, axis=1)
 
-        self.int_diff = int_diff  # NE x NTH, [ster^-1]
+        self.int_diff = int_diff * u.Unit('rad^-2')  # NE x NTH, [ster^-1]
 
     # Plot information about the grain size distribution
     def plot_sdist(self, ax, **kwargs):

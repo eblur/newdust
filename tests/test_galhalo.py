@@ -41,7 +41,7 @@ def test_galhalo_screen(x):
     # so halo should match differential scattering cross section integrated over dust grain size distributions
     if x == 1.0:
         # have to convert int_diff to arcsec^-2
-        test = np.abs(SCR_HALO.norm_int.value - GPOP.int_diff * u.arcsec.to('rad')**2)
+        test = np.abs(SCR_HALO.norm_int.value - GPOP.int_diff.to('arcsec^-2').value)
         assert np.all(test < 0.01)
 
 @pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
