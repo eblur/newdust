@@ -7,7 +7,6 @@ from astropy.io import fits
 
 from .halo import Halo
 from ..grainpop import *
-from .. import constants as c
 
 __all__ = ['UniformGalHalo','ScreenGalHalo','path_diff','time_delay']
 
@@ -50,17 +49,22 @@ class UniformGalHalo(Halo):
             nx, axis=2)
         assert np.shape(xmesh) == (NE, NA, nx)
         assert np.shape(ndmesh) == (NE, NA, nx)
+
+        # `al` (alpha) is the observed angular distance of the 
+        # scattering halo image from the point source center
         i_th = 0
         for al in self.theta:
             thscat = al / xgrid  # nx, goes from small to large angle
-            gpop.calculate_ext(self.lam, unit=self.lam_unit, theta=thscat)
-            dsig   = gpop.diff * c.arcs2rad**2 # NE x NA x nx, [cm^2 arcsec^-2]
+            gpop.calculate_ext(self.lam, theta=thscat)
+            dsig  = (gpop.diff / u.rad**2).to('arcsec^-2').value # NE x NA x nx, [cm^2 arcec^-2]
             itemp  = dsig * ndmesh / xmesh**2  # NE x NA x nx, [um^-1 arcsec^-2]
 
             intx      = trapz(itemp, xgrid, axis=2)  # NE x NA, [um^-1 arcsec^-2]
-            intensity = trapz(intx, gpop.a, axis=1)  # NE, [arcsec^-2]
+            intensity = trapz(intx, gpop.a.to('micron').value, axis=1)  # NE, [arcsec^-2]
             self.norm_int[:,i_th] = intensity
             i_th += 1
+        # attach the units from the above calculation
+        self.norm_int *= u.Unit('arcsec^-2')
 
         self.taux  = gpop.tau_sca
 
@@ -95,15 +99,16 @@ class ScreenGalHalo(Halo):
         NE, NA, NTH = np.size(self.lam), np.size(gpop.a), np.size(self.theta)
 
         thscat = self.theta / x
-        gpop.calculate_ext(self.lam, unit=self.lam_unit, theta=thscat)
-        dsig   = gpop.diff * c.arcs2rad**2 # NE x NA x NTH, [cm^2 arcsec^-2]
+        gpop.calculate_ext(self.lam, theta=thscat)
+        dsig   = (gpop.diff / u.rad**2).to('arcsec^-2') # NE x NA x NTH, [cm^2 arcsec^-2]
 
         ndmesh = np.repeat(
             np.repeat(gpop.ndens.reshape(1, NA, 1), NE, axis=0),
             NTH, axis=2)
 
         itemp  = np.power(x, -2.0) * dsig * ndmesh  # NE x NA x NTH, [um^-1 arcsec^-2]
-        intensity = trapz(itemp, gpop.a, axis=1)  # NE x NTH, [arcsec^-2]
+        intensity = trapz(itemp, gpop.a.to('micron').value, axis=1)  # NE x NTH, [arcsec^-2]
+        print(intensity.unit)
 
         self.norm_int = intensity
         self.taux     = gpop.tau_sca

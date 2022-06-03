@@ -3,7 +3,8 @@ from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
 from scipy.integrate import trapz
 from astropy.io import fits
 import astropy.units as u
-from .. import constants as c
+
+from .. import helpers
 
 __all__ = ['Halo']
 
@@ -12,92 +13,135 @@ ALLOWED_FUNIT = ['cgs','phot','count','none']
 
 class Halo(object):
     """
-    | An X-ray scattering halo
-    |
-    | **ATTRIBUTES**
-    | lam
-    | lam_unit
-    | theta
-    | norm_int
-    | taux
-    | fabs
-    | funit
-    | intensity
-    |
-    | *properties*
-    | fext
-    | fhalo
-    | percent_fabs
-    | percent_fext
-    |
-    | *methods*
-    | ecf(th, n)
-    | __getitem__(lmin, lmax)
+    An X-ray scattering halo.
+
+    Sliceable object: can input a range of energy/wavelength values and it will 
+    return the halo values for the range of interest. 
+    Can also summon values according using integers within range(len(lam))
+
+    Attributes
+    ----------
+    
+    description : string
+        Text description of this scattering halo.
+
+    lam : astropy.units.Quantity -or- numpy.ndarray
+        Wavelength or energy values for performing the calculation; 
+        if no units specified, defaults to keV
+        
+    theta : astropy.units.Quantity -or- numpy.ndarray 
+        Scattering angles for computing the differential scattering cross-section;
+        if no units specified, defaults to ARCCSEC
+    
+    norm_int : astropy.units.Quantity array [arcsec^-2]
+        Normalized scattering halo intensity as a function of energy (NE x NTH)
+    
+    taux : numpy.ndarray (NE)
+        Integrated X-ray scattering opacity as a function of energy
+    
+    fabs : numpy.ndarray or astropy.units.Quantity (NE)
+        Bin-integrated absorbed flux (photon/cm^2/s -or- erg/cm^2/s), 
+        used for calculating total halo intensity
+    
+    intensity : astropy.units.Quantity (NTH) [arcsec^-2 x fabs.unit]
+        Energy-integrated intensity calculated for the scattering halo [fabs x norm_int]
     """
-    def __init__(self, lam=1.0, theta=1.0, unit='kev', from_file=None):
+    def __init__(self, lam=1.0, theta=1.0, from_file=None):
         self.description = None
-        self.lam       = lam    # length NE
-        self.lam_unit  = unit   # 'kev' or 'angs'
-        self.theta     = theta  # length NTH, arcsec
+        if isinstance(lam, u.Quantity):
+            self.lam = lam
+        else:
+            self.lam = lam * u.keV    # length NE
+        if isinstance(theta, u.Quantity):
+            self.theta = theta
+        else:
+            self.theta = theta * u.arcsec  # length NTH, arcsec
         self.norm_int  = None   # NE x NTH, arcsec^-2
         self.taux      = None   # NE, unitless
         self.fabs      = None   # NE, bin integrated flux [e.g. phot/cm^2/s, NOT phot/cm^2/s/keV]
-        self.funit     = None
         self.intensity = None   # NTH, flux x arcsec^-2
         if from_file is not None:
             self._read_from_file(from_file)
 
-    def calculate_intensity(self, flux, ftype='abs', funit='none'):
+    def calculate_intensity(self, flux, ftype='abs'):
+        """
+        Calculate the scattering halo intensity from a flux spectrum.
+
+        flux : numpy.ndarray or astropy.units.Quantity (NE)
+            Bin-integrated absorbed flux (photon/cm^2/s -or- erg/cm^2/s), 
+            used for calculating total halo intensity
+        
+        ftype : string ('abs' or 'ext')
+            Describe whether the input spectrum is absorbed flux or 
+            point source component flux (after including scattring component of extinction)
+        """
         assert self.norm_int is not None
         assert ftype in ALLOWED_FTYPE
-        assert funit in ALLOWED_FUNIT
         if ftype == 'abs':
             fabs = flux
         if ftype == 'ext':
-            fabs = flux * np.exp(self.taux)
+            fabs = flux * np.exp(self.taux) # Fps = Fabs exp(-tau_sca)
         self.fabs = fabs
         NE, NTH = np.shape(self.norm_int)
         fa_grid = np.repeat(fabs.reshape(NE,1), NTH, axis=1)
-        self.fa_grid = fa_grid
         self.intensity = np.sum(self.norm_int * fa_grid, axis=0)
 
     @property
     def fext(self):
+        """
+        Returns the point-source flux component, Fps = Fabs exp(-tau_sca)
+        """
         assert self.fabs is not None
         return self.fabs * np.exp(-self.taux)
 
     @property
     def fhalo(self):
+        """
+        Returns the total scattring halo flux, Fh = Fabs (1 - exp(-tau_sca))
+        """
         assert self.fabs is not None
         return self.fabs * (1.0 - np.exp(-self.taux))
 
     @property
     def percent_fabs(self):
+        """
+        Calculate fraction of absorbed flux that goes into the scattring halo,
+        effectively (1 - exp(-tau))
+        """
         assert self.fabs is not None
         return np.sum(self.fhalo) / np.sum(self.fabs)
 
     @property
     def percent_fext(self):
+        """
+        Calculate fraction of point source flux that goes into the scattring halo,
+        effectively (1 - exp(-tau)) / exp(-tau) = exp(tau) - 1
+        """
         assert self.fabs is not None
         return np.sum(self.fhalo) / np.sum(self.fext)
 
     # http://stackoverflow.com/questions/2936863/python-implementing-slicing-in-getitem
     def __getitem__(self, key):
+        """
+        Returns a Halo object that is a subset / slice of the original halo.
+
+        Slice values must be floats that follow the same units as the original `lam` value.
+        """
         if isinstance(key, int):
             return self._get_lam_index(key)
         if isinstance(key, slice):
             lmin = key.start
             lmax = key.stop
             if lmin is None:
-                ii = (self.lam < lmax)
+                ii = (self.lam.value < lmax)
             elif lmax is None:
-                ii = (self.lam >= lmin)
+                ii = (self.lam.value >= lmin)
             else:
-                ii = (self.lam >= lmin) & (self.lam < lmax)
+                ii = (self.lam.value >= lmin) & (self.lam.value < lmax)
             return self._get_lam_slice(ii)
 
     def _get_lam_slice(self, ii):
-        result = Halo(self.lam[ii], self.theta, unit=self.lam_unit)
+        result = Halo(self.lam.value[ii] * self.lam.unit, self.theta)
         if self.norm_int is not None:
             result.description = self.description
             result.norm_int = self.norm_int[ii,...]
@@ -108,7 +152,7 @@ class Halo(object):
 
     def _get_lam_index(self, i):
         assert isinstance(i, int)
-        result = Halo(self.lam[i], self.theta, unit=self.lam_unit)
+        result = Halo(self.lam.value[i] * self.lam.unit, self.theta)
         if self.norm_int is not None:
             result.description = self.description
             result.norm_int = np.array([self.norm_int[i,...]])
@@ -119,21 +163,103 @@ class Halo(object):
         return result
 
     def ecf(self, th, n, log=False):
-        # th = angle for computing enclosed fraction [arcsec]
-        # n  = number of bins to use for interpolating
-        # SMALL ANGLE SCATTERING IS ASSUMED!!
+        """
+        Return the fraction of (energy-integrated) scattering halo flux enclosed by theta < th
+
+        Inputs
+        ------
+
+        th0 : astropy.units.Quantity -or- float:
+            Maximum theta value for calculating enclosed fraction;
+            if no unit specified, ARCSEC is assumed
+        
+        n : int : number of theta values to use for inteprolating
+
+        log : bool : If True, uses a log-spaced theta grid for the integral;
+            If False, uses a linear spaced theta grid.
+
+        Returns
+        -------
+        float : trapz(self.intensity * 2 pi theta_arcsec, theta_arcsec)
+
+        SMALL ANGLE SCATTERING IS ASSUMED!
+        """
+        # Will break if we attempt to run this without an intensity calculation
         assert self.intensity is not None
-        assert th > self.theta[0]
-        I_interp = interp1d(self.theta, self.intensity)
-        thmax    = max(th, self.theta[-1])
-        if log:
-            th_grid = np.logspace(np.log10(self.theta[0]), np.log10(thmax), n)
+
+        if isinstance(th, u.Quantity):
+            thmax = th.to('arcsec').value
         else:
-            th_grid  = np.linspace(self.theta[0], thmax, n)
-        I_grid   = I_interp(th_grid)
-        fh_tot   = np.sum(self.fhalo)
+            thmax = th * u.arcsec
+        
+        # Halo theta values, which will serve as grid
+        th_asec = self.theta.to('arcsec').value
+
+        # Make sure that the value of interest is within the calculated grid
+        assert thmax > np.min(th_asec) & thmax < np.max(th_sec)
+
+        # Get a new grid of intensity values over which to integrate
+        if log:
+            th_grid = np.logspace(np.log10(np.min(th_asec)), 
+                                  np.log10(np.max(th_asec)), n)
+        else:
+            th_grid  = np.linspace(np.min(th_asec), np.max(th_asec), n)
+        
+        I_grid = np.interp(th_grid, th_asec, self.intensity)
+        fh_tot = np.sum(self.fhalo) # total flux in the halo
         enclosed = trapz(I_grid * 2.0 * np.pi * th_grid, th_grid)
         return enclosed / fh_tot
+    
+    def frac_halo(self, th, n, log=False):
+        """
+        Calculate fraction of halo, as a function of energy, enclosed by theta < th
+
+        Inputs
+        ------
+
+        th0 : astropy.units.Quantity -or- float:
+            Maximum theta value for calculating enclosed fraction;
+            if no unit specified, ARCSEC is assumed
+        
+        n : int : number of theta values to use for inteprolating
+
+        log : bool : If True, uses a log-spaced theta grid for the integral;
+            If False, uses a linear spaced theta grid.
+
+        Returns
+        -------
+        float : trapz(self.intensity * 2 pi theta_arcsec, theta_arcsec)
+
+        SMALL ANGLE SCATTERING IS ASSUMED!
+        """
+        # Will break if we attempt to run this without an intensity calculation
+        assert self.norm_intensity is not None
+
+        if isinstance(th, u.Quantity):
+            thmax = th.to('arcsec').value
+        else:
+            thmax = th * u.arcsec
+        
+        # Halo theta values, which will serve as grid
+        th_asec = self.theta.to('arcsec').value
+
+        # Make sure that the value of interest is within the calculated grid
+        assert thmax > np.min(th_asec) & thmax < np.max(th_sec)
+
+        # Get a new grid of intensity values over which to integrate
+        if log:
+            th_grid = np.logspace(np.log10(np.min(th_asec)), 
+                                  np.log10(np.max(th_asec)), n)
+        else:
+            th_grid  = np.linspace(np.min(th_asec), np.max(th_asec), n)
+        
+        result = []
+        for i in range(len(self.lam)):
+            I_grid = np.interp(th_grid, th_asec, self.norm_int[i,:])
+            enclosed = trapz(I_grid * 2.0 * np.pi * th_grid, th_grid)
+            result.append[enclosed]
+        return np.array(result).flatten() # unitless, size NE
+
 
     def write(self, filename, overwrite=True):
         """
@@ -148,7 +274,8 @@ class Halo(object):
         hdr = fits.Header()
         hdr['COMMENT'] = "Normalized halo intensity as a function of angle"
         hdr['COMMENT'] = "HDU 1 is LAM, HDU 2 is THETA, HDU 3 is TAUX"
-        primary_hdu = fits.PrimaryHDU(self.norm_int, header=hdr)
+        hdr['INTUNIT'] = self.norm_int.unit.to_string()
+        primary_hdu = fits.PrimaryHDU(self.norm_int.value, header=hdr)
 
         hdus_to_write = [primary_hdu] + self._write_halo_pars()
         hdu_list = fits.HDUList(hdus=hdus_to_write)
@@ -161,13 +288,13 @@ class Halo(object):
         # e.g. pars['lam'], pars['a']
         # should this be part of WCS?
         c1 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='lam', array=c._make_array(self.lam),
-             format='E', unit=self.lam_unit)])
+             [fits.Column(name='lam', array=helpers._make_array(self.lam.value),
+             format='E', unit=self.lam.unit.to_string())])
         c2 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='theta', array=c._make_array(self.theta),
-             format='E', unit='arcsec')])
+             [fits.Column(name='theta', array=helpers._make_array(self.theta.value),
+             format='E', unit=self.theta.unit.to_string())])
         c3 = fits.BinTableHDU.from_columns(
-             [fits.Column(name='taux', array=c._make_array(self.taux),
+             [fits.Column(name='taux', array=helpers._make_array(self.taux),
              format='E', unit='')])
         return [c1, c2, c3]
 
@@ -175,11 +302,10 @@ class Halo(object):
         """Read a Halo object from a FITS file"""
         ff = fits.open(filename)
         # Load the normalized intensity
-        self.norm_int = ff[0].data
+        self.norm_int = ff[0].data * u.Unit(ff[0].header['INTUNIT'])
         # Load the other parameters
-        self.lam = ff[1].data['lam']
-        self.lam_unit = ff[1].columns['lam'].unit
-        self.theta = ff[2].data['theta']
+        self.lam = ff[1].data['lam'] * u.Unit(ff[1].columns['lam'].unit)
+        self.theta = ff[2].data['theta'] * u.Unit(ff[2].columns['theta'].unit)
         self.taux = ff[3].data['taux']
         # Set halo type
         self.description = filename

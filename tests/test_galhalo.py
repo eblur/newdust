@@ -1,44 +1,47 @@
 import pytest
 import numpy as np
 from scipy.integrate import trapz
+import astropy.units as u
 
 from newdust.halos import *
 from newdust import grainpop
 from . import percent_diff
-import newdust.constants as c
 
-NE, NTH = 10, 200
+# I tested a few values of NTH to reach the 5% integration threshold in some tests
+NE, NTH = 10, 80
 EVALS   = np.logspace(-1, 1, NE)   # keV
 THVALS  = np.logspace(-1, 4, NTH)  # arcsec
 
-GPOP    = grainpop.make_MRN_drude()['RGD']
+GPOP    = grainpop.make_MRN_RGDrude()
 
 E0, A0, TH0 = 1.0, 0.3, 10.0  # keV, um, arcsec
 FABS = 1.0 * np.power(EVALS, -2.0) * np.exp(-0.1 * np.power(EVALS, -2.5))
 
 def test_Halo_dimensions():
-    test = Halo(EVALS, THVALS, unit='kev')
+    test = Halo(EVALS, THVALS)
     assert len(test.lam) == NE
-    assert test.lam_unit == 'kev'
+    assert test.lam.unit == 'keV'
     assert len(test.theta) == NTH
 
 # ---- Test Galactic Halo stuff ---- #
 
-UNI_HALO = galhalo.UniformGalHalo(EVALS, THVALS, unit='kev')
-SCR_HALO = galhalo.ScreenGalHalo(EVALS, THVALS, unit='kev')
+UNI_HALO = galhalo.UniformGalHalo(EVALS, THVALS)
+SCR_HALO = galhalo.ScreenGalHalo(EVALS, THVALS)
 
 # Test that calculations run
 def test_galhalo_uniform():
     UNI_HALO.calculate(GPOP)
+    assert UNI_HALO.norm_int.unit == 'arcsec^-2'
 
 @pytest.mark.parametrize('x', [1.0, 0.5])
 def test_galhalo_screen(x):
     SCR_HALO.calculate(GPOP, x)
+    assert SCR_HALO.norm_int.unit == 'arcsec^-2'
     # Observed angle should be equal to scattering angle when x = 1,
     # so halo should match differential scattering cross section integrated over dust grain size distributions
     if x == 1.0:
         # have to convert int_diff to arcsec^-2
-        test = np.abs(SCR_HALO.norm_int - GPOP.int_diff * c.arcs2rad**2)
+        test = np.abs(SCR_HALO.norm_int.value - GPOP.int_diff * u.arcsec.to('rad')**2)
         assert np.all(test < 0.01)
 
 @pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
@@ -49,7 +52,7 @@ def test_halos_general(test):
 
     # Test that the scattering halos integrate to total scattering optical depth
     alph_grid = np.repeat(THVALS.reshape(1, NTH), NE, axis=0)
-    int_halo  = trapz(test.norm_int * 2.0 * np.pi * alph_grid, THVALS, axis=1)
+    int_halo  = trapz(test.norm_int.value * 2.0 * np.pi * alph_grid, THVALS, axis=1)
     assert all(percent_diff(int_halo, test.taux) <= 0.05)
 
     #--- Test that the flux and intensity functions work
@@ -59,9 +62,10 @@ def test_halos_general(test):
     assert np.size(test.fabs) == NE
     assert np.size(test.fext) == NE
     assert np.size(test.fhalo) == NE
+    assert test.intensity.unit == 'arcsec^-2'
     # Integrated intensity profile should add up to total halo flux
     # Calculation uses optically thin approximation, so it adds up to FABS * tau_sca
-    tot_halo = trapz(test.intensity * 2.0 * np.pi * THVALS, THVALS)
+    tot_halo = trapz(test.intensity * 2.0 * np.pi * THVALS * u.arcsec, THVALS * u.arcsec)
     assert percent_diff(tot_halo, np.sum(test.fabs * test.taux)) <= 0.05
 
     # The fhalo function calculations halo flux without optically thin approximation
@@ -121,4 +125,4 @@ def test_halo_io(test):
     assert np.all(percent_diff(new_halo.theta,test.theta) < 0.01)
     assert np.all(percent_diff(new_halo.taux,test.taux) < 0.01)
     assert np.all(percent_diff(new_halo.norm_int.flatten(),test.norm_int.flatten()) < 0.01)
-    assert new_halo.lam_unit == test.lam_unit
+    assert new_halo.lam.unit == 'keV'
