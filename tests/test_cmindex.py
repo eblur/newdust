@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import astropy.units as u
 from newdust.graindist import composition
+from . import percent_diff
 
 WAVEL = np.logspace(0, 2.5, 100) * u.angstrom
 ENERGY = np.logspace(-1, 1, 100) * u.keV
@@ -47,3 +48,11 @@ def test_cmgraphite(sizes, orients):
     test = composition.CmGraphite(rho=2.0, size=sizes, orient=orients)
     assert test.rho == RHO_TEST
     test_abstract_class(test)
+
+# Test that the interpolations run correctly
+@pytest.mark.parametrize('cm', CMS)
+def test_interpolation(cm):
+    new_x = ENERGY.to(cm.wavel.unit, equivalencies=u.spectral()).value
+    test = np.interp(new_x, cm.wavel.value, cm.revals)
+    ii = (cm.wavel.value >= min(new_x)) & (cm.wavel.value <= max(new_x))
+    assert percent_diff(np.mean(test), np.mean(cm.revals[ii])) <= 0.01

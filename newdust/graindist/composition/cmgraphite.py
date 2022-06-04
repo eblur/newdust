@@ -41,12 +41,18 @@ class CmGraphite(Composition):
         D03dat_para = ascii.read(D03file_para, header_start=4, data_start=5)
         D03dat_perp = ascii.read(D03file_perp, header_start=4, data_start=5)
 
+        # The wavelength grid needs to be in ascending order 
+        # for np.interp to run correctly
         if orient == 'perp':
-            self.wavel = D03dat_perp['wave(um)'] * u.micron
-            self.revals  = 1.0 + D03dat_perp['Re(n)-1']
-            self.imvals  = D03dat_perp['Im(n)']
+            wavel = D03dat_perp['wave(um)'] * u.micron
+            wsort = np.argsort(wavel.value)
+            self.wavel = wavel[wsort]
+            self.revals  = 1.0 + D03dat_perp['Re(n)-1'][wsort]
+            self.imvals  = D03dat_perp['Im(n)'][wsort]
 
         if orient == 'para':
-            self.wavel = D03dat_para['wave(um)'] * u.micron
-            self.revals  = 1.0 + D03dat_para['Re(n)-1']
-            self.imvals  = D03dat_para['Im(n)']
+            wavel = D03dat_para['wave(um)'] * u.micron
+            wsort = np.argsort(wavel)
+            self.wavel = wavel[wsort]
+            self.revals  = 1.0 + D03dat_para['Re(n)-1'][wsort]
+            self.imvals  = D03dat_para['Im(n)'][wsort]

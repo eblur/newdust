@@ -21,6 +21,10 @@ class CmSilicate(Composition):
         D03file = _find_cmfile('callindex.out_sil.D03')
         D03dat  = ascii.read(D03file, header_start=4, data_start=5)
 
-        self.wavel = D03dat['wave(um)'] * u.micron
-        self.revals = 1.0 + D03dat['Re(n)-1']
-        self.imvals = D03dat['Im(n)']
+        # The wavelength grid needs to be in ascending order for np.interp to run correctly
+        wavel = D03dat['wave(um)'] * u.micron
+        wsort = np.argsort(wavel.value)
+
+        self.wavel = wavel[wsort]
+        self.revals = 1.0 + D03dat['Re(n)-1'][wsort]
+        self.imvals = D03dat['Im(n)'][wsort]
