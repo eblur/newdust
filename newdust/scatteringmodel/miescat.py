@@ -36,7 +36,7 @@ class Mie(ScatteringModel):
         self.gsca  = None
         self.qback = None
 
-    def calculate(self, lam, a, cm, unit='kev', theta=0.0, memlim=MAX_RAM):
+    def calculate(self, lam, a, cm, theta=0.0, memlim=MAX_RAM):
         """
         Calculate the extinction efficiences using the Mie formula for spherical particles.
 
