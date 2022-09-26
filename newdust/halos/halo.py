@@ -45,6 +45,11 @@ class Halo(object):
     
     intensity : astropy.units.Quantity (NTH) [arcsec^-2 x fabs.unit]
         Energy-integrated intensity calculated for the scattering halo [fabs x norm_int]
+        
+    fhalo : numpy.ndarray or astropy.units.Quantity (NE) [fabs.unit]
+        Theoretical bin-integrated flux spectrum for the scattering
+        halo. This is computed using the formula Fabs * (1 - exp(-taux))
+
     """
     def __init__(self, lam=1.0, theta=1.0, from_file=None):
         self.description = None
@@ -73,7 +78,7 @@ class Halo(object):
         
         ftype : string ('abs' or 'ext')
             Describe whether the input spectrum is absorbed flux or 
-            point source component flux (after including scattring component of extinction)
+            point source component flux (after including scattering component of extinction)
         """
         assert self.norm_int is not None
         assert ftype in ALLOWED_FTYPE
