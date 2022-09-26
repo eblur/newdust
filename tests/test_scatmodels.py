@@ -86,7 +86,7 @@ def test_mie(cm):
     test.calculate(LAM * u.angstrom, A_UM, cm)
 
     # Test that cross-section asymptotes to a small number when grain size gets very small
-    test.calculate(LAM * u.angstrom, 1.e-10, cm, unit='angs')
+    test.calculate(LAM * u.angstrom, 1.e-10, cm)
     assert percent_diff(np.exp(test.qsca), 1.0) < 0.001
     assert percent_diff(np.exp(test.qext), 1.0) < 0.001
     assert percent_diff(np.exp(test.qabs), 1.0) < 0.001

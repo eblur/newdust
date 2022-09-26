@@ -111,7 +111,7 @@ class ScreenGalHalo(Halo):
 
         itemp  = np.power(x, -2.0) * dsig * ndmesh  # NE x NA x NTH, [um^-1 arcsec^-2]
         intensity = trapz(itemp, gpop.a.to('micron').value, axis=1)  # NE x NTH, [arcsec^-2]
-        print(intensity.unit)
+        #print(intensity.unit)
 
         self.norm_int = intensity
         self.taux     = gpop.tau_sca
