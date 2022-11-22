@@ -1,4 +1,5 @@
-from . import constants
+from . import helpers
 from . import graindist
-from . import scatmodels
+from . import scatteringmodel
+from . import halos
 from .grainpop import *

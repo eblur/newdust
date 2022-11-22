@@ -15,7 +15,10 @@ API
 
 `a` : an array
 
+And must contain the following two methods:
+
 `ndens` (md, rho, shape) returns number density of dust grains [e.g. cm^-2 um^-1]
 
 `mdens` (md, rho, shape) returns mass density of dust grains [e.g. g cm^-2 um^-1]
 """
+

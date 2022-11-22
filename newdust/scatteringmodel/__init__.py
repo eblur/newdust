@@ -1,12 +1,11 @@
-from .rgscat import RGscat
+from .rgscat import RGscattering
 from .miescat import Mie
 from .pah import PAH
-from .scatmodel import ScatModel
-from .. import constants as c
+from .scatteringmodel import ScatteringModel
 
 """
 --------------------------------------------------------------
-    API for Abstract Class 'ScatModel'
+    API for Abstract Class 'ScatteringModel'
 --------------------------------------------------------------
  A dust scattering model should contain the following attributes
 
@@ -21,9 +20,9 @@ calculate( lam : scalar or np.array [wavelength or energy grid, keV default]
 qsca : np.array, scattering efficiency [unitless]
 qabs : np.array, absorption efficiency [unitless]
 qext : np.array, extinction efficiency [unitless]
-diff : np.array, differentifal scattering cross section [cm**2/ster]
+diff : np.array, differentifal scattering cross section [ster^-1]
 pars : dict, stores the parameters used to run `calculate`
 
-write_table( outfile : string [filename for writing a FITS table of efficiency values]
-            )
+write_table( outfile : string [filename for writing a FITS table of efficiency values] )
+read_from_table( infile : string [filename for loading efficiency values from FITS file])
 """

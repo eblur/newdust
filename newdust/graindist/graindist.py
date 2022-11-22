@@ -5,7 +5,7 @@ from . import shape as sh
 
 MD_DEFAULT = 1.e-4  # g cm^-2
 RHO        = 3.0    # g cm^-3
-AMAX = 0.3  # um
+AMAX       = 0.3  # um
 
 ALLOWED_SIZES  = ['Grain','Powerlaw','ExpCutoff']
 ALLOWED_COMPS  = ['Drude', 'Silicate', 'Graphite']
@@ -15,36 +15,56 @@ __all__ = ['GrainDist']
 
 class GrainDist(object):
     """
-    | **ATTRIBUTES**
-    | size  : Abstract class from newdust.graindist.sizedist
-    | comp  : Abstract class from newdust.graindist.composition
-    | shape : Abstract class from newdust.graindist.shape
-    | md    : float
-    | a     : grain radii from size.a
-    | ndens : number density from size.ndens using the other attributes as input
-    | mdens : mass density as a function of grain size
-    | cgeo  : physical cross-sectional area based on grain shape
-    | vol   : physical grain volume based on grain shape
-    |
-    | *methods*
-    | plot(ax, kwargs) : Plots the number density of dust grains via size.plot()
-    |
-    | **__init__**
-    | dtype   : 'Grain', 'Powerlaw' or 'ExpCutoff' (defines the grain size distribution)
-    | cmtype  : 'Drude', 'Silicate' or 'Graphite' (defines the composition)
-    | shape   : 'Sphere' is only option, otherwise use custom defined shape
-    | md      : dust mass column (g cm^-2)
-    | amax    : Defines the grain size distribution properties
-    |   *Grain:* defines the singular grain size
-    |   *Powerlaw:* defines the maximum grain size
-    |   *ExpCutoff:* defines the *acut* value
-    | rho     : if defined, will alter the rho keyword in composition
-    |   if True, will set attributes of size, comp, and shape with raw input values
-    | **kwargs : extra input to the size dist functions
-    |
+    Graindist ties together the size distribution (which has no set abundance) 
+    and composition (which contains optical constants and density) and anchors them
+    with dust mass density and a series of convenience functions to get at some of the
+    frequently needed information.
+
+    Attributes
+    ----------
+    size : newdust.graindist.sizedist object
+    
+    comp : newdust.graindist.composition object
+    
+    shape : newdust.graindist.shape object
+    
+    md : float : dust mass column density [g cm^-2]
+
+    a  : grain radii (returns size.a)
+    
+    ndens : number density from (returns size.ndens based on other attributes)
+    
+    mdens : mass density as a function of grain radius (returns size.mdens based on other attributes)
+    
+    cgeo  : physical cross-sectional area based on grain shape [cm^2]
+    
+    vol   : physical grain volume based on grain shape [cm^2]
     """
     def __init__(self, dtype, cmtype, shape='Sphere', md=MD_DEFAULT,
                  amax=AMAX, rho=None, **kwargs):
+        """
+        Inputs
+        ------
+      
+        dtype : string ('Grain', 'Powerlaw', 'ExpCutoff') or 
+        newdust.graindist.sizedist object defining the grain radius distribution
+
+        cmtype : string ('Drude', 'Silicate', 'Graphite') or
+        newdust.graindist.composition object defining the optical constants and compound density
+
+        shape : string ('Sphere' is the only option), otherwise could be used to define a custom shape
+
+        md : float : dust mass column [g cm^-2]
+        
+        amax : float or astropy.Quantity : Defines the grain size distribution properties
+        |   *Grain:* defines the singular grain radius
+        |   *Powerlaw:* defines the maximum grain radius
+        |   *ExpCutoff:* defines the exponential cut-off value, `acut`
+
+        rho : if defined, will be provide as input to the `rho` keyword in composition
+
+        **kwargs : extra inputs passed to sizedist.__init__
+        """
 
         self.md = md
 
@@ -90,8 +110,8 @@ class GrainDist(object):
         return self.shape.vol(self.a)
 
     def plot(self, ax, **kwargs):
-        ax.plot(self.a, self.ndens * np.power(self.a, 4), **kwargs)
-        ax.set_xlabel("Radius (um)")
+        ax.plot(self.a.to('micron').value, self.ndens * np.power(self.a.to('micron').value, 4), **kwargs)
+        ax.set_xlabel("Radius (micron)")
         ax.set_ylabel("$(dn/da) a^4$ (cm$^{-2}$ um$^{3}$)")
         ax.set_xscale('log')
         ax.set_yscale('log')

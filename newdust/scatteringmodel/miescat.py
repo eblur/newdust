@@ -1,6 +1,7 @@
 import numpy as np
-from .. import constants as c
-from .scatmodel import ScatModel
+import astropy.units as u
+from .. import helpers
+from .scatteringmodel import ScatteringModel
 
 __all__ = ['Mie']
 
@@ -15,62 +16,68 @@ MAX_RAM = 8.0
 #    to calculate scattering and absorption by a homogenous isotropic
 #    sphere.''
 #
-class Mie(ScatModel):
+class Mie(ScatteringModel):
     """
-    | Mie scattering algorithms of Bohren & Hoffman
-    | See their book: *Absorption and Scattering of Light by Small Particles*
-    |
-    | **ATTRIBUTES**
-    | stype : string : 'RGscat'
-    | citation : string : citation string
-    | pars  : dict   : parameters used to run the calculation
-    | qsca  : array  : scattering efficiency (unitless, per geometric area)
-    | qext  : array  : extinction efficiency (unitless, per geometric area)
-    | qback : array  : back scattering efficiency (unitless, per geometric area)
-    | gsca  : array  : average scattering angle
-    | diff  : array  : differential scattering cross-section (ster^-1)
-    |
-    | *properties*
-    | qabs  : array  : absorption efficiency (unitless, per geometric area)
-    |
-    | *functions*
-    | calculate( lam, a, cm, unit='kev', theta=0.0, memlim=8.0 )
-    |    calculates the relevant values (qsca, qext, qback, gsca, diff)
-    |    memlim (float, in GB) sets the amount of RAM allowed for calculation,
-    |    limits size of complex number array used in Mie scattering calculation
-    """
+    Mie scattering algorithms of Bohren & Hoffman.
+    See their book: *Absorption and Scattering of Light by Small Particles*
 
+    Attributes
+    ----------
+    In addition to those inherited from ScatteringModel
+
+    gsca : numpy.ndarray : average cosine of scattering angle
+
+    qback : numpy.ndarray : back-scattering efficiency
+    """
     def __init__(self, **kwargs):
-        ScatModel.__init__(self, **kwargs)
+        ScatteringModel.__init__(self, **kwargs)
         self.stype = 'Mie'
-        self.citation = 'Mie scattering algorithm from Bohren & HOffman\n*Absorption and Scattering of Light by Small Particles*'
+        self.citation = 'Mie scattering algorithm from Bohren & Hoffman\n*Absorption and Scattering of Light by Small Particles*'
         self.gsca  = None
         self.qback = None
 
-    def calculate(self, lam, a, cm, unit='kev', theta=0.0, memlim=MAX_RAM):
+    def calculate(self, lam, a, cm, theta=0.0, memlim=MAX_RAM):
+        """
+        Calculate the extinction efficiences using the Mie formula for spherical particles.
 
-        self.pars = dict(zip(['lam','a','cm','theta','unit'],[lam, a, cm, theta, unit]))
+        lam : astropy.units.Quantity -or- numpy.ndarray
+            Wavelength or energy values for calculating the cross-sections;
+            if no units specified, defaults to keV
+        
+        a : astropy.units.Quantity -or- numpy.ndarray
+            Grain radius value(s) to use in the calculation;
+            if no units specified, defaults to micron
+        
+        cm : newdust.graindist.composition object
+            Holds the optical constants and density for the compound.
+        
+        theta : astropy.units.Quantity -or- numpy.ndarray -or- float
+            Scattering angles for computing the differential scattering cross-section;
+            if no units specified, defaults to radian
 
-        NE, NA, NTH = np.size(lam), np.size(a), np.size(theta)
+        Updates the `qsca`, `qext`, `qabs`, `diff`, `gsca`, and `qback` attributes
+        """
+        # Store the parameters
+        lam_cm0, a_cm0, theta_rad0 = self._store_parameters(lam, a, cm, theta)
+        NE, NA, NTH = np.size(lam_cm0), np.size(a_cm0), np.size(theta_rad0)
 
         # Deal with the 1d stuff first
         # Make sure every variable is an array
-        lam   = c._make_array(lam)
-        a     = c._make_array(a)
-        th_1d = c._make_array(theta)
+        lam_cm_1d    = helpers._make_array(lam_cm0)
+        a_cm_1d      = helpers._make_array(a_cm0)
+        theta_rad_1d = helpers._make_array(theta_rad0)
 
-        # Convert to the appropriate units
-        a_cm_1d   = a * c.micron2cm
-        lam_cm_1d = c._lam_cm(lam, unit)
-        refrel_1d = cm.cm(lam, unit)
+        # Complex index of refraction
+        refrel_1d = cm.cm(lam_cm_1d * u.cm)
 
         # Make everything NE x NA
         a_cm   = np.repeat(a_cm_1d.reshape(1, NA), NE, axis=0)
         lam_cm = np.repeat(lam_cm_1d.reshape(NE, 1), NA, axis=1)
         refrel = np.repeat(refrel_1d.reshape(NE, 1), NA, axis=1)
+        # Size parameter (grain circumference to incoming wavelength)
         x      = 2.0 * np.pi * a_cm / lam_cm
 
-        qsca, qext, qback, gsca, Cdiff = _mie_helper(x, refrel, theta=th_1d, memlim=memlim)
+        qsca, qext, qback, gsca, Cdiff = _mie_helper(x, refrel, theta=theta_rad_1d, memlim=memlim)
 
         self.qsca  = qsca  # NE x NA
         self.qext  = qext
@@ -82,8 +89,13 @@ class Mie(ScatModel):
 #---------------- Helper function that does the actual calculation
 
 def _mie_helper(x, refrel, theta, memlim=MAX_RAM):
-    # x and refrel are NE x NA
-    # need to make outputs that are NE x NA x NTH
+    """
+    theta is array of length NTH, units of radians
+    
+    x and refrel are NE x NA
+    
+    need to make outputs that are NE x NA x NTH
+    """
     assert np.shape(x) == np.shape(refrel)
     assert len(np.shape(x)) <= 2
     assert len(theta) >= 1
@@ -92,15 +104,14 @@ def _mie_helper(x, refrel, theta, memlim=MAX_RAM):
     NTH    = len(theta)
 
     # Make 3D array for the calculations on angular dependence
-    theta_3d  = np.repeat(
+    theta_rad_3d  = np.repeat(
         np.repeat(theta.reshape(1, 1, NTH), NE, axis=0),
         NA, axis=1)
     x_3d      = np.repeat(x.reshape(NE,NA,1), NTH, axis=2)
 
-    theta_rad = theta_3d * c.arcs2rad
-    amu       = np.abs(np.cos(theta_rad))
-    indl90    = (theta_rad < np.pi/2.0)
-    indg90    = (theta_rad >= np.pi/2.0)
+    amu       = np.abs(np.cos(theta_rad_3d))
+    indl90    = (theta_rad_3d < np.pi/2.0)
+    indg90    = (theta_rad_3d >= np.pi/2.0)
 
     s1    = np.zeros(shape=(NE, NA, NTH), dtype='complex')
     s2    = np.zeros(shape=(NE, NA, NTH), dtype='complex')
@@ -303,7 +314,7 @@ def _mie_helper(x, refrel, theta, memlim=MAX_RAM):
     qback = np.power(np.abs(s1_back)/x, 2) / np.pi
 
     Cdiff = 0.0
-    bad_theta = (np.abs(theta_rad) > np.pi)  # Set to 0 values where theta > !pi
+    bad_theta = (np.abs(theta_rad_3d) > np.pi)  # Set to 0 values where theta > !pi
     s1[...,bad_theta] = 0
     s2[...,bad_theta] = 0
     Cdiff = 0.5 * (np.power(np.abs(s1), 2) + np.power(np.abs(s2), 2)) / (np.pi * np.power(x_3d,2))

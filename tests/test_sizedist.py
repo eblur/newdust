@@ -20,7 +20,7 @@ def test_Powerlaw():
     nd   = test.ndens(MDTEST, RHOTEST)
     assert len(test.a) == len(nd)
     md   = test.mdens(MDTEST, RHOTEST)
-    tot_mass = trapz(md, test.a)
+    tot_mass = trapz(md, test.a.to('micron').value)
     assert percent_diff(tot_mass, MDTEST) <= 0.01
 
 def test_ExpCutoff():
@@ -28,7 +28,7 @@ def test_ExpCutoff():
     nd   = test.ndens(MDTEST, RHOTEST)
     assert len(test.a) == len(nd)
     md   = test.mdens(MDTEST, RHOTEST)
-    tot_mass = trapz(md, test.a)
+    tot_mass = trapz(md, test.a.to('micron').value)
     assert percent_diff(tot_mass, MDTEST) <= 0.01
 
 # Test that doubling the dust mass column doubles the total mass
@@ -44,8 +44,8 @@ def test_dmass(sd):
     if isinstance(sd, sizedist.Grain):
         mtot1, mtot2 = md1, md2
     else:
-        mtot1 = trapz(md1, sd.a)
-        mtot2 = trapz(md2, sd.a)
+        mtot1 = trapz(md1, sd.a.to('micron').value)
+        mtot2 = trapz(md2, sd.a.to('micron').value)
     assert percent_diff(mtot2, 2.0 * mtot1) <= 0.01
 
 # Test that doubling the dust material density halves the number density
@@ -61,6 +61,6 @@ def test_change_rho(sd):
     if isinstance(sd, sizedist.Grain):
         ntot1, ntot2 = nd1, nd2
     else:
-        ntot1 = trapz(nd1, sd.a)
-        ntot2 = trapz(nd2, sd.a)
+        ntot1 = trapz(nd1, sd.a.to('micron').value)
+        ntot2 = trapz(nd2, sd.a.to('micron').value)
     assert percent_diff(ntot2, 0.5 * ntot1) <= 0.01
