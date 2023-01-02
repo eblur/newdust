@@ -1,4 +1,7 @@
 # newdust
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7500048.svg)](https://doi.org/10.5281/zenodo.7500048)
+
 Major rewrite of [eblur/dust](https://github.com/eblur/dust) code. 
 
 This package calculates extinction curves and small-angle scattering halos from a user-defined dust grain size distribution.
