@@ -420,3 +420,154 @@ class Halo(object):
             hdul.writeto(save_file, overwrite=True)
 
         return result
+
+    #----- Simulate a scattering halo and save as SIMPUT format -----#
+    def make_simput(self, fabs, simput_file, spectrum_file, 
+                    ra0=0.0, dec0=0.0, exposure=1.e5*u.second, effective_area=1.e4*u.cm**2, mjd=53005.0):
+        """
+        fabs : Astropy Quantity [ct/cm^2/s] : bin-integrated photon flux spectrum 
+        
+        simput_file : string : SIMPUT file name
+        
+        spectrum_file : string : spectrum file name
+        
+        ra0 : float : image center RA [deg]
+        
+        dec0 : float : image center DEC [deg]
+        
+        exposure : Astropy Quantity [time] : Exposure time for generating photon list,
+        needs to be large to generate a statistically significant number of photons
+        (Default: 100 ks)
+        
+        effective_area : Astropy Quantity [area] : Effective area for generating photon list,
+        needs to be large to generate a statistically significant number of photons
+        (Default: 1 m^2)
+        
+        mjd : float : Nominal reference point for TIME information. Default is 01/01/2004
+        (Does not need to change unless concerned about time-variable halos.)
+
+        Returns
+        -------
+        Writes the top-level FITS files simput_file and spectrum_file
+        """
+        assert len(fabs) == len(self.lam) # quick check
+        
+        # simulates photons for a single halo energy
+        def pick_photons(nn, theta, profile):
+            """
+            nsrc : int : number of photons from the central point source
+            theta : np.array : observation angles for surface brightness profile (arcsec)
+            profile : np.array : normalized surface brightness profile [arcsec^-2]
+            
+            Returns
+            -------
+            rad : float : angular radius (arcsec) away from point source center
+            phi : float : azimuthal angle (radians) for the photon
+            n : int : total number of photons simulated for that scattering halo
+            """
+            # Cumulative distribution that will be used to select photons
+            dtheta = theta[1:] - theta[:-1]
+            dtheta = np.append(dtheta, dtheta[-1])
+            total  = np.sum(profile * 2.0 * np.pi * theta * dtheta)
+            cumulative_fraction = np.cumsum(profile * 2.0 * np.pi * theta * dtheta) / total
+        
+            # number of photons in the halo image
+            n = int(nn * total)
+            # pick a random radius (observation angle) and phi (azimuthal angle)
+            phi  = np.random.uniform(low=0.0, high=1.0, size=n) * 2.0 * np.pi # radians
+            rad  = np.interp(np.random.uniform(low=0.0, high=1.0, size=n), 
+                         cumulative_fraction, theta) # arcsec
+            return (rad, phi, n)
+
+        ## ---- Make the photon list
+        
+        # How many photons are in the halo image?
+        nphotons_src = (fabs * effective_area * exposure).to('ct').value
+        photon_rad, photon_phi, photon_en  = [], [], []
+        tot_energy_flux = 0.0 * u.erg # Total energy flux in the simulated halo
+        nrunning = 0 # running total of photons simulated
+        for i in range(len(self.lam)):
+            #print(self.lam[i], nphotons_src[i])
+            nsrc = int(nphotons_src[i])
+            rad, phi, nhalo = pick_photons(nsrc, 
+                                self.theta.to('arcsec').value, 
+                                self.norm_int[i,:].to('arcsec^-2').value)
+            photon_rad += list(rad)
+            photon_phi += list(phi)
+            photon_en  += ([self.lam[i].to('keV', equivalencies=u.spectral()).value] * len(rad))
+            tot_energy_flux += nhalo * self.lam[i]
+            nrunning += nhalo
+        photon_en = np.array(photon_en)
+        print("Total number of photons simulated: {}".format(nrunning))
+        
+        # Now we have a master list of photons with an r(theta) and phi
+        # We need to translate that into sky coordinates
+        ra  = ra0 + np.array(photon_rad) * u.arcsec.to('deg') * np.cos(np.array(photon_phi))
+        dec = dec0 + np.array(photon_rad) * u.arcsec.to('deg') * np.sin(np.array(photon_phi))
+        
+        # Scale the energy flux value by exposure and effective area
+        tot_energy_flux = tot_energy_flux / exposure / effective_area # erg/s/cm^2
+    
+        ## -- done making the photon list. Functions below are for saving to SIMPUT files
+        
+        def write_spectrum_file(filename, mjd=mjd):
+            ## Make the header
+            header = fits.Header()
+            header['HDUCLASS'] = 'HEASARC/SIMPUT'
+            header['HDUCLAS1'] = 'PHOTONS'
+            header['HDUVERS']  = '1.1.0'
+            header['RADESYS']  = 'FK5'
+            header['EQUINOX']  = '2000.0'
+            header['REFRA']    = ra0
+            header['REFDEC']   = dec0
+            # Time specification
+            # https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/rates/ogip_93_003/ogip_93_003.html#tth_sEc4.2
+            header['MJDREF']   = mjd
+            header['TSTART']   = 0.0
+            header['TSTOP']    = exposure.to('second').value
+            header['TIMEZERO'] = 0.0
+            header['TIMESYS']  = 'MJD'
+            header['TIMEUNIT'] = 's'
+            header['CLOCKCOR'] = 'NO'
+            primary = fits.PrimaryHDU(header=header)
+        
+            ## Make the binary table
+            ra_col      = fits.Column(name='RA', array=ra, format='E', unit='deg')
+            dec_col     = fits.Column(name='DEC', array=dec, format='E', unit='deg')
+            ener_col    = fits.Column(name='ENERGY', array=photon_en, format='E', unit='keV')
+            photon_list = fits.BinTableHDU.from_columns([ra_col, dec_col, ener_col], name='PHOTONS')
+            hdu_list    = fits.HDUList([primary, photon_list])
+            hdu_list.writeto(filename, overwrite=True)
+            print('Wrote spectrum SIMPUT file to {}'.format(filename))
+            return
+    
+        def write_simput_file(filename, specfile):
+            # Make the header
+            header = fits.Header()
+            header['HDUCLASS'] = 'HEASARC/SIMPUT'
+            header['HDUCLAS1'] = 'SRC_CAT'
+            header['HDUVERS']  = '1.1.0'
+            header['RADESYS']  = 'FK5'
+            header['EQUINOX']  = '2000.0'
+            hdu_list = fits.BinTableHDU.from_columns([ \
+                    fits.Column(name='SRC_ID', array=[1], format='K', unit=''),
+                    fits.Column(name='SRC_NAME', array=['scattering halo'], format='20A', unit=''),
+                    fits.Column(name='RA', array=[ra0], format='E', unit='deg'),
+                    fits.Column(name='DEC', array=[dec0], format='E', unit='deg'),
+                    fits.Column(name='E_MIN', array=[min(self.lam.to('keV', equivalencies=u.spectral()).value)], 
+                                format='E', unit='keV'),
+                    fits.Column(name='E_MAX', array=[max(self.lam.to('keV', equivalencies=u.spectral()).value)], 
+                                format='E', unit='keV'),
+                    fits.Column(name='FLUX', array=[tot_energy_flux.to('erg s^-1 cm^-2').value], 
+                                format='E', unit='erg s^-1 cm^-2'),
+                    fits.Column(name='SPECTRUM', array=[specfile], format='20A', unit='')],
+                    name='SRC_CAT')
+            hdu_list.writeto(filename, overwrite=True)
+            print('Wrote top level SIMPUT file: {}'.format(filename))
+            return
+    
+        ## --- Write the photon list to a SIMPUT file
+        
+        write_spectrum_file(spectrum_file)
+        write_simput_file(simput_file, spectrum_file)
+        return
