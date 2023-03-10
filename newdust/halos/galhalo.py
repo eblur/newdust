@@ -2,6 +2,11 @@ import numpy as np
 from scipy.integrate import trapz
 from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
 
+from scipy.special import erf
+from scipy.special import gammaincc
+from scipy.special import gamma
+from scipy.special import expi
+
 import astropy.units as u
 import astropy.constants as c
 
@@ -287,6 +292,162 @@ class ScreenGalHalo(Halo):
             hdul.writeto(save_file, overwrite=True)
 
         return result
+    
+#--------------- Analytic Halo Calculation --------------
+
+class UniformGalHaloCP15(Halo):
+    def __init__(self, *args, **kwargs):
+        Halo.__init__(self, *args, **kwargs)
+        self.description = 'Uniform CP15'
+        self.md = None
+    
+    def calculate(self, amin, amax, p, rho, md):
+        """
+        Calculate the X-ray scattering intensity for dust distributed
+        uniformly along the line of sight utlizing the analytic solution
+        according to the Corrales & Paerels 2015. 
+
+        Parameters
+        ----------
+        amin : float [micron]
+            Minimum grain radius
+
+        amax : float [micron]
+            Maximum grain radius
+
+        power : float [unitless]
+            Value of power law slope for the power law grain distribution
+
+        Returns
+        -------
+        None. Updates norm_int, and taux attributes.
+        """
+
+        NE, NTH = len(self.lam), len(self.theta)
+        #here will be a function that calculation taux based on Energy input
+        #Input energy would be an array with length NE, and the output taux would also have dimension NE
+        self.taux = calculate_taux(self.lam, amin, amax, p, rho, md)
+        hfrac = np.tile(self.taux.reshape(NE,1), NTH ) # NE x NTH
+        energy = np.tile(self.lam.reshape(NE,1), NTH ) # NE x NTH
+        theta = np.tile(self.theta, (NE,1) ) #NE x NTH
+
+        # single grain?
+
+        charsig = 1.04 * 60.0 / energy
+        const = hfrac / ( theta * charsig * np.sqrt(8.0*np.pi) )
+        result = const * G_u(energy, theta, amin, amax, p) / G_p(amin, amax, p)
+
+        self.norm_int = result
+
+class ScreenGalHaloCP15(Halo):
+    def __init__(self, *args, **kwargs):
+        Halo.__init__(self, *args, **kwargs)
+        self.description = 'Screen CP15'
+        self.md = None
+        self.x = None
+
+    def calculate(self, amin, amax, p, rho, md, x=0.5):
+        """
+        Calculate the X-ray scattering intensity for dust in an
+        infinitesimally thin wall somewhere on the line of sight.
+
+        Parameters
+        ----------
+        gpop : newdust.grainpop.SingleGrainPop
+
+        x : float (0.0, 1.0]
+            1.0 - (distance to screen / distance to X-ray source)
+
+        Returns
+        -------
+        None. Updates the md, x, norm_int, and taux attributes.
+        """
+
+        NE, NTH = len(self.lam), len(self.theta)
+        #here will be a function that calculation taux based on Energy input
+        #Input energy would be an array with length NE, and the output taux would also have dimension NE
+        self.taux = calculate_taux(self.lam, amin, amax, p, rho, md)
+        hfrac = np.tile(self.taux.reshape(NE,1), NTH ) # NE x NTH
+        energy = np.tile(self.lam.reshape(NE,1), NTH ) # NE x NTH
+        theta = np.tile(self.theta, (NE,1) ) #NE x NTH
+        self.x = x
+
+        charsig0 = 1.04 * 60.0 / energy
+        const = hfrac / ( 2.0*np.pi*charsig0**2 )
+        result = const / x**2 * G_s(energy, theta, amin, amax, p, x) / G_p(amin, amax, p)
+
+        self.norm_int = result
+
+
+# -------------- Useful Function -------------------
+
+def gammainc_fun( a, z ):
+    if np.any(z < 0):
+        print('ERROR: z must be >= 0')
+        return
+    if a == 0:
+        return -expi(-z)
+    elif a < 0:
+        return ( gammainc_fun(a+1,z) - np.power(z,a) * np.exp(-z) ) / a
+    else:
+        return gammaincc(a,z) * gamma(a)
+    
+def calculate_taux(lam, amin, amax, p, rho, md):
+
+    constA = 0.009 # referred to CP15
+    
+    # Calculate Normalization Constant C in Power Law Distribution
+    if p == 4:
+        constC = md/((4/3)*np.pi*rho*np.log(amax/amin))
+    else:
+        constC = (4-p)*md/((4/3)*np.pi*rho*(np.power(amax, 4-p) - np.power(amin, 4-p)))
+
+    # Calculate and Return taux
+    if p == 7:
+        taux = constA*constC*np.log(amax/amin)*np.power(lam, -2)
+    else:
+        taux = constA*constC*(np.power(amax, 7-p) - np.power(amin, 7-p))*np.power(lam, -2)/(7-p)
+    return taux
+   
+def G_p(amin, amax, p):
+    '''
+    Returns integral_a0^a1 a^(4-p) da
+    '''
+    if p == 5:
+        return np.log( amax/amin )
+    else:
+        return 1.0/(5.0-p) * ( np.power(amax,5.0-p) - np.power(amin,5.0-p) )
+        
+def G_u(lam, theta, amin, amax, p):
+    
+    # input lam and theta must be NE x NTH
+    print(lam.shape)
+    print(theta.shape)
+    power = 6.0 - p
+    pfrac = (7.0-p) / 2.0
+    charsig = 1.04 * 60.0 / lam
+    const   = theta / charsig / np.sqrt(2.0)
+
+    # Unit is an issue!!!
+
+    A1 = np.power(amax,power) * ( 1 - erf(const.value*amax) )
+    A0 = np.power(amin,power) * ( 1 - erf(const.value*amin) )
+    B1 = np.power(const.value,-power) * gammainc_fun( pfrac, const.value**2 * amax**2 ) / np.sqrt(np.pi)
+    B0 = np.power(const.value,-power) * gammainc_fun( pfrac, const.value**2 * amin**2 ) / np.sqrt(np.pi)
+    return ( (A1-B1) - (A0-B0) ) / power
+
+def G_s(lam, theta, amin, amax, p, x):
+    '''
+    Function used for evaluating halo from power law distribution of grain sizes (Screen case)
+    '''
+
+    charsig0 = 1.04 * 60.0 / lam
+    pfrac    = (7.0-p)/2.0
+    const    = theta**2/(2.0*charsig0**2*x**2)
+    gamma1   = gammainc_fun( pfrac, const.value * amax**2 )
+    gamma0   = gammainc_fun( pfrac, const.value * amin**2 )
+    return -0.5 * np.power( const.value, -pfrac ) * ( gamma1 - gamma0 )
+
 
 #--------------- Galactic Halos --------------------
 
