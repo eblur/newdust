@@ -301,7 +301,7 @@ class UniformGalHaloCP15(Halo):
         self.description = 'Uniform CP15'
         self.md = None
     
-    def calculate(self, md, amin=0.005*u.micron, amax=0.5*u.micron, p=3.5, rho = 3*u.g*u.cm**(-3)):
+    def calculate(self, md, amin=0.005*u.micron, amax=0.5*u.micron, p=3.5, rho = 3*u.Unit('g cm^-3'):
         """
         Calculate the X-ray scattering intensity for dust distributed
         uniformly along the line of sight utlizing the analytic solution
