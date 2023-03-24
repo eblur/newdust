@@ -17,6 +17,9 @@ GPOP    = grainpop.make_MRN_RGDrude()
 E0, A0, TH0 = 1.0, 0.3, 10.0  # keV, um, arcsec
 FABS = 1.0 * np.power(EVALS, -2.0) * np.exp(-0.1 * np.power(EVALS, -2.5))
 
+AMIN, AMAX, P, RHO = 0.1, 0.3, 3.5, 3 # micron, micron, unitless, g cm^-3
+MD = 1.e-6 # g cm^-2
+
 def test_Halo_dimensions():
     test = Halo(EVALS, THVALS)
     assert len(test.lam) == NE
@@ -27,16 +30,22 @@ def test_Halo_dimensions():
 
 UNI_HALO = galhalo.UniformGalHalo(EVALS, THVALS)
 SCR_HALO = galhalo.ScreenGalHalo(EVALS, THVALS)
+UNI_HALO_CP15 = galhalo.UniformGalHaloCP15(EVALS, THVALS)
+SCR_HALO_CP15 = galhalo.ScreenGalHaloCP15(EVALS,THVALS)
 
 # Test that calculations run
 def test_galhalo_uniform():
     UNI_HALO.calculate(GPOP)
     assert UNI_HALO.norm_int.unit == 'arcsec^-2'
+    UNI_HALO_CP15.calculate(MD)
+    assert UNI_HALO_CP15.norm_int.unit == 'arcsec^-2'
 
 @pytest.mark.parametrize('x', [1.0, 0.5])
 def test_galhalo_screen(x):
     SCR_HALO.calculate(GPOP, x)
     assert SCR_HALO.norm_int.unit == 'arcsec^-2'
+    SCR_HALO_CP15.calculate(MD, x=x)
+    assert SCR_HALO_CP15.norm_int.unit == 'arcsec^-2'
     # Observed angle should be equal to scattering angle when x = 1,
     # so halo should match differential scattering cross section integrated over dust grain size distributions
     if x == 1.0:
@@ -44,7 +53,7 @@ def test_galhalo_screen(x):
         test = np.abs(SCR_HALO.norm_int.value - GPOP.int_diff.to('arcsec^-2').value)
         assert np.all(test < 0.01)
 
-@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO, UNI_HALO_CP15, SCR_HALO_CP15])
 def test_halos_general(test):
     # Test basic shape properties of outputs
     assert np.shape(test.norm_int) == (NE, NTH)
@@ -84,7 +93,7 @@ def test_halos_general(test):
     assert percent_diff(pfa1, test.percent_fabs) <= 0.01
     assert percent_diff(pfe1, test.percent_fext) <= 0.01
 
-@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO, UNI_HALO_CP15, SCR_HALO_CP15])
 def test_halo_slices(test):
     # Test the halo slice functions
     # Split the energy values in half
@@ -106,7 +115,7 @@ def test_halo_slices(test):
     assert np.all(percent_diff(np.append(h1.taux,h2.taux), test.taux) == 0.0)
     assert np.all(percent_diff(np.append(h1.lam,h2.lam), test.lam) == 0.0)
 
-@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO, UNI_HALO_CP15, SCR_HALO_CP15])
 def test_halo_index(test):
     i = 0
     tt = test[0]
@@ -117,7 +126,7 @@ def test_halo_index(test):
     assert np.shape(tt.norm_int) == (1, NTH)
     assert np.shape(tt.intensity) == (NTH,)
 
-@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO])
+@pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO, UNI_HALO_CP15, SCR_HALO_CP15])
 def test_halo_io(test):
     test.write('test_halo_io.fits')
     new_halo = Halo(from_file='test_halo_io.fits')
