@@ -394,7 +394,7 @@ class ScreenGalHaloCP15(Halo):
         None. Updates the md, x, norm_int, and taux attributes.
         """
 
-        lam_keV = self.lam.to(u.keV)
+        lam_keV = self.lam.to(u.keV, equivalencies=u.spectral())
         theta_arcsec = self.theta.to(u.arcsec)
 
         if isinstance(md, u.Quantity):
