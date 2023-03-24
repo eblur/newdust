@@ -370,7 +370,7 @@ class ScreenGalHaloCP15(Halo):
         self.md = None
         self.x = None
 
-    def calculate(self, md, amin=0.005*u.micron, amax=0.5*u.micron, p=3.5, rho = 3*u.g*u.cm**(-3), x=0.5):
+    def calculate(self, md, amin=0.005*u.micron, amax=0.5*u.micron, p=3.5, rho = 3*u.Unit('g cm^-3'), x=0.5):
         """
         Calculate the X-ray scattering intensity for dust in an
         infinitesimally thin wall somewhere on the line of sight.
