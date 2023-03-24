@@ -323,7 +323,7 @@ class UniformGalHaloCP15(Halo):
         -------
         None. Updates norm_int [arcsec^-2], and taux [unitless] attributes.
         """
-        lam_keV = self.lam.to(u.keV)
+        lam_keV = self.lam.to(u.keV, equivalencies=u.spectral())
         theta_arcsec = self.theta.to(u.arcsec)
 
         if isinstance(md, u.Quantity):
