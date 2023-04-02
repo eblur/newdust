@@ -15,7 +15,7 @@ from astropy.io import fits
 from .halo import Halo
 from ..grainpop import *
 
-__all__ = ['UniformGalHalo','ScreenGalHalo','path_diff','time_delay']
+__all__ = ['UniformGalHalo','ScreenGalHalo','path_diff','time_delay','UniformGalHaloCP15','ScreenGalHaloCP15']
 
 ANGLES = np.logspace(0.0, 3.5, int(3.5/0.05))
 
