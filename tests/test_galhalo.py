@@ -17,8 +17,17 @@ GPOP    = grainpop.make_MRN_RGDrude()
 E0, A0, TH0 = 1.0, 0.3, 10.0  # keV, um, arcsec
 FABS = 1.0 * np.power(EVALS, -2.0) * np.exp(-0.1 * np.power(EVALS, -2.5))
 
-AMIN, AMAX, P, RHO = 0.1, 0.3, 3.5, 3 # micron, micron, unitless, g cm^-3
-MD = 1.e-6 # g cm^-2
+# Unit Default Input with Astropy Unit
+AMIN, AMAX, P, RHO = 0.005*u.micron, 0.5*u.micron, 3.5, 3*u.Unit('g cm^-3') # micron, micron, unitless, g cm^-3
+MD = 1.e-6*u.Unit('g cm^-2') # g cm^-2
+
+# Unitless Default Input for testing unit functionality
+AMIN_UL, AMAX_UL, P_UL, RHO_UL = 0.005, 0.5, 3.5, 3 # micron, micron, unitless, g cm^-3
+MD_UL = 1.e-6 # g cm^-2
+
+# Default Input with Different Unit
+AMIN_DU, AMAX_DU, P_DU, RHO_DU = AMIN.to(u.cm), AMAX.to(u.cm), P, RHO.to(u.Unit('kg m^-3')) # micron, micron, unitless, g cm^-3
+MD_DU = MD.to(u.Unit('kg m^-2')) # g cm^-2
 
 def test_Halo_dimensions():
     test = Halo(EVALS, THVALS)
@@ -28,30 +37,53 @@ def test_Halo_dimensions():
 
 # ---- Test Galactic Halo stuff ---- #
 
+# Tests with default values
 UNI_HALO = galhalo.UniformGalHalo(EVALS, THVALS)
 SCR_HALO = galhalo.ScreenGalHalo(EVALS, THVALS)
 UNI_HALO_CP15 = galhalo.UniformGalHaloCP15(EVALS, THVALS)
 SCR_HALO_CP15 = galhalo.ScreenGalHaloCP15(EVALS,THVALS)
+# Test for different unit
+UNI_HALO_CP15_UL = galhalo.UniformGalHaloCP15(EVALS,THVALS)
+SCR_HALO_CP15_UL = galhalo.ScreenGalHaloCP15(EVALS,THVALS)
+UNI_HALO_CP15_DU = galhalo.UniformGalHaloCP15(EVALS,THVALS)
+SCR_HALO_CP15_DU = galhalo.ScreenGalHaloCP15(EVALS,THVALS)
 
 # Test that calculations run
 def test_galhalo_uniform():
     UNI_HALO.calculate(GPOP)
     assert UNI_HALO.norm_int.unit == 'arcsec^-2'
+    # Test CP15 version
     UNI_HALO_CP15.calculate(MD)
     assert UNI_HALO_CP15.norm_int.unit == 'arcsec^-2'
+    UNI_HALO_CP15_UL.calculate(MD_UL,amin=AMIN_UL, amax=AMAX_UL, p=P_UL, rho = RHO_UL)
+    assert UNI_HALO_CP15_UL.norm_int.unit == 'arcsec^-2'
+    UNI_HALO_CP15_DU.calculate(MD_DU,amin=AMIN_DU, amax=AMAX_DU, p=P_DU, rho = RHO_DU)
+    assert UNI_HALO_CP15_DU.norm_int.unit == 'arcsec^-2'
+    # Check consistency of the results from different unit choices
+    assert all(percent_diff(np.concatenate(UNI_HALO_CP15.norm_int.value), np.concatenate(UNI_HALO_CP15_UL.norm_int.value)) <= 0.05)
+    assert all(percent_diff(np.concatenate(UNI_HALO_CP15.norm_int.value), np.concatenate(UNI_HALO_CP15_DU.norm_int.value)) <= 0.05)
 
 @pytest.mark.parametrize('x', [1.0, 0.5])
 def test_galhalo_screen(x):
     SCR_HALO.calculate(GPOP, x)
     assert SCR_HALO.norm_int.unit == 'arcsec^-2'
-    SCR_HALO_CP15.calculate(MD, x=x)
-    assert SCR_HALO_CP15.norm_int.unit == 'arcsec^-2'
+    
     # Observed angle should be equal to scattering angle when x = 1,
     # so halo should match differential scattering cross section integrated over dust grain size distributions
     if x == 1.0:
         # have to convert int_diff to arcsec^-2
         test = np.abs(SCR_HALO.norm_int.value - GPOP.int_diff.to('arcsec^-2').value)
         assert np.all(test < 0.01)
+    # Test CP15 version
+    SCR_HALO_CP15.calculate(MD, x=x)
+    assert SCR_HALO_CP15.norm_int.unit == 'arcsec^-2'
+    SCR_HALO_CP15_UL.calculate(MD_UL,amin=AMIN_UL, amax=AMAX_UL, p=P_UL, rho = RHO_UL, x=x)
+    assert SCR_HALO_CP15_UL.norm_int.unit == 'arcsec^-2'
+    SCR_HALO_CP15_DU.calculate(MD_DU,amin=AMIN_DU, amax=AMAX_DU, p=P_DU, rho = RHO_DU, x=x)
+    assert SCR_HALO_CP15_DU.norm_int.unit == 'arcsec^-2'
+    # Check consistency of the results from different unit choices
+    assert all(percent_diff(np.concatenate(SCR_HALO_CP15.norm_int.value), np.concatenate(SCR_HALO_CP15_UL.norm_int.value)) <= 0.05)
+    assert all(percent_diff(np.concatenate(SCR_HALO_CP15.norm_int.value), np.concatenate(SCR_HALO_CP15_DU.norm_int.value)) <= 0.05)
 
 @pytest.mark.parametrize('test', [UNI_HALO, SCR_HALO, UNI_HALO_CP15, SCR_HALO_CP15])
 def test_halos_general(test):

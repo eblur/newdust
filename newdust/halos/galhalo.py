@@ -348,14 +348,11 @@ class UniformGalHaloCP15(Halo):
         rho_u = rho_u.to(u.g * u.cm**(-3))
 
         NE, NTH = len(lam_keV), len(theta_arcsec)
-        #here will be a function that calculation taux based on Energy input
         #Input energy would be an array with length NE, and the output taux would also have dimension NE
         self.taux = calculate_taux(lam_keV, amin_um, amax_um, p, rho_u, md_u)
         hfrac = np.tile(self.taux.reshape(NE,1), NTH ) # NE x NTH
         energy = np.tile(lam_keV.reshape(NE,1), NTH ) # NE x NTH
         theta = np.tile(theta_arcsec, (NE,1) ) #NE x NTH
-
-        # single grain?
 
         charsig = 1.04 * 60.0 * u.arcsec/ (energy/u.keV) * u.micron
         const = hfrac / ( theta * charsig * np.sqrt(8.0*np.pi) )
@@ -419,7 +416,6 @@ class ScreenGalHaloCP15(Halo):
         rho_u = rho_u.to(u.g * u.cm**(-3))
 
         NE, NTH = len(lam_keV), len(theta_arcsec)
-        #here will be a function that calculation taux based on Energy input
         #Input energy would be an array with length NE, and the output taux would also have dimension NE
         self.taux = calculate_taux(lam_keV, amin_um, amax_um, p, rho_u, md_u)
         hfrac = np.tile(self.taux.reshape(NE,1), NTH ) # NE x NTH
