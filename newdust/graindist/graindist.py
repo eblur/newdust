@@ -7,7 +7,7 @@ MD_DEFAULT = 1.e-4  # g cm^-2
 RHO        = 3.0    # g cm^-3
 AMAX       = 0.3  # um
 
-ALLOWED_SIZES  = ['Grain','Powerlaw','ExpCutoff']
+ALLOWED_SIZES  = ['Grain','Powerlaw','ExpCutoff','Astrodust']
 ALLOWED_COMPS  = ['Drude', 'Silicate', 'Graphite']
 SHAPES = {'Sphere':sh.Sphere()}
 
@@ -46,7 +46,7 @@ class GrainDist(object):
         Inputs
         ------
       
-        dtype : string ('Grain', 'Powerlaw', 'ExpCutoff') or 
+        dtype : string ('Grain', 'Powerlaw', 'ExpCutoff', 'Astrodust') or 
         newdust.graindist.sizedist object defining the grain radius distribution
 
         cmtype : string ('Drude', 'Silicate', 'Graphite') or
@@ -60,6 +60,7 @@ class GrainDist(object):
         |   *Grain:* defines the singular grain radius
         |   *Powerlaw:* defines the maximum grain radius
         |   *ExpCutoff:* defines the exponential cut-off value, `acut`
+        |   *Astrodust:* defines the maximum grain radius
 
         rho : if defined, will be provide as input to the `rho` keyword in composition
 
@@ -125,6 +126,8 @@ class GrainDist(object):
             self.size = sizedist.Powerlaw(amax=amax, **kwargs)
         if dtype == 'ExpCutoff':
             self.size = sizedist.ExpCutoff(acut=amax, **kwargs)
+        if dtype == 'Astrodust':
+            self.size = sizedist.Astrodust(amax=amax, **kwargs)
         return
 
     def _assign_comp_from_string(self, cmtype, rho):
