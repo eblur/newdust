@@ -11,7 +11,7 @@ RHO = 3.0    # g cm^-3
 SDEFAULT = 'Powerlaw'
 CDEFAULT = 'Silicate'
 
-ALLOWED_SIZES = ['Grain','Powerlaw','ExpCutoff']
+ALLOWED_SIZES = ['Grain','Powerlaw','ExpCutoff','Astrodust']
 ALLOWED_COMPS = ['Drude','Silicate','Graphite']
 
 # Test that the helper function runs on all types
