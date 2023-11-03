@@ -111,8 +111,11 @@ class ScatteringModel(object):
         else:
             self.pars['a'] = a * u.micron
             a_cm = (a * u.micron).to('cm').value
-        
-        self.pars['cm'] = cm.cmtype
+
+        if cm is not None:
+            self.pars['cm'] = cm.cmtype
+        else:
+            self.pars['cm'] = cm
 
         theta_rad = None
         if isinstance(theta, u.Quantity):
