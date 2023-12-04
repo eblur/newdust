@@ -25,7 +25,7 @@ class UniformGalHalo(Halo):
         self.description = 'Uniform'
         self.md = None
 
-    def calculate(self, gpop, nx=500):
+    def calculate(self, gpop, nx=500, **kwargs):
         """
         Calculate the X-ray scattering intensity for dust distributed
         uniformly along the line of sight
@@ -36,6 +36,8 @@ class UniformGalHalo(Halo):
 
         nx : int
             Number of x-values to use for calculation (Default: 500)
+        
+        **kwargs are passed to grainpop extinction calculator
 
         Returns
         -------
@@ -62,7 +64,7 @@ class UniformGalHalo(Halo):
         i_th = 0
         for al in self.theta:
             thscat = al / xgrid  # nx, goes from small to large angle
-            gpop.calculate_ext(self.lam, theta=thscat)
+            gpop.calculate_ext(self.lam, theta=thscat, **kwargs)
             dsig  = gpop.diff.to('cm^2 arcsec^-2').value # NE x NA x nx, [cm^2 arcec^-2]
             itemp  = dsig * ndmesh / xmesh**2  # NE x NA x nx, [um^-1 arcsec^-2]
 
@@ -82,7 +84,7 @@ class ScreenGalHalo(Halo):
         self.md   = None
         self.x    = None
 
-    def calculate(self, gpop, x=0.5):
+    def calculate(self, gpop, x=0.5, **kwargs):
         """
         Calculate the X-ray scattering intensity for dust in an
         infinitesimally thin wall somewhere on the line of sight.
@@ -94,6 +96,8 @@ class ScreenGalHalo(Halo):
         x : float (0.0, 1.0]
             1.0 - (distance to screen / distance to X-ray source)
 
+        **kwargs are passed to grainpop extinction calculator
+        
         Returns
         -------
         None. Updates the md, x, norm_int, and taux attributes.
@@ -106,7 +110,7 @@ class ScreenGalHalo(Halo):
         NE, NA, NTH = np.size(self.lam), np.size(gpop.a), np.size(self.theta)
 
         thscat = self.theta / x
-        gpop.calculate_ext(self.lam, theta=thscat)
+        gpop.calculate_ext(self.lam, theta=thscat, **kwargs)
         dsig   = gpop.diff.to('cm^2 arcsec^-2') # NE x NA x NTH, [cm^2 arcsec^-2]
 
         ndmesh = np.repeat(
