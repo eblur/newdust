@@ -10,6 +10,7 @@ __all__ = ['SingleGrainPop','GrainPop','make_MRN','make_MRN_RGDrude']
 MD_DEFAULT    = 1.e-4  # g cm^-2
 AMIN, AMAX, P = 0.005, 0.3, 3.5  # um, um, unitless
 RHO_AVG       = 3.0  # g cm^-3
+RHO_AD        = 2.74 # g cm^-3; grain material density for porosity P=0.2 model
 
 # Make this a subclass of GrainDist at some point
 class SingleGrainPop(graindist.GrainDist):
@@ -43,10 +44,10 @@ class SingleGrainPop(graindist.GrainDist):
         Inputs
         ------
 
-        dtype : string ('Grain', 'Powerlaw', 'ExpCutoff') or 
+        dtype : string ('Grain', 'Powerlaw', 'ExpCutoff', 'Astrodust') or 
         newdust.graindist.sizedist object defining the grain radius distribution
 
-        cmtype : string ('Drude', 'Silicate', 'Graphite') or
+        cmtype : string ('Drude', 'Silicate', 'Graphite', 'Astrodust') or
         newdust.graindist.composition object defining the optical constants and compound density
 
         stype : string ('Mie' or 'RG') : defines what extinction model calculator to use. If an

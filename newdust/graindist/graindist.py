@@ -48,7 +48,7 @@ class GrainDist(object):
         dtype : string ('Grain', 'Powerlaw', 'ExpCutoff', 'Astrodust') or 
         newdust.graindist.sizedist object defining the grain radius distribution
 
-        cmtype : string ('Drude', 'Silicate', 'Graphite') or
+        cmtype : string ('Drude', 'Silicate', 'Graphite', 'Astrodust') or
         newdust.graindist.composition object defining the optical constants and compound density
 
         shape : string ('Sphere' is the only option), otherwise could be used to define a custom shape
@@ -140,6 +140,9 @@ class GrainDist(object):
         if cmtype == 'Graphite':
             if rho is not None: self.comp = composition.CmGraphite(rho=rho)
             else: self.comp = composition.CmGraphite()
+        if cmtype == 'Astrodust':
+            if rho is not None: self.comp = composition.CmAstrodust(rho=rho)
+            else: self.comp = composition.CmAstrodust()
         return
 
     def _assign_shape_from_string(self, shape):
