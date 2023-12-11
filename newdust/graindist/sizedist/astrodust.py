@@ -6,7 +6,9 @@ from newdust.graindist import shape
 __all__ = ['Astrodust']
 
 # Some default values
-RHO      = 3.0     # g cm^-3 (average grain material density)
+RHO      = 2.74     # (g cm^-3) 
+# grain material density for best fitting astrodust model from Hensley & Draine 2022
+# has a porosity P = 0.2; use RHO = 3.42 (1 - P) g cm^-3, according to their work
 
 NA       = 100     # default number for grain size dist resolution
 
@@ -14,7 +16,7 @@ NA       = 100     # default number for grain size dist resolution
 AMIN     = 4.5e-4   # micron (equivalent to 4.5 angstrom)
 AMAX     = 1.    # micron
 
-SHAPE    = shape.Sphere()
+SHAPE    = shape.Sphere() # not true, but this library doesn't handle non-spherical grains yet
 
 #------------------------------------
 
@@ -22,7 +24,7 @@ class Astrodust(object):
     """
     The Astrodust grain size distribution accroding to Hensley & Draine 2022
     """
-    def __init__(self, amin=AMIN, amax=AMAX, na=NA, log=False):
+    def __init__(self, amin=AMIN, amax=AMAX, na=NA, log=True):
         """
         Inputs
         ------
