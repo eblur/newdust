@@ -7,7 +7,7 @@ MD_DEFAULT = 1.e-4  # g cm^-2
 AMAX       = 0.3  # um
 
 ALLOWED_SIZES  = ['Grain','Powerlaw','ExpCutoff','Astrodust']
-ALLOWED_COMPS  = ['Drude', 'Silicate', 'Graphite']
+ALLOWED_COMPS  = ['Drude', 'Silicate', 'Graphite','Astrodust']
 SHAPES = {'Sphere':sh.Sphere()}
 
 __all__ = ['GrainDist']
@@ -126,7 +126,7 @@ class GrainDist(object):
         if dtype == 'ExpCutoff':
             self.size = sizedist.ExpCutoff(acut=amax, **kwargs)
         if dtype == 'Astrodust':
-            self.size = sizedist.Astrodust(amax=amax, **kwargs)
+            self.size = sizedist.Astrodust(**kwargs)
         return
 
     def _assign_comp_from_string(self, cmtype, rho):
