@@ -17,6 +17,7 @@ MRN_SIL = graindist.GrainDist('Powerlaw','Silicate')
 MRN_DRU = graindist.GrainDist('Powerlaw','Drude')
 EXP_SIL = graindist.GrainDist('ExpCutoff','Silicate')
 GRAIN   = graindist.GrainDist('Grain','Drude')
+ASTRODUST = graindist.GrainDist('Astrodust','Astrodust')
 
 ## NOTE: To test integrals over theta, need a large enough number of points on the grid
 ## I started with 100 and multiplied by 2 until the test_ext_calculation tests pass
@@ -96,8 +97,8 @@ def test_make_MRN_RGDrude():
 # Test that all the computations can run
 # Test RG-Drude with X-ray photons
 # Test everything else with optical photons
-@pytest.mark.parametrize('sd', ['Powerlaw', 'ExpCutoff','Grain'])
-@pytest.mark.parametrize('cm', ['Silicate','Graphite', 'Drude'])
+@pytest.mark.parametrize('sd', ['Powerlaw', 'ExpCutoff','Grain','Astrodust'])
+@pytest.mark.parametrize('cm', ['Silicate','Graphite', 'Drude','Astrodust'])
 @pytest.mark.parametrize('sc', ['Mie', 'RG'])
 def test_ext_calculations(sd, cm, sc):
     thresh = 0.05 # default threshold for agreement

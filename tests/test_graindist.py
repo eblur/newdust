@@ -12,7 +12,7 @@ SDEFAULT = 'Powerlaw'
 CDEFAULT = 'Silicate'
 
 ALLOWED_SIZES = ['Grain','Powerlaw','ExpCutoff','Astrodust']
-ALLOWED_COMPS = ['Drude','Silicate','Graphite']
+ALLOWED_COMPS = ['Drude','Silicate','Graphite','Astrodust']
 
 # Test that the helper function runs on all types
 @pytest.mark.parametrize('sstring', ALLOWED_SIZES)

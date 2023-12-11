@@ -37,7 +37,8 @@ MDTEST2 = 2.0 * MDTEST
 @pytest.mark.parametrize('sd',
                          [sizedist.Grain(),
                           sizedist.Powerlaw(),
-                          sizedist.ExpCutoff()])
+                          sizedist.ExpCutoff(),
+                          sizedist.Astrodust()])
 def test_dmass(sd):
     md1 = sd.mdens(MDTEST, RHOTEST)
     md2 = sd.mdens(MDTEST2, RHOTEST)
@@ -54,7 +55,8 @@ RHOTEST2 = 2.0 * RHOTEST
 @pytest.mark.parametrize('sd',
                          [sizedist.Grain(),
                           sizedist.Powerlaw(),
-                          sizedist.ExpCutoff()])
+                          sizedist.ExpCutoff(),
+                          sizedist.Astrodust()])
 def test_change_rho(sd):
     nd1 = sd.ndens(MDTEST, RHOTEST)
     nd2 = sd.ndens(MDTEST, RHOTEST2)
