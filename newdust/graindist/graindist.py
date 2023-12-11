@@ -4,7 +4,6 @@ from . import composition
 from . import shape as sh
 
 MD_DEFAULT = 1.e-4  # g cm^-2
-RHO        = 3.0    # g cm^-3
 AMAX       = 0.3  # um
 
 ALLOWED_SIZES  = ['Grain','Powerlaw','ExpCutoff','Astrodust']
