@@ -6,3 +6,5 @@ What this file does:
 
 '''
 
+def run():
+    return "hi"
