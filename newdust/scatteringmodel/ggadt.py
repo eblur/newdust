@@ -17,6 +17,17 @@ FITS format:
 import astropy.units as u
 from astropy.io import fits
 import numpy as np
+import scatteringmodel
+
+#child of ScatteringModel class
+class Ggadt(scatteringmodel.ScatteringModel):
+    #__init__ REQUIRES a fits file to open
+    def __init__(self, fits_file=None):
+        assert(fits_file is not None)
+
+        self.read_from_table(fits_file)
+
+
 
 #Makes a FITS table for a set of GGADT output files for grains of the same shape and material
 #NOTE: num_files is 0-indexed!
@@ -66,7 +77,7 @@ def make_fits(shape, material, num_files, outfile, overwrite=True):
     
     img_list = []
     for (val, head) in zip([qext, qabs, qsca, diff],
-                           ["Qext", "Qabs", "Qsca", "Diff x-sect (ster^-1)"]):
+                           ["Qext", "Qabs", "Qsca", "Diff-xsect (ster^-1)"]):
         htemp = fits.Header()
         htemp['TYPE'] = head
         img_list.append(fits.ImageHDU(val, header=htemp))
@@ -75,7 +86,7 @@ def make_fits(shape, material, num_files, outfile, overwrite=True):
     fnl_list = [header] + pars + img_list
     hdu_list = fits.HDUList(hdus=fnl_list)
     hdu_list.writeto(outfile, overwrite=overwrite)
-    return
+    return outfile
 
 def parse_file(filename, get_evs=False, get_ratio=False):
     #Read the file line by line (so we have data for each energy) then put each variable floato their own respective arrays
@@ -172,15 +183,13 @@ def make_header(material, shape, axis_ratio, oriented):
 
 def make_pars(evs, radii, theta):
     c1 = fits.BinTableHDU.from_columns(
-        [fits.Column(name='lam', array=np.array(evs), format='E', unit='kiloelectron-volts')]
+        [fits.Column(name='lam', array=np.array(evs), format='E', unit='kiloelectronvolt')]
     )
     c2 = fits.BinTableHDU.from_columns(
-        [fits.Column(name='a', array=np.array(radii), format='E', unit='microns')]
+        [fits.Column(name='a', array=np.array(radii), format='E', unit='um')]
     )
     c3 = fits.BinTableHDU.from_columns(
-        [fits.Column(name='theta', array=np.array(theta), format='E', unit='radians')]
+        [fits.Column(name='theta', array=np.array(theta), format='E', unit='radian')]
     )
 
     return [c1, c2, c3]
-
-make_fits('sphere', 'metallic_iron', 5, 'test')
