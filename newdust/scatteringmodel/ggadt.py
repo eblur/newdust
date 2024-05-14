@@ -38,6 +38,7 @@ def make_fits(shape, material, num_files, outfile, overwrite=True):
     #params data
     radii.append(data['radius'])
     evs = data['evs']
+    oriented = data['oriented']
 
     #img data
     qext.append(data['qext'])
@@ -46,7 +47,7 @@ def make_fits(shape, material, num_files, outfile, overwrite=True):
 
     #make header
     axis_ratio = data['axis ratio']
-    header = make_header(material, shape, axis_ratio)
+    header = make_header(material, shape, axis_ratio, oriented)
 
     #go through the rest of the output files and finish poplating qsca, qext, and qabs
     i = 1
@@ -154,11 +155,16 @@ def parse_file(filename, get_evs=False, get_ratio=False):
     file.close()
     return data
 
-def make_header(material, shape, axis_ratio):
+def make_header(material, shape, axis_ratio, oriented):
     result = fits.Header()
     result['SHAPE'] = shape
     result['MATERIAL'] = material
     result['AX_RATIO'] = axis_ratio
+    
+    result['ORIENT'] = "Random"
+    if oriented:
+        result['ORIENT'] = 'Set'
+
     result['COMMENT']  = "Extinction efficiency and differential cross-sections"
     result['COMMENT']  = "HDUS 4-6 are Qext, Qsca, Qabs in wavelength (or energy) vs grain radius"
     result['COMMENT']  = "HDU 7 is the differential scattering cross-section (ster^-1)"
@@ -177,4 +183,4 @@ def make_pars(evs, radii, theta):
 
     return [c1, c2, c3]
 
-make_fits('oblate', 'metallic_iron', 11, 'test')
+make_fits('sphere', 'metallic_iron', 5, 'test')
