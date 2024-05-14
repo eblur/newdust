@@ -184,14 +184,15 @@ def make_header(material, num_files):
 def make_params(filename):
     #make 2 columns, one with the ev range for the materials, and the other with the list of radii
     #radii start at 1 for file indicies, so this will do the same
-    rs = pd.read_csv("radii.csv", usecols=['a_eff'])
+    rs = pd.read_csv("astrodust_model/radii.csv", usecols=['a_eff'])
     radii = [0.0] + list(rs['a_eff'])
 
     evs = get_evs(filename)
 
-    c1 = fits.BinTableHDU.from_columns([fits.Column(name='Radii', array=np.array(radii), unit='micron', format='E')])
-    c2 = fits.BinTableHDU.from_columns([fits.Column(name='Energies', array=np.array(evs), unit='electron-volt', format='E')])
+    c1 = fits.BinTableHDU.from_columns([fits.Column(name='Radii', array=np.array(radii), unit='microns', format='E')])
+    c2 = fits.BinTableHDU.from_columns([fits.Column(name='Energies', array=np.array(evs), unit='kiloelectron-volts', format='E')])
 
     return [c1,c2]
 
 make_fits('fayalite', 'test')
+print("you need to change how this records the radii -- Seems cumbersome/unnecessary to do it through radii.csv")
