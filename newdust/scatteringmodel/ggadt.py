@@ -17,9 +17,8 @@ FITS format:
 import astropy.units as u
 from astropy.io import fits
 import numpy as np
-#import scatteringmodel
+import scatteringmodel
 
-'''
 #child of ScatteringModel class
 class Ggadt(scatteringmodel.ScatteringModel):
     #__init__ REQUIRES a fits file to open
@@ -27,7 +26,7 @@ class Ggadt(scatteringmodel.ScatteringModel):
         assert(fits_file is not None)
 
         self.read_from_table(fits_file)
-'''
+
 
 
 
