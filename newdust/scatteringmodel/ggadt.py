@@ -17,8 +17,9 @@ FITS format:
 import astropy.units as u
 from astropy.io import fits
 import numpy as np
-import scatteringmodel
+#import scatteringmodel
 
+'''
 #child of ScatteringModel class
 class Ggadt(scatteringmodel.ScatteringModel):
     #__init__ REQUIRES a fits file to open
@@ -26,12 +27,14 @@ class Ggadt(scatteringmodel.ScatteringModel):
         assert(fits_file is not None)
 
         self.read_from_table(fits_file)
+'''
 
 
 
 #Makes a FITS table for a set of GGADT output files for grains of the same shape and material
 #NOTE: num_files is 0-indexed!
-def make_fits(shape, material, num_files, outfile, overwrite=True):
+#folder denotes the file path to the folder the output data is stored in
+def make_fits(shape, material, folder, num_files, outfile, overwrite=True):
     #data to store in FITS
     radii = []
     evs = []
@@ -43,7 +46,7 @@ def make_fits(shape, material, num_files, outfile, overwrite=True):
 
     #The first file will be used to get the ev values so it will not be part of the loop to get data
     #CHANGE THE START OF THIS TO MAKE SURE YOU'RE IN THE RIGHT DIRECTORY TO ACCESS THE FILE
-    filename = "test_model/" + material + "_0_" + shape + ".out"
+    filename = folder+ "/" + material + "_0_" + shape + ".out"
     data = parse_file(filename, get_evs=True, get_ratio=True)
 
     #params data
@@ -63,7 +66,7 @@ def make_fits(shape, material, num_files, outfile, overwrite=True):
     #go through the rest of the output files and finish poplating qsca, qext, and qabs
     i = 1
     while i < num_files:
-        filename = "test_model/" + material + "_" + str(i) + "_" + shape + ".out"
+        filename = folder+ "/" + material + "_" + str(i) + "_" + shape + ".out"
         data = parse_file(filename)
         qext.append(data['qext'])
         qabs.append(data['qabs'])
@@ -148,7 +151,8 @@ def parse_file(filename, get_evs=False, get_ratio=False):
         qext.append(float(vals[3]))
 
         if get_evs:
-            evs.append(float(vals[0]))
+            val = (float(vals[0]))
+            evs.append(val)
 
 
         i += 1
@@ -183,13 +187,13 @@ def make_header(material, shape, axis_ratio, oriented):
 
 def make_pars(evs, radii, theta):
     c1 = fits.BinTableHDU.from_columns(
-        [fits.Column(name='lam', array=np.array(evs), format='E', unit='kiloelectronvolt')]
+        [fits.Column(name='lam', array=np.array(evs), format='D', unit='keV')]
     )
     c2 = fits.BinTableHDU.from_columns(
-        [fits.Column(name='a', array=np.array(radii), format='E', unit='um')]
+        [fits.Column(name='a', array=np.array(radii), format='D', unit='micron')]
     )
     c3 = fits.BinTableHDU.from_columns(
-        [fits.Column(name='theta', array=np.array(theta), format='E', unit='radian')]
+        [fits.Column(name='theta', array=np.array(theta), format='D', unit='rad')]
     )
 
     return [c1, c2, c3]
