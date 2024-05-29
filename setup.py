@@ -27,6 +27,7 @@ while keep_looking:
         n += 1
 
 PACKAGES.remove('newdust.graindist.tables')
+PACKAGES.remove('newdust.scatteringmodel.tables')
         
 ##-------------------------------------------------
 ## Package setup
@@ -38,5 +39,5 @@ setup(name='newdust',
       author_email='lia@astro.wisc.edu',
       url='https://github.com/eblur/newdust',
       packages=PACKAGES,
-      package_data={'newdust': ['graindist/tables/*']}
+      package_data={'newdust': ['graindist/tables/*', 'scatteringmodel/tables/*']}
 )

@@ -1,29 +1,26 @@
 """
 This file turns multiple GGADT output files containing extinction data for grains of the same material, shape, and orientation into a single FITS file
 
+FITS files produced by make_ggadt follow the same structure as those used by the ScatteringModel class
 """
-import os
+
 from astropy.io import fits
 import numpy as np
 
 """
-GGADT output files are named as such: [material]_[index]_[shape]_[orientation].out
+GGADT output files are named as such: [material]_[index].out
     
     [index] is 0-indexed -- grain radius increases with the index
 """
-def make_fits(shape, material, orientation, folder, last_index, outfile, overwrite=True):
+def make_fits(material, folder, indicies, outfile, overwrite=True):
     """
     Creates a FITS file containing qsca, qext, and qabs data from multiple GGADT grains of the shape and material
 
-    shape: string: shape of grain for output files as it appears in the file names -- this should be constant across all input files
-
     material: string: material of the grain as it appears in the file names -- this should be constant across all input files
-
-    orientation: string: Either 'set' or 'rand' -- 'set' denotes a set orientation (0º, 0º, 0º), 'rand' denotes a random orientation -- but the code should work as long as 'rand' denotes the random orientation (i.e. There could be multiple set orientations). This should be inputted as it appears in the file names.
 
     folder: string: file path to the folder containing the GGADT output data
 
-    last_index: int: the last (largest) index of a GGADT output file (ex: if there are 32 files, last_index = 31)
+    indicies: list[int]: a list of the indicies used in file naming -- should be consecutive integers range from 0 to the last index used in file naming (ex: if there are 32 files, indicies = range(32))
 
     outfile: string: name of the ouputted FITS file
 
@@ -34,49 +31,53 @@ def make_fits(shape, material, orientation, folder, last_index, outfile, overwri
 
     #data to store in FITS
     radii = []
-    evs = []
-    theta = [] #NEED TO IMPLEMENT
     qext = []
     qabs = []
     qsca = []
     diff = [] #NEED TO IMPLEMENT
 
-    axis_ratio = 1.0
-    have_evs_and_ratio = False
+    #constant parameters
+    evs = []
+    theta = [] #NEED TO IMPLEMENT
+    axis_ratio = 0.0
+    shape = ''
+    orientation = ''
 
     #go through the output files and popuate above variables
-    i = 0
-    while i <= last_index:
-        filename= f'{folder}/{material}_{i}_{shape}_{orientation}.out'
+    for i in indicies:
+        filename= f'{folder}/{material}_{i}.out'
+        data = parse_file(filename)
 
-        #check file existence -- for larger astrodust models there many not be GGADT output files with certain names (ex: no random oblates from indicies 0 - 10)
-        if not os.path.isfile(filename):
-            i += 1
-            continue
-        
-        #evs and axis ratio are constant through a FITS file so they only need to be collected once
-        if have_evs_and_ratio:
+        qext.append(data['qext'])
+        qabs.append(data['qabs'])
+        qsca.append(data['qsca'])
+        radii.append(data['radius'])
 
-            data = parse_file(filename, orientation)
-            qext.append(data['qext'])
-            qabs.append(data['qabs'])
-            qsca.append(data['qsca'])
-            radii.append(data['radius'])
-
-        else:
-
-            data = parse_file(filename, orientation, have_evs_and_ratio=False)
-            qext.append(data['qext'])
-            qabs.append(data['qabs'])
-            qsca.append(data['qsca'])
-            radii.append(data['radius'])
+        #need to either assign or check consistency of constant parameters
+        if not evs: 
             evs = data['evs']
+        elif evs != data['evs']:  
+            raise Exception('Error: Incident energy range must be constant')
+
+        if axis_ratio == 0.0:
             axis_ratio = data['axis ratio']
-
-            have_evs_and_ratio = True
-
-        i += 1
+        elif axis_ratio != data['axis ratio']:
+            raise Exception('Error: Axis ratio must be constant')
+        
+        if shape == '':
+            shape = data['shape']
+        elif shape != data['shape']:
+            raise Exception('Error: Shape must be constant')
+        
+        if orientation == '':
+            orientation = data['orientation']
+        elif orientation != data['orientation']:
+            raise Exception('Error: Orientation must be constant')
     
+    #Radii and indicies should be the same length -- if they're not something is wrong
+    if len(indicies) != len(radii):
+        raise Exception('Error: Too many radii') if len(indicies) < len(radii) else Exception('Error: Not enough radii')
+
     #make parameters and header
     header = make_header(material, shape, axis_ratio, orientation)
     pars = make_pars(evs, radii, theta)
@@ -96,15 +97,11 @@ def make_fits(shape, material, orientation, folder, last_index, outfile, overwri
 
 #Helper functions:
 
-def parse_file(filename, orientation, have_evs_and_ratio=True):
+def parse_file(filename):
     """
     Parses through a GGADT output file and returns header and extinction data
 
     filename: string: full path, including name, to a GGADT output file
-
-    orientation: string: Either 'set' or 'rand' -- 'set' denotes a set orientation (0º, 0º, 0º), 'rand' denotes a random orientation -- but the code should work as long as 'rand' denotes the random orientation (i.e. There could be multiple set orientations). This should be inputted as it appears in the file names.
-
-    have_evs_and_ratio: bool: if true, parse_file() not will record the axis ratio nor incident energy values of the grain in the given output file -- these should be the same for every output file so they only need to be recorded once
 
     Returns a dict containing all of the relevant data for the GGADT output file given by filename
     """
@@ -113,28 +110,42 @@ def parse_file(filename, orientation, have_evs_and_ratio=True):
     data = file.readlines()
 
     radius = float((data[6].split())[2]) #in microns
+    orientation = (data[12].split())[2]
+    if orientation == 'file':
+        orientation = 'set'
 
-    #Need to find the axis ratio (should be the same for all grains in the model so it only needs to be done once)
+    #Need to find the axis ratio 
     axis_ratio = 1.0
-    if not have_evs_and_ratio:
 
-        i = 15
-        #axis data is one line lower if the grain is set by an angle file
-        if orientation != 'rand':
-            i = 16
+    i = 15
+    #axis data is one line lower if the grain is set by an angle file
+    if orientation != 'random':
+        i = 16
         
-        x_axis = float((data[i].split())[2])
-        y_axis = float((data[i + 1].split())[2])
-        z_axis = float((data[i + 2].split())[2])
+    x_axis = float((data[i].split())[2])
+    y_axis = float((data[i + 1].split())[2])
+    z_axis = float((data[i + 2].split())[2])
 
-        #Axis ratio should be > 1 so we don't need to do every permutation
-        y_x = round(y_axis / x_axis, 2) if (y_axis / x_axis) >= 1 else round(x_axis / y_axis, 2)
-        y_z = round(y_axis / z_axis, 2) if (y_axis / z_axis) >= 1 else round(z_axis / y_axis, 2)
-        x_z = round(x_axis / z_axis, 2) if (x_axis / z_axis) >= 1 else round(z_axis / x_axis, 2)
+    shape = ''
+    #can determine the shape based on axis equalities
+    axes = [x_axis, y_axis, z_axis]
+    axes.sort(key = float)
 
-        #Will use largest ratio for axis ratio
-        axis_ratio = max(y_x, y_z, x_z)
-        
+    if (axes[0] == axes[1] and axes[1] == axes[2]):
+        shape = 'sphere'
+    elif (axes[0] == axes[1] and axes[1] < axes[2]):
+        shape = 'prolate'
+    elif (axes[0] < axes[1] and axes[1] == axes[2]):
+        shape = 'oblate'
+    else:
+        raise Exception('Error: Unknown Shape')
+
+    #Axis ratio should be > 1 so we don't need to do every permutation
+    y_x = round(y_axis / x_axis, 2) if (y_axis / x_axis) >= 1 else round(x_axis / y_axis, 2)
+    y_z = round(y_axis / z_axis, 2) if (y_axis / z_axis) >= 1 else round(z_axis / y_axis, 2)
+    x_z = round(x_axis / z_axis, 2) if (x_axis / z_axis) >= 1 else round(z_axis / x_axis, 2)
+
+    axis_ratio = max(y_x, y_z, x_z)
 
     qsca = []
     qabs = []
@@ -144,25 +155,24 @@ def parse_file(filename, orientation, have_evs_and_ratio=True):
     #split each line to each variable
     #If the grain is oriented there's an extra line in the header so i needs to be one greater
     i = 23
-    if orientation != 'rand':
+    if orientation != 'random':
         i += 1
     
     while i < len(data):
         #There should be 4 different vals, which can then be added to the lists above
         vals = data[i].split()
+        evs.append(float(vals[0]))
         qsca.append(float(vals[1]))
         qabs.append(float(vals[2]))
         qext.append(float(vals[3]))
-
-        if not have_evs_and_ratio:
-            val = (float(vals[0]))
-            evs.append(val)
 
 
         i += 1
     
     data = {
         'radius': radius,
+        'orientation': orientation,
+        'shape': shape,
         'axis ratio': axis_ratio,
         'qsca': qsca,
         'qabs': qabs,
@@ -177,9 +187,9 @@ def make_header(material, shape, axis_ratio, orientation):
     """
     Makes the PimaryHDU for the FITS file returned by make_fits
 
-    material: string: the material of the grains (this is the same for every file)
+    material: string: the material of the grains (this is the same for every GGADT output file)
 
-    shape: string: the shape of the grains (this is the same for every file)
+    shape: string: the shape of the grains (this is the same for every GGADT output file)
 
     axis_ratio: float: the axis ratio of the grains
 

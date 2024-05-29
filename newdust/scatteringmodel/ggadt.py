@@ -28,3 +28,6 @@ class GGADT(scatteringmodel.ScatteringModel):
       from_file: string: REQUIRED, the name of the fits file with GGADT data in it
       """
       self.read_from_table(from_file)
+      self.stype = 'GGADT'
+      self.citation = 'https://ui.adsabs.harvard.edu/abs/2016ApJ...817..139H/abstract'
+

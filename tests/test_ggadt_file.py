@@ -9,51 +9,68 @@ from newdust.scatteringmodel import make_ggadt_astrodust as astro
 
 
 #make FITS files
-#make_fits(shape, material, orientation, folder, last_index, outfile, overwrite=True)
-gg_1 = ggadt.make_fits('oblate', 'lepidocrocite', 'rand', '../newdust/scatteringmodel/tables/ggadt_rand_oblate', 4, 'gg_1.fits')
+#make_fits(material, folder, indicies, outfile, overwrite=True)
+ggadt.make_fits('lepidocrocite', '../newdust/scatteringmodel/tables/ggadt_rand_oblate', range(4), 'gg_1.fits')
 
-gg_2 = ggadt.make_fits('prolate', 'fayalite', 'set', '../newdust/scatteringmodel/tables/ggadt_set_prolate', 3, 'gg_2.fits')
+ggadt.make_fits('fayalite', '../newdust/scatteringmodel/tables/ggadt_set_prolate', range(3), 'gg_2.fits')
 
-#make_astrodust_fits(shapes, material, orientations, folder, last_index)
-ast = astro.make_astrodust_fits(['sphere', 'oblate'], 'hematite', ['set', 'rand'], '../newdust/scatteringmodel/tables/astrodust_hematite', 9)
+#make_fits_astrodust(material, indicies, folder, outfile, overwrite=True)
+astro.make_fits_astrodust('hematite', '../newdust/scatteringmodel/tables/astrodust_hematite', range(10), 'astro.fits')
 
 def test_headers():
-        assert(check_header('gg_1.fits', 'oblate', 'lepidocrocite', 1.4, 'rand') == True)
-        assert(check_header('gg_2.fits', 'prolate', 'fayalite', 2.0, 'set'))
-        assert(check_header('hematite_oblate_rand.fits', 'oblate', 'hematite', 1.4, 'rand') == True)
-        assert(check_header('hematite_oblate_set.fits', 'oblate', 'hematite', 1.4, 'set') == True)
-        assert(check_header('hematite_sphere_rand.fits', 'sphere', 'hematite', 1.0, 'rand') == True)
-        assert(check_header('hematite_sphere_set.fits', 'sphere', 'hematite', 1.0, 'set') == True)
+        assert(check_header('gg_1.fits', 'lepidocrocite',  'oblate', 1.4, 'random') == True)
+        assert(check_header('gg_2.fits', 'fayalite', 'prolate', 2.0, 'set') == True)
+        assert(check_header('astro.fits', 'hematite') == True)
         return
 
-@pytest.mark.parametrize('f', ['gg_1.fits', 'gg_2.fits', 'hematite_oblate_rand.fits', 'hematite_oblate_set.fits', 'hematite_sphere_rand.fits', 'hematite_sphere_set.fits'])
+@pytest.mark.parametrize('f', ['gg_1.fits', 'gg_2.fits', 'astro.fits'])
 def test_radii(f):
     assert (check_radii(f))
 
-@pytest.mark.parametrize('f', ['gg_1.fits', 'gg_2.fits', 'hematite_oblate_rand.fits', 'hematite_oblate_set.fits', 'hematite_sphere_rand.fits', 'hematite_sphere_set.fits'])
+def test_check_astro_rec():
+    file = fits.open('astro.fits')
+    shapes = file[2].data.field(1)
+    orientations = file[2].data.field(2)
+    ratios = file[2].data.field(3)
+
+    file.close()
+
+    assert(np.array_equal(shapes, np.array(['sphere', 'sphere', 'sphere', 'oblate', 'oblate', 'oblate', 'oblate', 'oblate', 'oblate', 'oblate'])))
+
+    assert(np.array_equal(orientations, np.array(['random', 'random', 'random', 'set', 'set', 'set', 'set', 'set', 'set', 'set'])))
+
+    assert(np.array_equal(ratios, np.array([1.0, 1.0, 1.0, 1.4, 1.4, 1.4, 1.4, 1.4, 1.4, 1.4])))
+
+@pytest.mark.parametrize('f', ['gg_1.fits', 'gg_2.fits', 'astro.fits'])
 def test_ephots(f):
     assert(check_ephots(f))
 
-@pytest.mark.parametrize('f', ['gg_1.fits', 'gg_2.fits', 'hematite_oblate_rand.fits', 'hematite_oblate_set.fits', 'hematite_sphere_rand.fits', 'hematite_sphere_set.fits'])
+@pytest.mark.parametrize('f', ['gg_1.fits', 'gg_2.fits', 'astro.fits'])
 def test_data(f):
     assert(check_data(f) == True)
 
 #This isn't actually a test, just a way to remove the test files
 def test_remove_files():
-    command = 'rm gg_1.fits gg_2.fits hematite_oblate_rand.fits hematite_oblate_set.fits hematite_sphere_rand.fits hematite_sphere_set.fits'
+    command = 'rm gg_1.fits gg_2.fits astro.fits'
 
     subprocess.run(command, shell=True)
 
     assert(True)
 
-def check_header(fits_file, shape, material, ax_ratio, orient):
+def check_header(fits_file, material, shape='', ax_ratio=0.0, orient=''):
         file = fits.open(fits_file)
         header = file[0].header
 
-        shape = header['SHAPE'] == shape
         material = header['MATERIAL'] == material
-        ax_ratio = header['AX_RATIO'] == ax_ratio
-        orient = header['ORIENT'] == orient
+
+        if (fits_file != 'astro.fits'):
+            shape = header['SHAPE'] == shape
+            ax_ratio = header['AX_RATIO'] == ax_ratio
+            orient = header['ORIENT'] == orient
+        else:
+            shape = True
+            ax_ratio = True
+            orient = True
         
         file.close()
         if (shape and material and ax_ratio and orient):
@@ -62,15 +79,11 @@ def check_header(fits_file, shape, material, ax_ratio, orient):
             return False
 
 def check_radii(file):
-    radii = []
+    radii = [0.01, 0.12, 0.23, 0.34, 0.45, 0.56, 0.67, 0.78, 0.89, 1.0]
     if file == 'gg_1.fits':
         radii = [0.01, 0.34, 0.67, 1.0]
     elif file == 'gg_2.fits':
         radii = [0.01, 0.505, 1.0]
-    elif file == 'hematite_oblate_rand.fits' or file == 'hematite_oblate_set.fits':
-        radii = [0.34, 0.45, 0.56, 0.67, 0.78, 0.89, 1.0]
-    elif file == 'hematite_sphere_rand.fits':
-        radii = [0.01, 0.12, 0.23]
 
     file = fits.open(file)
     a = file[2].data.field(0)
@@ -83,9 +96,6 @@ def check_ephots(file):
     f = fits.open(file)
     e = f[1].data.field(0)
     unit = f[1].header['TUNIT1']
-
-    if (file == 'hematite_sphere_set.fits'):
-        return (np.array_equal(e, np.array([])) and unit == u.keV.to_string())
 
     ephots = range(600, 800)
     evs = []
@@ -102,45 +112,21 @@ def check_data(file):
 
     if file == 'gg_1.fits':
         while i < 4:
-            test_file = f'../newdust/scatteringmodel/tables/ggadt_rand_oblate/lepidocrocite_{i}_oblate_rand.out'
+            test_file = f'../newdust/scatteringmodel/tables/ggadt_rand_oblate/lepidocrocite_{i}.out'
             result = check_vals(test_file, f, i)
             i += 1
 
     elif file == 'gg_2.fits':
         while i < 3:
-            test_file = f'../newdust/scatteringmodel/tables/ggadt_set_prolate/fayalite_{i}_prolate_set.out'
+            test_file = f'../newdust/scatteringmodel/tables/ggadt_set_prolate/fayalite_{i}.out'
             result = check_vals(test_file, f, i)
-            i += 1
-    
-    elif file == 'hematite_sphere_rand.fits':
-        while i < 3:
-            test_file = f'../newdust/scatteringmodel/tables/astrodust_hematite/hematite_{i}_sphere_rand.out'
-            result = check_vals(test_file, f, i)
-            i += 1
-
-    elif file == 'hematite_oblate_rand.fits':
-        i = 3
-        while i < 10:
-            test_file = f'../newdust/scatteringmodel/tables/astrodust_hematite/hematite_{i}_oblate_rand.out'
-            result = check_vals(test_file, f, i - 3)
-            i += 1
-        
-    elif file == 'hematite_oblate_set.fits':
-        i = 3
-        while i < 10:
-            test_file = f'../newdust/scatteringmodel/tables/astrodust_hematite/hematite_{i}_oblate_set.out'
-            result = check_vals(test_file, f, i - 3)
             i += 1
     
     else:
-        ext = np.array_equal(f[4].data, np.array([]))
-        abs = np.array_equal(f[5].data, np.array([]))
-        sca = np.array_equal(f[6].data, np.array([]))
-
-        if (ext and abs and sca):
-            result = True
-        else:
-            result = False
+        while i < 10:
+            test_file = f'../newdust/scatteringmodel/tables/astrodust_hematite/hematite_{i}.out'
+            result = check_vals(test_file, f, i)
+            i += 1
     
     f.close()
     return result
