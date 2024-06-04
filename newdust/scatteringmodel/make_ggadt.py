@@ -38,7 +38,7 @@ def make_fits(material, folder, indicies, outfile, overwrite=True):
 
     #constant parameters
     evs = []
-    theta = [] #NEED TO IMPLEMENT
+    theta = [0.0] #NEED TO IMPLEMENT
     axis_ratio = 0.0
     shape = ''
     orientation = ''
@@ -51,6 +51,7 @@ def make_fits(material, folder, indicies, outfile, overwrite=True):
         qext.append(data['qext'])
         qabs.append(data['qabs'])
         qsca.append(data['qsca'])
+        diff.append(data['diff'])
         radii.append(data['radius'])
 
         #need to either assign or check consistency of constant parameters
@@ -81,6 +82,13 @@ def make_fits(material, folder, indicies, outfile, overwrite=True):
     #make parameters and header
     header = make_header(material, shape, axis_ratio, orientation)
     pars = make_pars(evs, radii, theta)
+    
+    #need to transpose the shape of qext, qabs, qsca, and diff to follow scatteringmodel
+    #diff also needs the extra dimension for theta
+    qext = np.array(qext).transpose()
+    qabs = np.array(qabs).transpose()
+    qsca = np.array(qsca).transpose()
+    diff = np.expand_dims(np.array(diff).transpose(), 2)
     
     img_list = []
     for (val, head) in zip([qext, qabs, qsca, diff],
@@ -150,6 +158,7 @@ def parse_file(filename):
     qsca = []
     qabs = []
     qext = []
+    diff = []
     evs = []
 
     #split each line to each variable
@@ -165,6 +174,7 @@ def parse_file(filename):
         qsca.append(float(vals[1]))
         qabs.append(float(vals[2]))
         qext.append(float(vals[3]))
+        diff.append(0.0)
 
 
         i += 1
@@ -177,7 +187,8 @@ def parse_file(filename):
         'qsca': qsca,
         'qabs': qabs,
         'qext': qext,
-        'evs': evs
+        'evs': evs,
+        'diff': diff
     }
     
     file.close()

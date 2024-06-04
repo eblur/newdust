@@ -134,9 +134,12 @@ def check_data(file):
 def check_vals(test_file, fits_file, i):
     #access output files with numpy
     vals = np.loadtxt(test_file, dtype=np.dtype([('E', np.float_), ('qsca', np.float_), ('qabs', np.float_), ('qext', np.float_)]))
-    ext = np.array_equal(fits_file[4].data[i], vals['qext'])
-    abs = np.array_equal(fits_file[5].data[i], vals['qabs'])
-    sca = np.array_equal(fits_file[6].data[i], vals['qsca'])
+    qext = fits_file[4].data.transpose()
+    qabs = fits_file[5].data.transpose()
+    qsca = fits_file[6].data.transpose()
+    ext = np.array_equal(qext[i], vals['qext'])
+    abs = np.array_equal(qabs[i], vals['qabs'])
+    sca = np.array_equal(qsca[i], vals['qsca'])
 
     if (ext and abs and sca):
         return True

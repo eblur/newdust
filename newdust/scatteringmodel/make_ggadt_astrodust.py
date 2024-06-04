@@ -47,7 +47,7 @@ def make_fits_astrodust(material, folder, indicies, outfile, overwrite=True):
 
     #constant parameters:
     evs = []
-    theta = [] #NEED TO IMPLEMENT
+    theta = [0.0] #NEED TO IMPLEMENT
 
     #Go file by file, parsing data and populating the lists above
     for i in indicies:
@@ -62,6 +62,7 @@ def make_fits_astrodust(material, folder, indicies, outfile, overwrite=True):
         shapes.append(data['shape'])
         orientations.append(data['orientation'])
         axis_ratios.append(data['axis ratio'])
+        diff.append(data['diff'])
 
         #evs and theta is still constant so once it's populated it just needs to be checked for consistency
         if not evs: 
@@ -84,6 +85,13 @@ def make_fits_astrodust(material, folder, indicies, outfile, overwrite=True):
     header = make_header(material)
     pars = make_pars(evs, radii, shapes, orientations, axis_ratios, theta)
     
+    #need to transpose the shape of qext, qabs, qsca, and diff to follow scatteringmodel
+    #diff also needs the extra dimension for theta
+    qext = np.array(qext).transpose()
+    qabs = np.array(qabs).transpose()
+    qsca = np.array(qsca).transpose()
+    diff = np.expand_dims(np.array(diff).transpose(), 2)
+
     img_list = []
     for (val, head) in zip([qext, qabs, qsca, diff],
                            ["Qext", "Qabs", "Qsca", "Diff-xsect (ster^-1)"]):
