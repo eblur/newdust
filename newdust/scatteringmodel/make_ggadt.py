@@ -55,7 +55,7 @@ def make_fits(material, folder, indicies, outfile, overwrite=True):
         radii.append(data['radius'])
 
         #need to either assign or check consistency of constant parameters
-        if not len(evs) == 0: 
+        if len(evs) == 0: 
             evs = data['evs']
         elif evs != data['evs']:  
             raise Exception('Error: Energy grid must be the same across all files')

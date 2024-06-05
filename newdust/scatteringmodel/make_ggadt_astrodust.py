@@ -65,7 +65,7 @@ def make_fits_astrodust(material, folder, indicies, outfile, overwrite=True):
         diff.append(data['diff'])
 
         #evs and theta is still constant so once it's populated it just needs to be checked for consistency
-        if not len(evs) == 0: 
+        if len(evs) == 0: 
             evs = data['evs']
         elif evs != data['evs']:
             raise Exception('Error: Energy grid must be the same across all files')
