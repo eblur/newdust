@@ -4,7 +4,7 @@ This file turns multiple GGADT output files for grains of the same material, but
 FITS files made by make_ggadt_astrodust do follow the same structure as those in ScatteringModel HOWEVER the 3rd HDU (containing radius data) now also contains the shape, axis ratio, and orientation.
 """
 
-from make_ggadt import parse_file
+from make_ggadt import _parse_file
 import numpy as np
 from astropy.io import fits
 
@@ -53,7 +53,7 @@ def make_fits_astrodust(material, folder, indicies, outfile, overwrite=True):
     for i in indicies:
 
         filename = f'{folder}/{material}_{i}.out'
-        data = parse_file(filename)
+        data = _parse_file(filename)
 
         qext.append(data['qext'])
         qabs.append(data['qabs'])
@@ -65,25 +65,25 @@ def make_fits_astrodust(material, folder, indicies, outfile, overwrite=True):
         diff.append(data['diff'])
 
         #evs and theta is still constant so once it's populated it just needs to be checked for consistency
-        if not evs: 
+        if not len(evs) == 0: 
             evs = data['evs']
         elif evs != data['evs']:
-            raise Exception('Error: Incident energy range must be constant')
+            raise Exception('Error: Energy grid must be the same across all files')
 
     #Radii, shapes, orientations, and axis ratios should all be the same length
     length = len(indicies)
     if length != len(radii):
-        raise Exception('Error: Too many radii') if length < len(radii) else Exception('Error: Not enough radii')
+        raise Exception('Error: Too many radii') if length < len(radii) else Exception('Error: Not enough radii -- Check for missing GGADT output files')
     if length != len(shapes):
-        raise Exception('Error: Too many radii') if length < len(radii) else Exception('Error: Not enough radii')
+        raise Exception('Error: Too many shapes -- there should be one per radius') if length < len(radii) else Exception('Error: Not enough shapes -- there should be one per radius')
     if length != len(orientations):
-        raise Exception('Error: Too many radii') if length < len(radii) else Exception('Error: Not enough radii')
+        raise Exception('Error: Too many orientations -- there should be one per radius') if length < len(radii) else Exception('Error: Not enough orientations -- there should be one per radius')
     if length != len(axis_ratios):
-        raise Exception('Error: Too many radii') if length < len(radii) else Exception('Error: Not enough radii')
+        raise Exception('Error: Too many axis ratios -- there should be one per radius') if length < len(radii) else Exception('Error: Not enough axis ratios -- there should be one per radius')
     
     #make parameters and header
-    header = make_header(material)
-    pars = make_pars(evs, radii, shapes, orientations, axis_ratios, theta)
+    header = _make_header(material)
+    pars = _make_pars(evs, radii, shapes, orientations, axis_ratios, theta)
     
     #need to transpose the shape of qext, qabs, qsca, and diff to follow scatteringmodel
     #diff also needs the extra dimension for theta
@@ -106,7 +106,7 @@ def make_fits_astrodust(material, folder, indicies, outfile, overwrite=True):
     return outfile
 
 #helper functions
-def make_header(material):
+def _make_header(material):
     """
     Makes the PrimaryHDU header for the FITS file
 
@@ -122,7 +122,7 @@ def make_header(material):
     result['COMMENT']  = "HDU 7 is the differential scattering cross-section (ster^-1)"
     return fits.PrimaryHDU(header=result)
 
-def make_pars(evs, radii, shapes, orientations, axis_ratios, theta):
+def _make_pars(evs, radii, shapes, orientations, axis_ratios, theta):
     """
     Makes three BinaryTableHDUs after the PrimaryHDU for make_fits
 

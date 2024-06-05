@@ -46,7 +46,7 @@ def make_fits(material, folder, indicies, outfile, overwrite=True):
     #go through the output files and popuate above variables
     for i in indicies:
         filename= f'{folder}/{material}_{i}.out'
-        data = parse_file(filename)
+        data = _parse_file(filename)
 
         qext.append(data['qext'])
         qabs.append(data['qabs'])
@@ -55,33 +55,33 @@ def make_fits(material, folder, indicies, outfile, overwrite=True):
         radii.append(data['radius'])
 
         #need to either assign or check consistency of constant parameters
-        if not evs: 
+        if not len(evs) == 0: 
             evs = data['evs']
         elif evs != data['evs']:  
-            raise Exception('Error: Incident energy range must be constant')
+            raise Exception('Error: Energy grid must be the same across all files')
 
         if axis_ratio == 0.0:
             axis_ratio = data['axis ratio']
         elif axis_ratio != data['axis ratio']:
-            raise Exception('Error: Axis ratio must be constant')
+            raise Exception('Error: Axis ratio must be constant across all files')
         
         if shape == '':
             shape = data['shape']
         elif shape != data['shape']:
-            raise Exception('Error: Shape must be constant')
+            raise Exception('Error: Shape must be constant across all files')
         
         if orientation == '':
             orientation = data['orientation']
         elif orientation != data['orientation']:
-            raise Exception('Error: Orientation must be constant')
+            raise Exception('Error: Orientation must be constant across all files')
     
     #Radii and indicies should be the same length -- if they're not something is wrong
     if len(indicies) != len(radii):
         raise Exception('Error: Too many radii') if len(indicies) < len(radii) else Exception('Error: Not enough radii')
 
     #make parameters and header
-    header = make_header(material, shape, axis_ratio, orientation)
-    pars = make_pars(evs, radii, theta)
+    header = _make_header(material, shape, axis_ratio, orientation)
+    pars = _make_pars(evs, radii, theta)
     
     #need to transpose the shape of qext, qabs, qsca, and diff to follow scatteringmodel
     #diff also needs the extra dimension for theta
@@ -105,7 +105,7 @@ def make_fits(material, folder, indicies, outfile, overwrite=True):
 
 #Helper functions:
 
-def parse_file(filename):
+def _parse_file(filename):
     """
     Parses through a GGADT output file and returns header and extinction data
 
@@ -194,7 +194,7 @@ def parse_file(filename):
     file.close()
     return data
 
-def make_header(material, shape, axis_ratio, orientation):
+def _make_header(material, shape, axis_ratio, orientation):
     """
     Makes the PimaryHDU for the FITS file returned by make_fits
 
@@ -218,7 +218,7 @@ def make_header(material, shape, axis_ratio, orientation):
     result['COMMENT']  = "HDU 7 is the differential scattering cross-section (ster^-1)"
     return fits.PrimaryHDU(header=result)
 
-def make_pars(evs, radii, theta):
+def _make_pars(evs, radii, theta):
     """
     Makes three BinaryTableHDUs after the PrimaryHDU for make_fits
 

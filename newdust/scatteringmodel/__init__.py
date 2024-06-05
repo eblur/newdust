@@ -2,6 +2,8 @@ from .rgscat import RGscattering
 from .miescat import Mie
 from .pah import PAH
 from .scatteringmodel import ScatteringModel
+import make_ggadt
+import make_ggadt_astrodust
 
 """
 --------------------------------------------------------------
