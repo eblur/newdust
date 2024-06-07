@@ -1,7 +1,7 @@
 
-from newdust import scatteringmodel
+from .scatteringmodel import ScatteringModel
 
-class GGADT(scatteringmodel.ScatteringModel):
+class GGADT(ScatteringModel):
     """
     Child of scatteringModel class
 

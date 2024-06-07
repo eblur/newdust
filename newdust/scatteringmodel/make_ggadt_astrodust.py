@@ -4,7 +4,7 @@ This file turns multiple GGADT output files for grains of the same material, but
 FITS files made by make_ggadt_astrodust do follow the same structure as those in ScatteringModel HOWEVER the 3rd HDU (containing radius data) now also contains the shape, axis ratio, and orientation.
 """
 
-from make_ggadt import _parse_file
+from .make_ggadt import _parse_file
 import numpy as np
 from astropy.io import fits
 
