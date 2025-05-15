@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid as trapz
 from astropy.io import fits
 import astropy.units as u
 
