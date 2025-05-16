@@ -1,6 +1,6 @@
 import numpy as np
 import astropy.units as u
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid as trapz
 from newdust.graindist import shape
 
 __all__ = ['Astrodust']

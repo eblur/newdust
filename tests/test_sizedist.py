@@ -1,5 +1,5 @@
 import pytest
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid as trapz
 
 from newdust.graindist import sizedist
 from . import percent_diff

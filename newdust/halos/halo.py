@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid as trapz
 from astropy.io import fits
 import astropy.units as u
 
@@ -294,13 +294,13 @@ class Halo(object):
         # should this be part of WCS?
         c1 = fits.BinTableHDU.from_columns(
              [fits.Column(name='lam', array=helpers._make_array(self.lam.value),
-             format='E', unit=self.lam.unit.to_string())])
+             format='D', unit=self.lam.unit.to_string())])
         c2 = fits.BinTableHDU.from_columns(
              [fits.Column(name='theta', array=helpers._make_array(self.theta.value),
-             format='E', unit=self.theta.unit.to_string())])
+             format='D', unit=self.theta.unit.to_string())])
         c3 = fits.BinTableHDU.from_columns(
              [fits.Column(name='taux', array=helpers._make_array(self.taux),
-             format='E', unit='')])
+             format='D', unit='')])
         return [c1, c2, c3]
 
     def _read_from_file(self, filename):

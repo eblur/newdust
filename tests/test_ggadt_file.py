@@ -133,7 +133,7 @@ def check_data(file):
 
 def check_vals(test_file, fits_file, i):
     #access output files with numpy
-    vals = np.loadtxt(test_file, dtype=np.dtype([('E', np.float_), ('qsca', np.float_), ('qabs', np.float_), ('qext', np.float_)]))
+    vals = np.loadtxt(test_file, dtype=np.dtype([('D', np.float64), ('qsca', np.float64), ('qabs', np.float64), ('qext', np.float64)]))
     qext = fits_file[4].data.transpose()
     qabs = fits_file[5].data.transpose()
     qsca = fits_file[6].data.transpose()

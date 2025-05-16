@@ -199,11 +199,11 @@ class ScatteringModel(object):
         # should this be part of WCS?
         c1 = fits.BinTableHDU.from_columns(
              [fits.Column(name='lam', array=helpers._make_array(self.pars['lam'].value),
-             format='E', unit=self.pars['lam'].unit.to_string())])
+             format='D', unit=self.pars['lam'].unit.to_string())])
         c2 = fits.BinTableHDU.from_columns(
              [fits.Column(name='a', array=helpers._make_array(self.pars['a'].value),
-             format='E', unit=self.pars['a'].unit.to_string())])
+             format='D', unit=self.pars['a'].unit.to_string())])
         c3 = fits.BinTableHDU.from_columns(
              [fits.Column(name='theta', array=helpers._make_array(self.pars['theta'].value),
-             format='E', unit=self.pars['theta'].unit.to_string())])
+             format='D', unit=self.pars['theta'].unit.to_string())])
         return [c1, c2, c3]

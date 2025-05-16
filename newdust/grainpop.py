@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid as trapz
 import astropy.units as u
 
 from . import graindist
