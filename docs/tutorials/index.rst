@@ -10,5 +10,7 @@ a good starting point if you are new to the library.
 .. toctree::
    :maxdepth: 1
 
+   quickstart
    grainpop
    scattering
+   halos
