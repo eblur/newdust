@@ -1,7 +1,7 @@
 .. _graindist:
 
-xdust.graindist
-===============
+graindist
+=========
 
 This module contains:
 
@@ -14,7 +14,7 @@ This is tied together by the :ref:`GrainDistClass` superclass.
 .. _GrainDistClass:
    
 GrainDist
----------------------------
+----------
 
 .. autoclass:: xdust.graindist.GrainDist
 

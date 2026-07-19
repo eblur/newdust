@@ -1,7 +1,7 @@
 .. _grainpop:
 
-xdust.grainpop
-==============
+grainpop
+========
 
 The :ref:`SingleGrainPop` object is used to model a population of dust grains 
 based on three distinct properties:

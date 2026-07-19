@@ -5,7 +5,7 @@
 
 .. _index:
 
-*Xdust* documentation
+Xdust documentation
 =====================
 
 The *xdust* library calculates scattering and absorption efficiencies 
@@ -17,7 +17,7 @@ http://dx.doi.org/10.5281/zenodo.15991
 
 **Source code:** `github.com/eblur/xdust <https://github.com/eblur/xdust>`_
 
-**Support:** If you are having issues, please contact liac@umich.edu
+**Support:** If you have questions, please contact liac@umich.edu
 
 Features
 --------
@@ -85,10 +85,7 @@ Modules
 .. toctree::
    :maxdepth: 2
 
-   grainpop
-   graindist
-   scatmodels
-   halos
+   modules/index
 
 
 .. Indices and tables
