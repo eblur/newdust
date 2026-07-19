@@ -1,7 +1,7 @@
 .. _scatmodels:
 
-xdust.scatteringmodel
-=====================
+scatteringmodel
+===============
 
 The scattering model library is built on the superclass :ref:`ScatteringModelClass`, which defines the scattering physics model and holds the 
 computational results once the scattering model is calculated. 

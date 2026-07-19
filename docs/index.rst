@@ -5,7 +5,7 @@
 
 .. _index:
 
-*Xdust* documentation
+Xdust documentation
 =====================
 
 The *xdust* library calculates scattering and absorption efficiencies 
@@ -17,7 +17,7 @@ http://dx.doi.org/10.5281/zenodo.15991
 
 **Source code:** `github.com/eblur/xdust <https://github.com/eblur/xdust>`_
 
-**Support:** If you are having issues, please contact liac@umich.edu
+**Support:** If you have questions, please contact liac@umich.edu
 
 Features
 --------
@@ -71,16 +71,21 @@ The ``xdust.halos`` module provides tools for calculating the intensity of
 X-ray dust scattering halos under the ideal assumptions of single-scattering 
 through an optically thin sight line (Corrales & Paerels 2015, Corrales et al. 2016).
 
+Tutorials
+---------
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorials/index
+
 Modules
 -------
 
 .. toctree::
    :maxdepth: 2
 
-   grainpop
-   graindist
-   scatmodels
-   halos
+   modules/index
 
 
 .. Indices and tables

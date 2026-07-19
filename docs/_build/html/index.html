@@ -3,12 +3,13 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="xdust.grainpop" href="grainpop.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Tutorials" href="tutorials/index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Xdust 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css?v=8cd3d715" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -191,15 +192,27 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
-<li class="toctree-l1"><a class="reference internal" href="grainpop.html">xdust.grainpop</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="graindist.html">xdust.graindist</a><input aria-label="Toggle navigation of xdust.graindist" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="sizedist.html">xdust.graindist.sizedist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="composition.html">xdust.graindist.composition</a></li>
-<li class="toctree-l2"><a class="reference internal" href="shape.html">xdust.graindist.shape</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/grainpop.html">Extinction curves from custom grain populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/scattering.html">Computing scattering and extinction efficiencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/halos.html">Modeling X-ray dust scattering halos</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="scatmodels.html">xdust.scatteringmodel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="halos.html">xdust.halos</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="modules/index.html">Modules</a><input aria-label="Toggle navigation of Modules" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/grainpop.html">grainpop</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="modules/graindist.html">graindist</a><input aria-label="Toggle navigation of graindist" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules/sizedist.html">graindist.sizedist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/composition.html">graindist.composition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/shape.html">graindist.shape</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="modules/scatmodels.html">scatteringmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/halos.html">halos</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -239,14 +252,14 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="xdust-documentation">
-<span id="index"></span><h1><em>Xdust</em> documentation<a class="headerlink" href="#xdust-documentation" title="Link to this heading">¶</a></h1>
+<span id="index"></span><h1>Xdust documentation<a class="headerlink" href="#xdust-documentation" title="Link to this heading">¶</a></h1>
 <p>The <em>xdust</em> library calculates scattering and absorption efficiencies
 for dust from the infrared to the X-ray. It has special capabilities
 to calculate dust scattering halo images in the X-ray.</p>
 <p><strong>First published version of this code</strong> (released with <a class="reference external" href="http://adsabs.harvard.edu/abs/2015MNRAS.453.1121C">Corrales &amp; Paerels, 2015</a>)
 <a class="reference external" href="http://dx.doi.org/10.5281/zenodo.15991">http://dx.doi.org/10.5281/zenodo.15991</a></p>
 <p><strong>Source code:</strong> <a class="reference external" href="https://github.com/eblur/xdust">github.com/eblur/xdust</a></p>
-<p><strong>Support:</strong> If you are having issues, please contact <a class="reference external" href="mailto:liac&#37;&#52;&#48;umich&#46;edu">liac<span>&#64;</span>umich<span>&#46;</span>edu</a></p>
+<p><strong>Support:</strong> If you have questions, please contact <a class="reference external" href="mailto:liac&#37;&#52;&#48;umich&#46;edu">liac<span>&#64;</span>umich<span>&#46;</span>edu</a></p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
 <p>A number of dust grain size distributions and optical constants are
@@ -295,38 +308,29 @@ See the <code class="docutils literal notranslate"><span class="pre">xdust.grain
 X-ray dust scattering halos under the ideal assumptions of single-scattering
 through an optically thin sight line (Corrales &amp; Paerels 2015, Corrales et al. 2016).</p>
 </section>
+<section id="tutorials">
+<h2>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/grainpop.html">Extinction curves from custom grain populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/scattering.html">Computing scattering and extinction efficiencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/halos.html">Modeling X-ray dust scattering halos</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 <section id="modules">
 <h2>Modules<a class="headerlink" href="#modules" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="grainpop.html">xdust.grainpop</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="grainpop.html#singlegrainpop">SingleGrainPop</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grainpop.html#grainpopclass">GrainPop</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grainpop.html#helper-functions">Helper functions</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="graindist.html">xdust.graindist</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="graindist.html#graindistclass">GrainDist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="graindist.html#supporting-modules">Supporting modules</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="scatmodels.html">xdust.scatteringmodel</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="scatmodels.html#scatteringmodel">ScatteringModel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="scatmodels.html#rgscattering">RGscattering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="scatmodels.html#mie">Mie</a></li>
-<li class="toctree-l2"><a class="reference internal" href="scatmodels.html#ggadt">GGADT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="scatmodels.html#pah">PAH</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="halos.html">xdust.halos</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="halos.html#halo">Halo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="halos.html#uniformgalhalo">UniformGalHalo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="halos.html#screengalhalo">ScreenGalHalo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="halos.html#uniformgalhalocp15">UniformGalHaloCP15</a></li>
-<li class="toctree-l2"><a class="reference internal" href="halos.html#screengalhalocp15">ScreenGalHaloCP15</a></li>
-<li class="toctree-l2"><a class="reference internal" href="halos.html#path-diff">path_diff</a></li>
-<li class="toctree-l2"><a class="reference internal" href="halos.html#time-delay">time_delay</a></li>
-<li class="toctree-l2"><a class="reference internal" href="halos.html#calculate-taux">calculate_taux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/index.html">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/grainpop.html">grainpop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/graindist.html">graindist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/scatmodels.html">scatteringmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/halos.html">halos</a></li>
 </ul>
 </li>
 </ul>
@@ -339,12 +343,12 @@ through an optically thin sight line (Corrales &amp; Paerels 2015, Corrales et a
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="grainpop.html">
+          <a class="next-page" href="tutorials/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">xdust.grainpop</div>
+                <div class="title">Tutorials</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -379,10 +383,11 @@ through an optically thin sight line (Corrales &amp; Paerels 2015, Corrales et a
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#"><em>Xdust</em> documentation</a><ul>
+<li><a class="reference internal" href="#">Xdust documentation</a><ul>
 <li><a class="reference internal" href="#features">Features</a></li>
 <li><a class="reference internal" href="#grain-populations">Grain Populations</a></li>
 <li><a class="reference internal" href="#x-ray-scattering-halos">X-ray Scattering Halos</a></li>
+<li><a class="reference internal" href="#tutorials">Tutorials</a></li>
 <li><a class="reference internal" href="#modules">Modules</a></li>
 </ul>
 </li>

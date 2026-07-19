@@ -1,7 +1,7 @@
 .. _shape:
 
-xdust.graindist.shape
-=====================
+graindist.shape
+===============
 
 The superclass :ref:`ShapeClass` describes the geometric properties of the dust grains.
 

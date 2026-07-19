@@ -19,6 +19,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'myst_nb',
     # 'sphinx_autodoc_typehints', # requires a different format: https://pypi.org/project/sphinx-autodoc-typehints/
 ]
 
@@ -34,8 +35,16 @@ templates_path = ['_templates']
 exclude_patterns = ['_build']
 
 master_doc = 'index'
-source_suffix = '.rst'
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.ipynb': 'myst-nb',
+}
 language = 'en'
+
+# -- Options for myst-nb -------------------------------------------------
+nb_execution_mode = 'auto'
+nb_execution_timeout = 120
+myst_enable_extensions = ['dollarmath', 'amsmath']
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = 'furo'

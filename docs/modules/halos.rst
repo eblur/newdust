@@ -1,7 +1,7 @@
 .. _halos:
 
-xdust.halos
-===========
+halos
+=====
 
 The superclass :ref:`Halo` holds all information and special functions for 
 working with a simulated X-ray dust scattering halo. 

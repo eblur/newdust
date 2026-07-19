@@ -1,7 +1,7 @@
 .. _composition:
 
-xdust.graindist.composition
-===========================
+graindist.composition
+=====================
 
 The composition library is built on the superclass :ref:`CompositionClass`, which holds the optical constants and material density [g cm^-3] of a grain composition type.
 
@@ -15,7 +15,7 @@ The composition library is built on the superclass :ref:`CompositionClass`, whic
 .. _CompositionClass:
 
 Composition
----------------------------
+-----------
 
 .. autoclass:: xdust.graindist.composition.Composition
 

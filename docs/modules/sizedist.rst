@@ -1,7 +1,7 @@
 .. _sizedist:
 
-xdust.graindist.sizedist
-============================
+graindist.sizedist
+==================
 
 The size distribution library is built on the superclass :ref:`SizedistClass`, which holds the grain size distribution function and the grain size array. 
 
