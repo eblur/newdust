@@ -8,6 +8,7 @@
         <title>xdust.halos.galhalo - Xdust 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -190,15 +191,27 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../grainpop.html">xdust.grainpop</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../graindist.html">xdust.graindist</a><input aria-label="Toggle navigation of xdust.graindist" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../sizedist.html">xdust.graindist.sizedist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../composition.html">xdust.graindist.composition</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../shape.html">xdust.graindist.shape</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/grainpop.html">Extinction curves from custom grain populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/scattering.html">Computing scattering and extinction efficiencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/halos.html">Modeling X-ray dust scattering halos</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../scatmodels.html">xdust.scatteringmodel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../halos.html">xdust.halos</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../modules/index.html">Modules</a><input aria-label="Toggle navigation of Modules" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/grainpop.html">grainpop</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../modules/graindist.html">graindist</a><input aria-label="Toggle navigation of graindist" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/sizedist.html">graindist.sizedist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/composition.html">graindist.composition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/shape.html">graindist.shape</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/scatmodels.html">scatteringmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/halos.html">halos</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -254,7 +267,7 @@
 <span class="n">ANGLES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">3.5</span><span class="o">/</span><span class="mf">0.05</span><span class="p">))</span>
 
 <div class="viewcode-block" id="UniformGalHalo">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.UniformGalHalo">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.UniformGalHalo">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UniformGalHalo</span><span class="p">(</span><span class="n">Halo</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">Halo</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -262,7 +275,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">md</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="UniformGalHalo.calculate">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.UniformGalHalo.calculate">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.UniformGalHalo.calculate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gpop</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the X-ray scattering intensity for dust distributed</span>
@@ -320,7 +333,7 @@
 
 
 <div class="viewcode-block" id="ScreenGalHalo">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.ScreenGalHalo">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.ScreenGalHalo">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ScreenGalHalo</span><span class="p">(</span><span class="n">Halo</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">Halo</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -329,7 +342,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ScreenGalHalo.calculate">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.ScreenGalHalo.calculate">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.ScreenGalHalo.calculate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gpop</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the X-ray scattering intensity for dust in an</span>
@@ -376,7 +389,7 @@
 
     <span class="c1">#------- Deal with variable scattering halo images ----#</span>
 <div class="viewcode-block" id="ScreenGalHalo.variable_profile">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.ScreenGalHalo.variable_profile">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.ScreenGalHalo.variable_profile">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">variable_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">tnow</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a light curve, calculate the energy-dependent intensity of</span>
@@ -431,7 +444,7 @@
 
 
 <div class="viewcode-block" id="ScreenGalHalo.fake_variable_image">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.ScreenGalHalo.fake_variable_image">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.ScreenGalHalo.fake_variable_image">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fake_variable_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="n">arf</span><span class="p">,</span>
                             <span class="n">exposure</span><span class="o">=</span><span class="mf">10.e3</span><span class="p">,</span> <span class="n">tnow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span>
                             <span class="n">pix_scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">num_pix</span><span class="o">=</span><span class="p">[</span><span class="mi">2400</span><span class="p">,</span><span class="mi">2400</span><span class="p">],</span>
@@ -545,7 +558,7 @@
 <span class="c1">#--------------- Analytic Halo Calculation --------------</span>
 
 <div class="viewcode-block" id="UniformGalHaloCP15">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.UniformGalHaloCP15">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.UniformGalHaloCP15">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UniformGalHaloCP15</span><span class="p">(</span><span class="n">Halo</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">Halo</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -553,7 +566,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">md</span> <span class="o">=</span> <span class="kc">None</span>
     
 <div class="viewcode-block" id="UniformGalHaloCP15.calculate">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.UniformGalHaloCP15.calculate">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.UniformGalHaloCP15.calculate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="mf">0.005</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">micron</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">micron</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">rho</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;g cm^-3&#39;</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the X-ray scattering intensity for dust distributed</span>
@@ -622,7 +635,7 @@
 
 
 <div class="viewcode-block" id="ScreenGalHaloCP15">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.ScreenGalHaloCP15">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.ScreenGalHaloCP15">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ScreenGalHaloCP15</span><span class="p">(</span><span class="n">Halo</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">Halo</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -631,7 +644,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ScreenGalHaloCP15.calculate">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.ScreenGalHaloCP15.calculate">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.ScreenGalHaloCP15.calculate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="mf">0.005</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">micron</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">micron</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">rho</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;g cm^-3&#39;</span><span class="p">),</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the X-ray scattering intensity for dust in an</span>
@@ -723,7 +736,7 @@
         <span class="k">return</span> <span class="n">gammaincc</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     
 <div class="viewcode-block" id="calculate_taux">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.calculate_taux">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.calculate_taux">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_taux</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">md</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the integrated X-ray scattering opacity taux using an analytic expression</span>
@@ -815,7 +828,7 @@
 
 
 <div class="viewcode-block" id="path_diff">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.path_diff">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.path_diff">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">path_diff</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates path difference associated with a particular observation angle (:math:`\\alpha`)</span>
@@ -848,7 +861,7 @@
 
 
 <div class="viewcode-block" id="time_delay">
-<a class="viewcode-back" href="../../../halos.html#xdust.halos.galhalo.time_delay">[docs]</a>
+<a class="viewcode-back" href="../../../modules/halos.html#xdust.halos.galhalo.time_delay">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">time_delay</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dkpc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the time delay associated with a particular observation angle (:math:`\\alpha`), </span>

@@ -8,6 +8,7 @@
         <title>xdust.scatteringmodel.pah - Xdust 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -190,15 +191,27 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../grainpop.html">xdust.grainpop</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../graindist.html">xdust.graindist</a><input aria-label="Toggle navigation of xdust.graindist" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../sizedist.html">xdust.graindist.sizedist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../composition.html">xdust.graindist.composition</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../shape.html">xdust.graindist.shape</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/grainpop.html">Extinction curves from custom grain populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/scattering.html">Computing scattering and extinction efficiencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/halos.html">Modeling X-ray dust scattering halos</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../scatmodels.html">xdust.scatteringmodel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../halos.html">xdust.halos</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../modules/index.html">Modules</a><input aria-label="Toggle navigation of Modules" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/grainpop.html">grainpop</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../modules/graindist.html">graindist</a><input aria-label="Toggle navigation of graindist" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/sizedist.html">graindist.sizedist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/composition.html">graindist.composition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/shape.html">graindist.shape</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/scatmodels.html">scatteringmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/halos.html">halos</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -295,7 +308,7 @@
     <span class="k">return</span> <span class="n">result</span>
 
 <div class="viewcode-block" id="PAH">
-<a class="viewcode-back" href="../../../scatmodels.html#xdust.scatteringmodel.PAH">[docs]</a>
+<a class="viewcode-back" href="../../../modules/scatmodels.html#xdust.scatteringmodel.PAH">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PAH</span><span class="p">(</span><span class="n">ScatteringModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    PAH properties loaded from Draine tables (public on B. Draine&#39;s website). </span>
@@ -334,7 +347,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR: Cannot find PAH type&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PAH.calculate">
-<a class="viewcode-back" href="../../../scatmodels.html#xdust.scatteringmodel.PAH.calculate">[docs]</a>
+<a class="viewcode-back" href="../../../modules/scatmodels.html#xdust.scatteringmodel.PAH.calculate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;keV&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the extinction efficiences by interpolating the tables from Li &amp; Draine (2001).</span>

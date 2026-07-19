@@ -1,0 +1,669 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Modules" href="../modules/index.html"><link rel="prev" title="Computing scattering and extinction efficiencies" href="scattering.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>Modeling X-ray dust scattering halos - Xdust 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Xdust 1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Xdust 1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grainpop.html">Extinction curves from custom grain populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scattering.html">Computing scattering and extinction efficiencies</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Modeling X-ray dust scattering halos</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/index.html">Modules</a><input aria-label="Toggle navigation of Modules" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/grainpop.html">grainpop</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/graindist.html">graindist</a><input aria-label="Toggle navigation of graindist" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/sizedist.html">graindist.sizedist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/composition.html">graindist.composition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/shape.html">graindist.shape</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/scatmodels.html">scatteringmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/halos.html">halos</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/tutorials/halos.ipynb.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="modeling-x-ray-dust-scattering-halos">
+<h1>Modeling X-ray dust scattering halos<a class="headerlink" href="#modeling-x-ray-dust-scattering-halos" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">xdust.halos</span></code> module computes the surface brightness profile of an X-ray dust scattering halo under a variety of geometric assumptions. This functionality is provided by two subclasses of <code class="docutils literal notranslate"><span class="pre">xdust.halos.Halo</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">xdust.halos.UniformGalHalo</span></code> assumes the scattering dust is distributed uniformly along the line of sight between the telescope and the X-ray point source.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xdust.halos.ScreenGalHalo</span></code> assumes the scattering dust is confined to an infinitesimally thin screen at position <span class="math notranslate nohighlight">\(x = 1 - d/D\)</span>, where <span class="math notranslate nohighlight">\(d\)</span> is the distance from the telescope to the screen and <span class="math notranslate nohighlight">\(D\)</span> is the distance from the telescope to the X-ray point source.</p></li>
+</ul>
+<p>See the <a class="reference internal" href="../modules/halos.html#halos"><span class="std std-ref">halos</span></a> module reference for the full API, including the <code class="docutils literal notranslate"><span class="pre">UniformGalHaloCP15</span></code> and <code class="docutils literal notranslate"><span class="pre">ScreenGalHaloCP15</span></code> shortcuts for the semi-analytic model of Corrales &amp; Paerels (2015).</p>
+<p>By the end of this tutorial, you will be able to:</p>
+<ul class="simple">
+<li><p>initialize a <code class="docutils literal notranslate"><span class="pre">UniformGalHalo</span></code> and a <code class="docutils literal notranslate"><span class="pre">ScreenGalHalo</span></code> over an energy and angle grid</p></li>
+<li><p>run a scattering halo calculation for a given <code class="docutils literal notranslate"><span class="pre">GrainPop</span></code></p></li>
+<li><p>verify a halo calculation by integrating its surface brightness profile</p></li>
+<li><p>compute the halo intensity produced by an X-ray point-source spectrum</p></li>
+<li><p>slice a <code class="docutils literal notranslate"><span class="pre">Halo</span></code> object by energy, the same way you would slice a numpy array</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.constants</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">c</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">xdust</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="setting-up-a-scattering-halo">
+<h2>Setting up a scattering halo<a class="headerlink" href="#setting-up-a-scattering-halo" title="Link to this heading">¶</a></h2>
+<p>To initialize a scattering halo object, we need a grid of photon energies and a grid of angular distances (the angles at which the scattering halo is visible around the point source).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_energy</span><span class="p">,</span> <span class="n">n_theta</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">200</span>
+<span class="n">energy_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_energy</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">keV</span>
+<span class="n">theta_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">n_theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">arcsec</span>
+
+<span class="n">uniform_halo</span> <span class="o">=</span> <span class="n">xdust</span><span class="o">.</span><span class="n">halos</span><span class="o">.</span><span class="n">UniformGalHalo</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">theta_grid</span><span class="p">)</span>
+<span class="n">screen_halo</span> <span class="o">=</span> <span class="n">xdust</span><span class="o">.</span><span class="n">halos</span><span class="o">.</span><span class="n">ScreenGalHalo</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">theta_grid</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To run the calculation, each halo also needs to know what kind of dust grains are doing the scattering – their size distribution and composition, stored in a <code class="docutils literal notranslate"><span class="pre">xdust.GrainPop</span></code> object.</p>
+<p>Below, we use the Rayleigh-Gans-plus-Drude approximation, which treats a dust grain as a cloud of free electrons and is therefore relatively insensitive to grain composition (unlike Mie scattering). The <code class="docutils literal notranslate"><span class="pre">xdust.make_MRN_RGDrude</span></code> shortcut builds a standard power-law grain size distribution (Mathis, Rumpl &amp; Nordsieck 1977) using the RG-Drude approximation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dust_pop</span> <span class="o">=</span> <span class="n">xdust</span><span class="o">.</span><span class="n">make_MRN_RGDrude</span><span class="p">(</span><span class="n">md</span><span class="o">=</span><span class="mf">1.e-6</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we run the <code class="docutils literal notranslate"><span class="pre">calculate</span></code> method for each halo, passing in the dust population.</p>
+<p>For the screen halo, we choose <span class="math notranslate nohighlight">\(x = 0.33\)</span>, meaning the dust screen sits two-thirds of the way along the line of sight between the telescope and the background X-ray point source. The <code class="docutils literal notranslate"><span class="pre">%%time</span></code> cell magic prints how long each calculation takes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<span class="n">screen_halo</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">dust_pop</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.33</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 5.82 ms, sys: 8.96 ms, total: 14.8 ms
+Wall time: 14.6 ms
+</pre></div>
+</div>
+</div>
+</div>
+<p>For dust distributed uniformly along the line of sight, the calculation instead integrates the scattering profile over many positions between the telescope and the point source. The <code class="docutils literal notranslate"><span class="pre">nx</span></code> keyword sets how fine that integration grid is – try changing it to see how it affects both the calculation speed and the shape of the resulting profile (plotted below).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
+<span class="n">uniform_halo</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">dust_pop</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 626 ms, sys: 77 μs, total: 626 ms
+Wall time: 626 ms
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="plotting-the-surface-brightness-profile">
+<h2>Plotting the surface brightness profile<a class="headerlink" href="#plotting-the-surface-brightness-profile" title="Link to this heading">¶</a></h2>
+<p>The results are stored in the <code class="docutils literal notranslate"><span class="pre">norm_int</span></code> attribute, with shape <code class="docutils literal notranslate"><span class="pre">(len(energy_grid),</span> <span class="pre">len(theta_grid))</span></code> – the normalized intensity (surface brightness divided by flux) as a function of energy and angle. To see a single profile, pick an energy index.</p>
+<p>Below we plot an arbitrary energy index; try other values to see how the halo profile shape changes with energy.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">theta_grid</span><span class="p">,</span> <span class="n">screen_halo</span><span class="o">.</span><span class="n">norm_int</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Screen halo&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">theta_grid</span><span class="p">,</span> <span class="n">uniform_halo</span><span class="o">.</span><span class="n">norm_int</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Uniform halo&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Photon Energy = </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Angular Distance from Point Source (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">theta_grid</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Normalized Intensity (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">screen_halo</span><span class="o">.</span><span class="n">norm_int</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;Normalized Intensity (1 / arcsec2)&#39;)
+</pre></div>
+</div>
+<img alt="../_images/273177f5427508687ea25355b925a65266dba1e546bea0685d018b4e580a85cd.png" src="../_images/273177f5427508687ea25355b925a65266dba1e546bea0685d018b4e580a85cd.png" />
+</div>
+</div>
+</section>
+<section id="verifying-the-halo-calculation">
+<h2>Verifying the halo calculation<a class="headerlink" href="#verifying-the-halo-calculation" title="Link to this heading">¶</a></h2>
+<p>As a check, we can integrate the surface brightness profile stored in <code class="docutils literal notranslate"><span class="pre">norm_int</span></code> and confirm it reproduces the scattering optical depth (<code class="docutils literal notranslate"><span class="pre">taux</span></code>) at each energy.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># A 2D grid of theta values, matching the shape of norm_int</span>
+<span class="n">theta_grid_2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">theta_grid</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_theta</span><span class="p">),</span> <span class="n">n_energy</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Integrate the surface brightness profile over solid angle: 2*pi*theta*dtheta.</span>
+<span class="c1"># Because the angles are small, sin(theta) -&gt; theta, and since norm_int has</span>
+<span class="c1"># units of arcsec^-2, theta_grid_2d can stay in arcsec.</span>
+<span class="n">integrated_uniform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span>
+    <span class="n">uniform_halo</span><span class="o">.</span><span class="n">norm_int</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">theta_grid_2d</span><span class="p">,</span> <span class="n">theta_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">integrated_screen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span>
+    <span class="n">screen_halo</span><span class="o">.</span><span class="n">norm_int</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">theta_grid_2d</span><span class="p">,</span> <span class="n">theta_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The plot below shows that integrating each normalized halo profile reproduces its <code class="docutils literal notranslate"><span class="pre">taux</span></code> value – as expected in the optically thin regime (<span class="math notranslate nohighlight">\(\tau_{\rm sca} &lt; 1\)</span>). Note that the uniform and screen halos share the same <code class="docutils literal notranslate"><span class="pre">taux</span></code> values, even though their profile shapes differ.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">uniform_halo</span><span class="o">.</span><span class="n">taux</span><span class="p">,</span> <span class="s1">&#39;rs&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Uniform (taux)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">integrated_uniform</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Uniform (integrated)&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">screen_halo</span><span class="o">.</span><span class="n">taux</span><span class="p">,</span> <span class="s1">&#39;bo&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Screen (taux)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">integrated_screen</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Screen (integrated)&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;X-ray Scattering Opacity ($\tau_{\rm sca}$)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;X-ray Scattering Opacity ($\\tau_{\\rm sca}$)&#39;)
+</pre></div>
+</div>
+<img alt="../_images/33e52c8723ebd5dbf6ea82b0a68b56848a0b58f5fa9352d81e9db56b531405d4.png" src="../_images/33e52c8723ebd5dbf6ea82b0a68b56848a0b58f5fa9352d81e9db56b531405d4.png" />
+</div>
+</div>
+<p>We can also plot the fractional difference between the integrated profile and <code class="docutils literal notranslate"><span class="pre">taux</span></code> directly. A value of 0 means the integration exactly reproduces <code class="docutils literal notranslate"><span class="pre">taux</span></code>; in general this calculation is accurate to a few percent.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">integrated_uniform</span> <span class="o">/</span> <span class="n">uniform_halo</span><span class="o">.</span><span class="n">taux</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Uniform&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">integrated_screen</span> <span class="o">/</span> <span class="n">screen_halo</span><span class="o">.</span><span class="n">taux</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Screen&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Fractional Difference (integrated / taux - 1.0)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;Fractional Difference (integrated / taux - 1.0)&#39;)
+</pre></div>
+</div>
+<img alt="../_images/16932c745c975c32b76edecc2c0a8e9383b3db242f67f2bb97f544322122d904.png" src="../_images/16932c745c975c32b76edecc2c0a8e9383b3db242f67f2bb97f544322122d904.png" />
+</div>
+</div>
+</section>
+<section id="computing-halo-intensity-from-a-point-source-spectrum">
+<h2>Computing halo intensity from a point-source spectrum<a class="headerlink" href="#computing-halo-intensity-from-a-point-source-spectrum" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Halo.calculate_intensity</span></code> method computes the total scattering halo intensity, summed over the energy grid stored in <code class="docutils literal notranslate"><span class="pre">Halo.lam</span></code>.</p>
+<p>Below, we construct a model spectrum with a shape similar to many Galactic X-ray binaries. <code class="docutils literal notranslate"><span class="pre">calculate_intensity</span></code> integrates using <code class="docutils literal notranslate"><span class="pre">numpy.sum</span></code>, so the input flux must be <em>bin-integrated</em> – each point in the spectrum represents the total counts (or energy) within an energy bin centered on the corresponding <code class="docutils literal notranslate"><span class="pre">lam</span></code> value, not a specific flux density. Bin-integrated flux has units like counts/s/cm<span class="math notranslate nohighlight">\(^2\)</span> (as opposed to a specific flux, which would have units of counts/s/cm<span class="math notranslate nohighlight">\(^2\)</span>/keV).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># An approximation of a typical Galactic X-ray binary spectrum</span>
+<span class="n">source_flux</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">)</span> <span class="o">*</span>
+               <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5</span><span class="p">))</span> <span class="o">*</span>
+               <span class="n">u</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;ct s^-1 cm^-2&#39;</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">source_flux</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source_flux</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.e-12</span><span class="p">,</span> <span class="mf">1.e3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(1e-12, 1000.0)
+</pre></div>
+</div>
+<img alt="../_images/ce0da35329442bc955b6118817581631ab866436250addcbc5ec9bf857271c06.png" src="../_images/ce0da35329442bc955b6118817581631ab866436250addcbc5ec9bf857271c06.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">screen_halo</span><span class="o">.</span><span class="n">calculate_intensity</span><span class="p">(</span><span class="n">source_flux</span><span class="p">)</span>
+<span class="n">uniform_halo</span><span class="o">.</span><span class="n">calculate_intensity</span><span class="p">(</span><span class="n">source_flux</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The result is stored in each halo’s <code class="docutils literal notranslate"><span class="pre">intensity</span></code> attribute – the surface brightness profile summed over all energies, as a 1D array with the same length as <code class="docutils literal notranslate"><span class="pre">theta_grid</span></code>. Note that the units carry through automatically from the input spectrum and <code class="docutils literal notranslate"><span class="pre">norm_int</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">theta_grid</span><span class="p">,</span> <span class="n">screen_halo</span><span class="o">.</span><span class="n">intensity</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Screen halo&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">theta_grid</span><span class="p">,</span> <span class="n">uniform_halo</span><span class="o">.</span><span class="n">intensity</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Uniform halo&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Angular Distance from Point Source (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">theta_grid</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">screen_halo</span><span class="o">.</span><span class="n">intensity</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Scattering halo surface brightness (</span><span class="si">{:.2f}</span><span class="s2"> - </span><span class="si">{:.2f}</span><span class="s2"> keV)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;keV&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;keV&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Scattering halo surface brightness (0.10 - 10.00 keV)&#39;)
+</pre></div>
+</div>
+<img alt="../_images/9ca6b22e51c494e3e3d8403a09b02001e784abc6f3fd2c123acd9cc321026081.png" src="../_images/9ca6b22e51c494e3e3d8403a09b02001e784abc6f3fd2c123acd9cc321026081.png" />
+</div>
+</div>
+<p>To get the total flux contained in the scattering halo, integrate <code class="docutils literal notranslate"><span class="pre">intensity</span></code> over solid angle (again, <span class="math notranslate nohighlight">\(2\pi\theta\,d\theta\)</span>). Because both halos share the same <code class="docutils literal notranslate"><span class="pre">GrainPop</span></code> and dust mass column, they integrate to the same total flux, despite having different profile shapes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">total_flux_uniform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">uniform_halo</span><span class="o">.</span><span class="n">intensity</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">theta_grid</span><span class="p">,</span> <span class="n">theta_grid</span><span class="p">)</span>
+<span class="n">total_flux_screen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">screen_halo</span><span class="o">.</span><span class="n">intensity</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">theta_grid</span><span class="p">,</span> <span class="n">theta_grid</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total flux in uniform scattering halo: </span><span class="si">{:.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_flux_uniform</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total flux in screen scattering halo: </span><span class="si">{:.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_flux_screen</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Total flux in uniform scattering halo: 0.305 ct / (s cm2)
+Total flux in screen scattering halo: 0.309 ct / (s cm2)
+</pre></div>
+</div>
+</div>
+</div>
+<p>After <code class="docutils literal notranslate"><span class="pre">calculate_intensity</span></code> has run, the <code class="docutils literal notranslate"><span class="pre">fhalo</span></code> attribute gives the flux spectrum of the scattering halo itself, as a function of energy.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">source_flux</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Input flux (absorbed)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">uniform_halo</span><span class="o">.</span><span class="n">fhalo</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Uniform halo flux&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">screen_halo</span><span class="o">.</span><span class="n">fhalo</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Screen halo flux&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.e-12</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Flux (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uniform_halo</span><span class="o">.</span><span class="n">fhalo</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;Flux (ct / (s cm2))&#39;)
+</pre></div>
+</div>
+<img alt="../_images/157c08bfb0f13612017d497bf4258978715280da14323455fc36b632dd583e69.png" src="../_images/157c08bfb0f13612017d497bf4258978715280da14323455fc36b632dd583e69.png" />
+</div>
+</div>
+</section>
+<section id="indexing-and-slicing-a-halo">
+<h2>Indexing and slicing a Halo<a class="headerlink" href="#indexing-and-slicing-a-halo" title="Link to this heading">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">Halo</span></code> object can be indexed or sliced much like a numpy array. Slicing returns a new <code class="docutils literal notranslate"><span class="pre">Halo</span></code> covering a sub-range of the original energy grid, with all of its calculated attributes (including <code class="docutils literal notranslate"><span class="pre">intensity</span></code>) carried over automatically.</p>
+<p>The slice bounds must be given in the same units used to define <code class="docutils literal notranslate"><span class="pre">Halo.lam</span></code> – if <code class="docutils literal notranslate"><span class="pre">lam</span></code> was defined in keV, you cannot slice using Angstrom values.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">low_energy_halo</span> <span class="o">=</span> <span class="n">uniform_halo</span><span class="p">[:</span><span class="mf">3.0</span><span class="p">]</span>   <span class="c1"># everything below 3 keV</span>
+<span class="n">high_energy_halo</span> <span class="o">=</span> <span class="n">uniform_halo</span><span class="p">[</span><span class="mf">3.0</span><span class="p">:]</span>   <span class="c1"># everything above 3 keV</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Low-energy slice: </span><span class="si">{:.2f}</span><span class="s2"> - </span><span class="si">{:.2f}</span><span class="s2"> keV&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">low_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">low_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;High-energy slice: </span><span class="si">{:.2f}</span><span class="s2"> - </span><span class="si">{:.2f}</span><span class="s2"> keV&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">high_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">high_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Low-energy slice: 0.10 - 2.95 keV
+High-energy slice: 3.24 - 10.00 keV
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">low_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">low_energy_halo</span><span class="o">.</span><span class="n">taux</span><span class="p">,</span> <span class="s1">&#39;rs&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Low-energy slice&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">high_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">high_energy_halo</span><span class="o">.</span><span class="n">taux</span><span class="p">,</span> <span class="s1">&#39;gs&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;High-energy slice&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">uniform_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">uniform_halo</span><span class="o">.</span><span class="n">taux</span><span class="p">,</span> <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Original halo&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">low_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;X-ray Scattering Opacity (taux)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x7fec2f3d7650&gt;
+</pre></div>
+</div>
+<img alt="../_images/40aa7311f8f5f0b8c97a014b471183ba3b42e4caefc08239bef67131310bc6ad.png" src="../_images/40aa7311f8f5f0b8c97a014b471183ba3b42e4caefc08239bef67131310bc6ad.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">low_energy_halo</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">low_energy_halo</span><span class="o">.</span><span class="n">intensity</span><span class="p">,</span>
+         <span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">-</span><span class="si">{:.2f}</span><span class="s1"> keV&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">low_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">low_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">high_energy_halo</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">high_energy_halo</span><span class="o">.</span><span class="n">intensity</span><span class="p">,</span>
+         <span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">-</span><span class="si">{:.2f}</span><span class="s1"> keV&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">high_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">high_energy_halo</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">low_energy_halo</span><span class="o">.</span><span class="n">theta</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">high_energy_halo</span><span class="o">.</span><span class="n">intensity</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Uniform halo surface brightness profile&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Uniform halo surface brightness profile&#39;)
+</pre></div>
+</div>
+<img alt="../_images/dbedff72ba0f506c84b284a8081441ba5c31cb053ddd9385087aa2605333004e.png" src="../_images/dbedff72ba0f506c84b284a8081441ba5c31cb053ddd9385087aa2605333004e.png" />
+</div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../modules/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Modules</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="scattering.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Computing scattering and extinction efficiencies</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Lia Corrales
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Modeling X-ray dust scattering halos</a><ul>
+<li><a class="reference internal" href="#setting-up-a-scattering-halo">Setting up a scattering halo</a></li>
+<li><a class="reference internal" href="#plotting-the-surface-brightness-profile">Plotting the surface brightness profile</a></li>
+<li><a class="reference internal" href="#verifying-the-halo-calculation">Verifying the halo calculation</a></li>
+<li><a class="reference internal" href="#computing-halo-intensity-from-a-point-source-spectrum">Computing halo intensity from a point-source spectrum</a></li>
+<li><a class="reference internal" href="#indexing-and-slicing-a-halo">Indexing and slicing a Halo</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    </body>
+</html>

@@ -8,6 +8,7 @@
         <title>xdust.grainpop - Xdust 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -190,15 +191,27 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../grainpop.html">xdust.grainpop</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../graindist.html">xdust.graindist</a><input aria-label="Toggle navigation of xdust.graindist" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../sizedist.html">xdust.graindist.sizedist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../composition.html">xdust.graindist.composition</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../shape.html">xdust.graindist.shape</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/grainpop.html">Extinction curves from custom grain populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/scattering.html">Computing scattering and extinction efficiencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/halos.html">Modeling X-ray dust scattering halos</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../scatmodels.html">xdust.scatteringmodel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../halos.html">xdust.halos</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../modules/index.html">Modules</a><input aria-label="Toggle navigation of Modules" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/grainpop.html">grainpop</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../modules/graindist.html">graindist</a><input aria-label="Toggle navigation of graindist" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/sizedist.html">graindist.sizedist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/composition.html">graindist.composition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/shape.html">graindist.shape</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/scatmodels.html">scatteringmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/halos.html">halos</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -247,7 +260,7 @@
 
 <span class="c1"># Make this a subclass of GrainDist at some point</span>
 <div class="viewcode-block" id="SingleGrainPop">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.SingleGrainPop">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.SingleGrainPop">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SingleGrainPop</span><span class="p">(</span><span class="n">graindist</span><span class="o">.</span><span class="n">GrainDist</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    SingleGrainPop unifies the grain size distribution (its parent class) </span>
@@ -343,7 +356,7 @@
 
     <span class="c1"># Run scattering model calculation, then compute optical depths</span>
 <div class="viewcode-block" id="SingleGrainPop.calculate_ext">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.SingleGrainPop.calculate_ext">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.SingleGrainPop.calculate_ext">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the extinction model.</span>
@@ -409,7 +422,7 @@
 
     <span class="c1"># Plot information about the grain size distribution</span>
 <div class="viewcode-block" id="SingleGrainPop.plot_sdist">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.SingleGrainPop.plot_sdist">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.SingleGrainPop.plot_sdist">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_sdist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot information about the grain size distribution (calls GrainDist.plot)</span>
@@ -424,7 +437,7 @@
 
     <span class="c1"># Plot the extinction properties</span>
 <div class="viewcode-block" id="SingleGrainPop.plot_ext">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.SingleGrainPop.plot_ext">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.SingleGrainPop.plot_ext">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot  the extinction properties of the grain population.</span>
@@ -481,7 +494,7 @@
 
     <span class="c1"># Printing information</span>
 <div class="viewcode-block" id="SingleGrainPop.info">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.SingleGrainPop.info">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.SingleGrainPop.info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print information about this grain population</span>
@@ -494,7 +507,7 @@
 
     <span class="c1"># Write an extinction table</span>
 <div class="viewcode-block" id="SingleGrainPop.write_extinction_table">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.SingleGrainPop.write_extinction_table">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.SingleGrainPop.write_extinction_table">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_extinction_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write the contents of the extinction calculation to a FITS file. </span>
@@ -515,7 +528,7 @@
 
 
 <div class="viewcode-block" id="GrainPop">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.GrainPop">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.GrainPop">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GrainPop</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A collection of SingleGrainPop objects. Each SingleGrainPop represents </span>
@@ -588,7 +601,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="kc">None</span>
         
 <div class="viewcode-block" id="GrainPop.calculate_ext">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.GrainPop.calculate_ext">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.GrainPop.calculate_ext">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the extinction model.</span>
@@ -680,7 +693,7 @@
         <span class="k">return</span> <span class="n">result</span>
 
 <div class="viewcode-block" id="GrainPop.plot_ext">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.GrainPop.plot_ext">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.GrainPop.plot_ext">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the sum of the extinction properties across all grain populations</span>
@@ -732,7 +745,7 @@
 
 
 <div class="viewcode-block" id="GrainPop.info">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.GrainPop.info">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.GrainPop.info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print information about this collection of grain populations</span>
@@ -759,7 +772,7 @@
 <span class="c1">#---------- Basic helper functions for fast production of GrainPop objects</span>
 
 <div class="viewcode-block" id="make_MRN">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.make_MRN">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.make_MRN">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_MRN</span><span class="p">(</span><span class="n">amin</span><span class="o">=</span><span class="n">AMIN</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="n">AMAX</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">md</span><span class="o">=</span><span class="n">MD_DEFAULT</span><span class="p">,</span> <span class="n">fsil</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Builds a :ref:`GrainPop` object describing an MRN dust grain size distribution, </span>
@@ -817,7 +830,7 @@
 
 
 <div class="viewcode-block" id="make_MRN_RGDrude">
-<a class="viewcode-back" href="../../grainpop.html#xdust.grainpop.make_MRN_RGDrude">[docs]</a>
+<a class="viewcode-back" href="../../modules/grainpop.html#xdust.grainpop.make_MRN_RGDrude">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_MRN_RGDrude</span><span class="p">(</span><span class="n">amin</span><span class="o">=</span><span class="n">AMIN</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="n">AMAX</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">RHO_AVG</span><span class="p">,</span> <span class="n">md</span><span class="o">=</span><span class="n">MD_DEFAULT</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Builds a :ref:`SingleGrainPop` object describing an MRN dust grain size distribution, but uses </span>
