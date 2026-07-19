@@ -71,6 +71,14 @@ The ``xdust.halos`` module provides tools for calculating the intensity of
 X-ray dust scattering halos under the ideal assumptions of single-scattering 
 through an optically thin sight line (Corrales & Paerels 2015, Corrales et al. 2016).
 
+Tutorials
+---------
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/index
+
 Modules
 -------
 
